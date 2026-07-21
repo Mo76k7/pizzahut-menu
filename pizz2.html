@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pizza Hut Addis Ababa — Premium Interactive Menu</title>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,900;1,900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Pizza Hut Brand Colors */
+            --color-primary: #EE1945;       
+            --color-primary-dark: #C91438;
+            --color-primary-light: #FF335F;
+            --color-accent: #FFAA00;        
+            
+            /* Modern Dark Theme */
+            --color-bg: #0A0A0A;            
+            --color-surface: #141414;
+            --color-surface-elevated: #1F1F1F;
+            --color-border: rgba(255, 255, 255, 0.08);
+            
+            /* Text */
+            --color-text-main: #FFFFFF;     
+            --color-text-muted: #9CA3AF;
+            
+            /* Semantic */
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-danger: #EF4444;
+            
+            /* Typography */
+            --font-display: 'Barlow Condensed', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+            
+            /* Shadows & Effects */
+            --shadow-sm: 0 4px 6px -1px rgba(0,0,0,0.3);
+            --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.5);
+            --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.7);
+            --shadow-glow: 0 0 20px rgba(238, 25, 69, 0.3);
+            --glass-bg: rgba(20, 20, 20, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            
+            /* Border Radius */
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #000;
+            background-image: radial-gradient(circle at 50% 0%, #1a0508 0%, #000 70%);
+            font-family: var(--font-sans);
+            color: var(--color-text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Device Frame */
+        .phone-wrapper {
+            width: 100%;
+            max-width: 430px;
+            height: 932px; /* iPhone 14 Pro Max height */
+            background-color: var(--color-bg);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+            border-radius: 44px;
+            border: 10px solid #111;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Glassmorphism Global Header */
+        .app-header {
+            padding: 40px 20px 15px; /* Account for mobile notch */
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            z-index: 50;
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Delivery / Pickup Toggle */
+        .order-type-toggle {
+            display: flex;
+            background: rgba(0,0,0,0.5);
+            border-radius: 30px;
+            padding: 4px;
+            border: 1px solid var(--color-border);
+        }
+        .order-type-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .order-type-btn.active {
+            background: var(--color-surface-elevated);
+            color: #fff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .lang-toggle {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            background: var(--color-surface);
+            padding: 6px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--color-border);
+        }
+
+        .header-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .brand-logo {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-style: italic;
+            font-size: 28px;
+            letter-spacing: -1px;
+            color: var(--color-text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 2px 2px 0px var(--color-primary);
+        }
+        
+        .brand-logo img {
+            height: 32px;
+        }
+
+        .eta-badge {
+            background: rgba(238, 25, 69, 0.1);
+            color: var(--color-primary-light);
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(238, 25, 69, 0.2);
+        }
+
+        /* Utility Bar */
+        .utility-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .search-container {
+            flex: 1;
+            position: relative;
+        }
+        .search-container i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-muted);
+            font-size: 14px;
+        }
+        .search-input {
+            width: 100%;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: #fff;
+            padding: 10px 14px 10px 38px;
+            border-radius: 30px;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(238, 25, 69, 0.15);
+        }
+
+        /* Premium Fasting Toggle */
+        .fasting-toggle-wrapper {
+            background: linear-gradient(145deg, #1A1A1A, #111);
+            border: 1px solid var(--color-border);
+            padding: 6px 12px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fasting-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s cubic-bezier(0.4, 0.0, 0.2, 1);
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--color-success); }
+        input:checked + .slider:before { transform: translateX(16px); }
+
+        /* Main Viewport */
+        .view-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 0 100px;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+        }
+        .view-container::-webkit-scrollbar { display: none; }
+        
+        .app-view {
+            display: none;
+            animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .app-view.active { display: block; }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Hero Banner Container */
+        .hero-banner-container {
+            padding: 15px 20px;
+        }
+        .hero-banner {
+            position: relative;
+            width: 100%;
+            height: 160px;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            background: linear-gradient(to right, #000, rgba(0,0,0,0)), url('https://images.unsplash.com/photo-1613564834361-9436948817d1?auto=format&fit=crop&w=800&q=80') center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--color-border);
+        }
+        .hero-badge {
+            background: var(--color-primary);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            width: fit-content;
+            margin-bottom: 8px;
+        }
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 900;
+            line-height: 1.1;
+            color: #fff;
+            text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+        .hero-subtitle {
+            font-size: 12px;
+            color: rgba(255,255,255,0.9);
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* Category Navigation */
+        .category-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 10px 20px;
+            scrollbar-width: none;
+            position: sticky;
+            top: 130px; /* Below header */
+            background: linear-gradient(to bottom, var(--color-bg) 70%, transparent);
+            z-index: 40;
+        }
+        .category-scroll::-webkit-scrollbar { display: none; }
+        .cat-pill {
+            background: var(--color-surface);
+            padding: 12px 20px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            white-space: nowrap;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            border: 1px solid var(--color-border);
+        }
+        .cat-pill i { font-size: 14px; opacity: 0.7; }
+        .cat-pill:hover { border-color: rgba(255,255,255,0.2); color: #fff; }
+        .cat-pill.active {
+            background: var(--color-primary);
+            color: #FFF;
+            border-color: var(--color-primary-light);
+            box-shadow: var(--shadow-glow);
+        }
+        .cat-pill.active i { opacity: 1; }
+
+        /* Dynamic Product Grid */
+        .section-header {
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .section-title {
+            font-size: 24px;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+        .item-count { font-size: 12px; color: var(--color-text-muted); }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding: 0 20px 20px;
+        }
+        .product-card {
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .product-card:active { transform: scale(0.96); }
+        .product-card:hover { border-color: rgba(255,255,255,0.2); }
+        
+        .product-card.sold-out { opacity: 0.6; filter: grayscale(0.8); pointer-events: none; }
+        
+        /* Badges */
+        .card-badges {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 2;
+        }
+        .badge-pill {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(4px);
+        }
+        .badge-popular { background: rgba(245, 158, 11, 0.9); color: #000; }
+        .badge-new { background: rgba(16, 185, 129, 0.9); color: #fff; }
+        .badge-soldout { background: rgba(0, 0, 0, 0.8); color: #fff; border: 1px solid #444; }
+
+        .img-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 100%; /* 1:1 Aspect Ratio */
+            background: var(--color-surface-elevated);
+            overflow: hidden;
+        }
+        .skeleton {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(90deg, #1F1F1F 25%, #2A2A2A 50%, #1F1F1F 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .product-card img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .product-card img.loaded { opacity: 1; }
+        
+        .product-info {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4));
+        }
+        .product-info h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #FFF;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+        .product-info p {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+        .product-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+        .product-price {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--color-accent);
+        }
+        .add-icon-btn {
+            background: var(--color-primary);
+            color: #fff;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(238, 25, 69, 0.4);
+            transition: transform 0.2s;
+        }
+        .product-card:hover .add-icon-btn { transform: scale(1.1); }
+
+        /* Premium Overlay Modal */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open { opacity: 1; display: flex; }
+        
+        .modal-sheet {
+            width: 100%;
+            background: var(--color-bg);
+            border-top-left-radius: var(--radius-xl);
+            border-top-right-radius: var(--radius-xl);
+            border-top: 1px solid var(--color-border);
+            max-height: 92%;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-overlay.open .modal-sheet { transform: translateY(0); }
+        
+        /* Modal Content Scrollable Area */
+        .modal-scroll-area {
+            overflow-y: auto;
+            padding: 0 24px 24px;
+            scrollbar-width: none;
+        }
+        .modal-scroll-area::-webkit-scrollbar { display: none; }
+
+        .modal-drag-handle {
+            width: 40px; height: 4px;
+            background: #444;
+            border-radius: 2px;
+            margin: 12px auto 20px;
+        }
+
+        .modal-img-container {
+            position: relative;
+            width: calc(100% + 48px);
+            margin: -20px -24px 20px;
+            height: 220px;
+        }
+        .modal-img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 16px; right: 16px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #FFF;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 16px;
+            z-index: 10;
+        }
+
+        .modal-header-info { margin-bottom: 16px; }
+        .modal-title { font-family: var(--font-display); font-size: 28px; font-weight: 800; text-transform: uppercase; margin-bottom: 6px; }
+        .modal-desc { font-size: 13px; color: var(--color-text-muted); line-height: 1.5; margin-bottom: 16px; }
+        
+        /* Nutritional & Allergy Badges */
+        .nutrition-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .info-chip {
+            display: flex; align-items: center; gap: 6px;
+            background: var(--color-surface);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #ddd;
+            border: 1px solid var(--color-border);
+        }
+        .info-chip i { color: var(--color-primary); }
+
+        .options-section {
+            border-top: 1px solid var(--color-border);
+            padding-top: 20px;
+            margin-bottom: 20px;
+        }
+        .options-group-title {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 12px;
+        }
+        .required-badge { background: rgba(255,255,255,0.1); font-size: 10px; padding: 3px 6px; border-radius: 4px; }
+        
+        .size-selector {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+        }
+        .size-btn {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 12px 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .size-btn.active {
+            background: rgba(238, 25, 69, 0.1);
+            border-color: var(--color-primary);
+        }
+        .size-btn-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .size-btn-price { font-size: 11px; color: var(--color-accent); font-weight: 600; }
+
+        /* Add-ons List */
+        .addon-list { display: flex; flex-direction: column; gap: 10px; }
+        .addon-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+        }
+        .addon-item.selected { border-color: var(--color-primary); background: rgba(238, 25, 69, 0.05); }
+        .addon-info h5 { font-size: 13px; font-weight: 600; color: #fff; }
+        .addon-price { font-size: 12px; color: var(--color-text-muted); margin-top: 2px; }
+        .custom-checkbox {
+            width: 20px; height: 20px;
+            border-radius: 4px; border: 2px solid #555;
+            display: flex; justify-content: center; align-items: center;
+            transition: 0.2s;
+        }
+        .addon-item.selected .custom-checkbox { background: var(--color-primary); border-color: var(--color-primary); }
+        .custom-checkbox i { color: #fff; font-size: 12px; opacity: 0; }
+        .addon-item.selected .custom-checkbox i { opacity: 1; }
+
+        /* Modal Footer Sticky */
+        .modal-footer {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--color-border);
+            padding: 16px 24px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .qty-control {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--color-surface);
+            padding: 8px 12px;
+            border-radius: 30px;
+            border: 1px solid var(--color-border);
+        }
+        .qty-btn { background: none; border: none; color: #fff; font-size: 16px; width: 24px; height: 24px; cursor: pointer; display: flex; justify-content:center; align-items:center; }
+        .qty-val { font-weight: 700; font-size: 14px; min-width: 16px; text-align: center; }
+        
+        .btn-add-cart {
+            flex: 1;
+            background: var(--color-primary);
+            color: #fff; border: none;
+            padding: 16px; border-radius: var(--radius-md);
+            font-size: 15px; font-weight: 700;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 8px 20px rgba(238, 25, 69, 0.3);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-add-cart:active { transform: scale(0.98); }
+
+        /* Cart View Enhancements */
+        .cart-header {
+            padding: 20px 20px 10px;
+            font-family: var(--font-display); font-size: 28px; font-weight: 800; text-transform: uppercase;
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        
+        /* Swipe to remove simulation */
+        .cart-item {
+            display: flex; gap: 12px;
+            background: var(--color-surface);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin: 0 20px 12px;
+            border: 1px solid var(--color-border);
+            position: relative;
+            overflow: hidden;
+        }
+        .cart-item-img { width: 64px; height: 64px; object-fit: cover; border-radius: var(--radius-sm); }
+        .cart-item-details { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .cart-item-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .cart-item-meta { font-size: 11px; color: var(--color-text-muted); margin-bottom: 6px; }
+        .cart-item-bottom { display: flex; justify-content: space-between; align-items: center; }
+        .cart-item-price { font-size: 14px; font-weight: 800; color: var(--color-accent); }
+        
+        .cart-qty-mini {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--color-surface-elevated);
+            padding: 4px 8px; border-radius: 20px;
+        }
+        
+        .cart-remove-btn {
+            color: var(--color-danger);
+            background: rgba(239, 68, 68, 0.1);
+            border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Order Operations UI */
+        .ops-section {
+            margin: 20px; padding: 16px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+        }
+        .ops-title { font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--color-text-muted); margin-bottom: 12px; letter-spacing: 0.5px;}
+        
+        /* Form Inputs */
+        .input-group { margin-bottom: 12px; position: relative; }
+        .input-group i { position: absolute; left: 14px; top: 14px; color: var(--color-text-muted); font-size: 14px; }
+        .premium-input {
+            width: 100%; background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            color: #fff; padding: 12px 12px 12px 40px;
+            border-radius: var(--radius-sm); font-family: var(--font-sans); font-size: 13px;
+        }
+        .premium-input:focus { border-color: var(--color-primary); outline: none; }
+        
+        textarea.premium-input { padding: 12px; min-height: 80px; resize: none; }
+
+        /* Payment Selector */
+        .payment-methods { display: flex; gap: 10px; margin-bottom: 16px; }
+        .pay-btn {
+            flex: 1; padding: 12px 8px;
+            background: var(--color-bg); border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm); color: #fff; font-size: 11px; font-weight: 600;
+            display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
+        }
+        .pay-btn.active { background: rgba(238, 25, 69, 0.1); border-color: var(--color-primary); color: var(--color-primary); }
+        .pay-btn img { height: 16px; opacity: 0.8; }
+        .pay-btn.active img { opacity: 1; }
+
+        /* Tip Selector */
+        .tip-selector { display: flex; gap: 8px; margin-bottom: 16px; }
+        .tip-btn {
+            flex: 1; padding: 10px;
+            background: var(--color-bg); border: 1px solid var(--color-border);
+            border-radius: 20px; color: #fff; font-size: 12px; font-weight: 600;
+            text-align: center; cursor: pointer;
+        }
+        .tip-btn.active { background: var(--color-primary); border-color: var(--color-primary); }
+
+        /* Promo Code */
+        .promo-flex { display: flex; gap: 8px; }
+        .btn-apply { background: var(--color-surface-elevated); color: #fff; border: 1px solid var(--color-border); padding: 0 16px; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; font-size: 12px;}
+        
+        .receipt-breakdown { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #333; }
+        .receipt-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--color-text-muted); margin-bottom: 8px; }
+        .receipt-row.discount { color: var(--color-success); }
+        .receipt-row.total { font-size: 16px; font-weight: 800; color: #fff; margin-top: 12px; border-top: 1px solid #333; padding-top: 12px; }
+
+        .btn-checkout {
+            background: var(--color-primary); color: #fff; border: none;
+            width: calc(100% - 40px); margin: 0 20px 20px; padding: 18px;
+            border-radius: var(--radius-md); font-size: 15px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;
+            box-shadow: 0 10px 20px rgba(238, 25, 69, 0.3);
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+
+        /* Bottom Floating Navigation */
+        .bottom-nav {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            display: flex; justify-content: space-around;
+            padding: 12px 10px 28px; /* Extra bottom padding for home indicator */
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--color-text-muted); text-decoration: none;
+            font-size: 10px; font-weight: 600; gap: 6px; cursor: pointer; position: relative;
+            transition: color 0.3s;
+        }
+        .nav-item i { font-size: 20px; transition: transform 0.3s; }
+        .nav-item.active { color: var(--color-primary); }
+        .nav-item.active i { transform: translateY(-2px); }
+        
+        .floating-badge {
+            position: absolute; top: -6px; right: -10px;
+            background: var(--color-accent); color: #000;
+            font-size: 10px; font-weight: 800;
+            width: 18px; height: 18px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            border: 2px solid var(--color-bg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-state {
+            text-align: center; padding: 60px 20px; color: var(--color-text-muted);
+        }
+        .empty-state i { font-size: 48px; opacity: 0.2; margin-bottom: 16px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="phone-wrapper">
+        
+        <!-- Global Header -->
+        <header class="app-header" id="app-header">
+            <div class="header-top">
+                <div class="brand-logo">
+                    <!-- Text representation of logo for simplicity, styling mimics brand -->
+                    <i class="fa-solid fa-pizza-slice" style="color:var(--color-primary); font-size:24px;"></i>
+                    <span>Pizza Hut</span>
+                </div>
+                
+                <div class="order-type-toggle">
+                    <div class="order-type-btn active" onclick="setOrderType('delivery', this)">Delivery</div>
+                    <div class="order-type-btn" onclick="setOrderType('pickup', this)">Pickup</div>
+                </div>
+            </div>
+
+            <div class="header-main">
+                <div>
+                    <div style="font-size: 11px; color:var(--color-text-muted); margin-bottom: 4px; text-transform:uppercase; font-weight:600; letter-spacing:0.5px;">Deliver To</div>
+                    <div style="font-size: 14px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-location-dot" style="color:var(--color-primary)"></i>
+                        <select id="branch-select" style="background:transparent; border:none; color:inherit; font-weight:inherit; font-size:inherit; outline:none; cursor:pointer; font-family:var(--font-sans);">
+                            <option value="Bole Road" style="background:#111;">Bole Road, Addis Ababa</option>
+                            <option value="Bethel Square" style="background:#111;">Bethel Square</option>
+                            <option value="CMC Branch" style="background:#111;">CMC Area</option>
+                            <option value="Ayat Zone 8" style="background:#111;">Ayat Zone 8</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down" style="font-size:10px; color:var(--color-text-muted)"></i>
+                    </div>
+                </div>
+                <div class="eta-badge">
+                    <i class="fa-solid fa-motorcycle"></i> <span id="eta-text">25-35 min</span>
+                </div>
+            </div>
+
+            <div class="utility-bar">
+                <div class="search-container">
+                    <i class="fa-solid fa-search"></i>
+                    <input type="text" class="search-input" id="menu-search" placeholder="Search pizza, wings, drinks...">
+                </div>
+                <div class="fasting-toggle-wrapper">
+                    <span class="fasting-label">Fasting</span>
+                    <label class="switch">
+                        <input type="checkbox" id="fasting-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Viewport -->
+        <main class="view-container" id="main-viewport">
+            
+            <!-- HOME VIEW -->
+            <div id="view-home" class="app-view active">
+                
+                <!-- Promotional Hero Banner -->
+                <div class="hero-banner-container">
+                    <div class="hero-banner">
+                        <div class="hero-badge">Limited Time Offer</div>
+                        <h2 class="hero-title">Free Wings<br>Friday!</h2>
+                        <p class="hero-subtitle">Get 6 bone-out wings free with any Large Pizza purchase. Code: WINGS26</p>
+                    </div>
+                </div>
+
+                <!-- Sticky Category Bar -->
+                <div class="category-scroll" id="categories-bar">
+                    <!-- Injected via JS -->
+                </div>
+
+                <!-- Category Title Area -->
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title" id="current-category-title">Signature Pizzas</h2>
+                        <div class="item-count" id="item-count-display">Displaying items</div>
+                    </div>
+                    <div class="lang-toggle"><i class="fa-solid fa-language"></i> EN | AM</div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="product-grid" id="products-target-grid">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- CART VIEW -->
+            <div id="view-cart" class="app-view">
+                <div class="cart-header">
+                    <span>Your Order</span>
+                    <i class="fa-solid fa-basket-shopping" style="color:var(--color-primary)"></i>
+                </div>
+
+                <div id="cart-items-root"></div>
+
+                <!-- Operations Details -->
+                <div class="ops-section" id="cart-ops-section" style="display:none;">
+                    <div class="ops-title">Delivery Details</div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="cust-name" class="premium-input" placeholder="Full Name">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="tel" id="cust-phone" class="premium-input" placeholder="Phone Number (e.g. 0911...)">
+                    </div>
+                    <div class="input-group">
+                        <textarea id="cust-address" class="premium-input" placeholder="Delivery Address / Table No. Add building or specific instructions here."></textarea>
+                    </div>
+
+                    <div class="ops-title" style="margin-top:20px;">Payment Method</div>
+                    <div class="payment-methods">
+                        <div class="pay-btn active" onclick="setPayment('Telebirr', this)">
+                            <i class="fa-solid fa-mobile-screen" style="font-size:18px;"></i> Telebirr
+                        </div>
+                        <div class="pay-btn" onclick="setPayment('Chapa', this)">
+                            <i class="fa-solid fa-credit-card" style="font-size:18px;"></i> Chapa
+                        </div>
+                        <div class="pay-btn" onclick="setPayment('Cash', this)">
+                            <i class="fa-solid fa-money-bill-wave" style="font-size:18px;"></i> Cash
+                        </div>
+                    </div>
+
+                    <div class="ops-title">Tip the driver</div>
+                    <div class="tip-selector">
+                        <div class="tip-btn active" onclick="setTip(0, this)">No Tip</div>
+                        <div class="tip-btn" onclick="setTip(30, this)">Br 30</div>
+                        <div class="tip-btn" onclick="setTip(50, this)">Br 50</div>
+                        <div class="tip-btn" onclick="setTip(100, this)">Br 100</div>
+                    </div>
+
+                    <div class="ops-title">Promo Code</div>
+                    <div class="promo-flex">
+                        <input type="text" id="promo-code" class="premium-input" placeholder="Enter code" style="padding-left:12px;">
+                        <button class="btn-apply" onclick="applyPromo()">Apply</button>
+                    </div>
+
+                    <!-- Receipt -->
+                    <div class="receipt-breakdown">
+                        <div class="receipt-row"><span>Subtotal</span><span id="summary-subtotal">Br 0.00</span></div>
+                        <div class="receipt-row"><span>VAT (15%)</span><span id="summary-tax">Br 0.00</span></div>
+                        <div class="receipt-row" id="row-delivery"><span>Delivery Fee</span><span id="summary-delivery">Br 100.00</span></div>
+                        <div class="receipt-row"><span>Driver Tip</span><span id="summary-tip">Br 0.00</span></div>
+                        <div class="receipt-row discount" id="row-discount" style="display:none;"><span>Discount</span><span id="summary-discount">- Br 0.00</span></div>
+                        <div class="receipt-row total"><span>Total to Pay</span><span id="summary-total">Br 0.00</span></div>
+                    </div>
+                </div>
+
+                <button class="btn-checkout" id="btn-checkout-submit" style="display:none;" onclick="submitOrder()">
+                    <i class="fa-brands fa-telegram" style="font-size:20px;"></i> Order via Telegram
+                </button>
+            </div>
+
+        </main>
+
+        <!-- Product Customization Modal -->
+        <div class="modal-overlay" id="product-modal">
+            <div class="modal-sheet">
+                <div class="modal-drag-handle"></div>
+                <button class="modal-close-btn" onclick="closeProductModal()"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div class="modal-scroll-area">
+                    <div class="modal-img-container">
+                        <img src="" id="modal-item-img" class="modal-img" alt="Product">
+                    </div>
+                    
+                    <div class="modal-header-info">
+                        <h3 class="modal-title" id="modal-item-name">Item Title</h3>
+                        <p id="modal-item-desc" class="modal-desc">Description</p>
+                        
+                        <div class="nutrition-row" id="modal-badges-container">
+                            <!-- Injected: Calories, Allergens, Spice -->
+                        </div>
+                    </div>
+                    
+                    <!-- Size Selection -->
+                    <div class="options-section" id="size-options-container" style="display:none;">
+                        <div class="options-group-title">
+                            <span>Choose Size</span>
+                            <span class="required-badge">REQUIRED</span>
+                        </div>
+                        <div class="size-selector" id="pizza-size-matrix">
+                            <!-- Injected -->
+                        </div>
+                    </div>
+
+                    <!-- Add-ons Section -->
+                    <div class="options-section" id="addons-container" style="display:none;">
+                        <div class="options-group-title">
+                            <span>Recommended Add-ons</span>
+                            <span style="font-size:11px; font-weight:400; color:var(--color-text-muted);">Optional</span>
+                        </div>
+                        <div class="addon-list" id="modal-addons-list">
+                            <!-- Injected -->
+                        </div>
+                    </div>
+                    
+                    <!-- Order Notes -->
+                    <div class="options-section">
+                        <div class="options-group-title">Special Instructions</div>
+                        <textarea id="modal-notes" class="premium-input" placeholder="e.g. No onions, extra crispy..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Sticky Footer Add to Cart -->
+                <div class="modal-footer">
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="mutateModalQty(-1)"><i class="fa-solid fa-minus"></i></button>
+                        <span class="qty-val" id="modal-qty-display">1</span>
+                        <button class="qty-btn" onclick="mutateModalQty(1)"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    <button class="btn-add-cart" onclick="addModalItemToCart()">
+                        <span>Add to Order</span>
+                        <span id="modal-total-price">Br 0.00</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" id="nav-home" onclick="navigateTo('home')">
+                <i class="fa-solid fa-pizza-slice"></i>
+                <span>Menu</span>
+            </div>
+            <div class="nav-item" id="nav-offers" onclick="alert('Offers section coming soon!')">
+                <i class="fa-solid fa-tag"></i>
+                <span>Deals</span>
+            </div>
+            <div class="nav-item" id="nav-cart" onclick="navigateTo('cart')">
+                <i class="fa-solid fa-bag-shopping"></i>
+                <span>Cart</span>
+                <span class="floating-badge" id="cart-badge-count" style="display:none;">0</span>
+            </div>
+            <div class="nav-item" id="nav-profile" onclick="alert('Profile accounts feature MVP coming soon.')">
+                <i class="fa-solid fa-user"></i>
+                <span>Profile</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        /**
+         * ROBUST DATA SCHEMA - 2026 Premium MVP
+         */
+        const MENU_DATA = {
+            "signature": {
+                title: "Signature Pizzas",
+                icon: "fa-star",
+                items: [
+                    { id: "sig1", name: "SUPER SUPREME", desc: "Tomato Sauce, Mozzarella, Beef, Pepperoni, Turkey Ham, Chicken, Onion, Tomato, Capsicum, Olives", prices: { small: 795, medium: 1200, large: 1535 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=600&q=80", type: "pizza", badges: ["popular"], cal: "280 kcal/slice", allergens: ["Dairy", "Gluten", "Meat"], spice: 0, available: true },
+                    { id: "sig2", name: "MEAT LOVERS", desc: "Tomato Sauce, Mozzarella Cheese, Pepperoni, Turkey Ham, Beef chunks", prices: { small: 765, medium: 1150, large: 1535 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?auto=format&fit=crop&w=600&q=80", type: "pizza", badges: [], cal: "310 kcal/slice", allergens: ["Dairy", "Gluten", "Meat"], spice: 0, available: true },
+                    { id: "sig3", name: "HOT & SPICY VEG", desc: "Tomato Sauce, Mozzarella, Onion, Capsicum, Fiery Green Chilli", prices: { small: 550, medium: 875, large: 1315 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=600&q=80", type: "pizza", badges: ["new"], cal: "220 kcal/slice", allergens: ["Dairy", "Gluten"], spice: 3, available: true }
+                ]
+            },
+            "classics": {
+                title: "Classic Pizzas",
+                icon: "fa-pizza-slice",
+                items: [
+                    { id: "cl1", name: "MARGHERITA", desc: "Classic Tomato Sauce, Double Mozzarella Cheese, Herbs", prices: { small: 495, medium: 770, large: 1120 }, img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=600&q=80", type: "pizza", badges: [], cal: "210 kcal/slice", allergens: ["Dairy", "Gluten"], spice: 0, available: true },
+                    { id: "cl2", name: "PEPPERONI LOVERS", desc: "Tomato Sauce, Mozzarella Cheese, Double Layer Pepperoni", prices: { small: 685, medium: 965, large: 1410 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=600&q=80", type: "pizza", badges: ["popular"], cal: "290 kcal/slice", allergens: ["Dairy", "Gluten", "Meat"], spice: 1, available: false }, // Sold out demo
+                    { id: "cl3", name: "BBQ CHICKEN", desc: "BBQ Sauce, Mozzarella Cheese, Turkey Ham, Grilled Chicken", prices: { small: 740, medium: 1165, large: 1535 }, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=600&q=80", type: "pizza", badges: [], cal: "260 kcal/slice", allergens: ["Dairy", "Gluten"], spice: 0, available: true }
+                ]
+            },
+            "fasting-pizza": {
+                title: "Fasting Pizzas",
+                icon: "fa-leaf",
+                items: [
+                    { id: "f1", name: "VEGGIE BLAST (FASTING)", desc: "Fasting Sauce, Pineapple, Onion, Olives, Capsicum, Mushroom, Green Chilli", prices: { small: 480, medium: 795, large: 1100 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=600&q=80", type: "pizza", badges: ["popular"], cal: "180 kcal/slice", allergens: ["Gluten"], spice: 2, available: true },
+                    { id: "f2", name: "TUNA PIZZA", desc: "Fasting Sauce, Premium Tuna, Onion, Capsicum, Olives", prices: { small: 540, medium: 740, large: 1165 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=600&q=80", type: "pizza", badges: [], cal: "210 kcal/slice", allergens: ["Gluten", "Fish"], spice: 0, available: true }
+                ]
+            },
+            "sides": {
+                title: "Sides & Wings",
+                icon: "fa-drumstick-bite",
+                items: [
+                    { id: "s1", name: "6 BONE-OUT WINGS", desc: "Tender chicken bites tossed in your choice of sauce", price: 1300, img: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?auto=format&fit=crop&w=600&q=80", type: "flat", badges: ["popular"], cal: "650 kcal", allergens: ["Gluten"], spice: 1, available: true },
+                    { id: "s2", name: "CHEESY FRIES", desc: "Crispy fries loaded with melted cheese blend", price: 425, img: "https://images.unsplash.com/photo-1534939561126-855b8675edd7?auto=format&fit=crop&w=600&q=80", type: "flat", badges: [], cal: "520 kcal", allergens: ["Dairy"], spice: 0, available: true }
+                ]
+            },
+            "drinks": {
+                title: "Beverages",
+                icon: "fa-bottle-water",
+                items: [
+                    { id: "d1", name: "COCA-COLA", desc: "Ice cold refreshment", prices: { small: 100, medium: 140, large: 140 }, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80", type: "pizza", sizeLabels: ["300ml", "500ml", "1L"], badges: [], cal: "140 kcal", allergens: [], spice: 0, available: true }
+                ]
+            }
+        };
+
+        const ADD_ONS = [
+            { id: "add1", name: "Extra Mozzarella Cheese", price: 150 },
+            { id: "add2", name: "Extra Pepperoni", price: 180 },
+            { id: "add3", name: "Garlic Mayo Dip", price: 60 },
+            { id: "add4", name: "Hot Sauce Dip", price: 60 }
+        ];
+
+        // State Variables
+        let cart = JSON.parse(localStorage.getItem('pizzaHutCart2026')) || [];
+        let currentCategory = 'signature';
+        let isFastingMode = false;
+        let searchQuery = "";
+        let orderType = 'delivery'; // delivery | pickup
+        let selectedPayment = 'Telebirr';
+        let tipAmount = 0;
+        let activeDiscount = 0;
+
+        // Modal State
+        let modalProduct = null;
+        let modalSize = 'small';
+        let modalQty = 1;
+        let modalSelectedAddons = [];
+
+        // INIT
+        function init() {
+            setupListeners();
+            renderCategories();
+            renderProducts(currentCategory);
+            updateCartBadge();
+            renderCartItems();
+        }
+
+        function setupListeners() {
+            document.getElementById('fasting-toggle').addEventListener('change', (e) => {
+                isFastingMode = e.target.checked;
+                currentCategory = isFastingMode ? 'fasting-pizza' : 'signature';
+                renderCategories();
+                renderProducts(currentCategory);
+            });
+
+            document.getElementById('menu-search').addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                renderProducts(currentCategory);
+            });
+        }
+
+        function setOrderType(type, el) {
+            orderType = type;
+            document.querySelectorAll('.order-type-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            
+            // Adjust ETA text
+            document.getElementById('eta-text').innerText = type === 'delivery' ? '25-35 min' : '15-20 min';
+            
+            // Toggle delivery fee display in cart
+            const delRow = document.getElementById('row-delivery');
+            if (delRow) delRow.style.display = type === 'delivery' ? 'flex' : 'none';
+            renderCartItems(); // Recalculate totals
+        }
+
+        // DOM Rendering
+        function renderCategories() {
+            const bar = document.getElementById('categories-bar');
+            bar.innerHTML = '';
+            
+            Object.keys(MENU_DATA).forEach(key => {
+                // Fasting mode logic isolation
+                if (isFastingMode && !['fasting-pizza', 'drinks'].includes(key)) return;
+
+                const cat = MENU_DATA[key];
+                const pill = document.createElement('div');
+                pill.className = `cat-pill ${key === currentCategory ? 'active' : ''}`;
+                pill.innerHTML = `<i class="fa-solid ${cat.icon}"></i> ${cat.title}`;
+                pill.onclick = () => {
+                    currentCategory = key;
+                    renderCategories();
+                    renderProducts(key);
+                };
+                bar.appendChild(pill);
+            });
+            
+            if(MENU_DATA[currentCategory]) {
+                document.getElementById('current-category-title').innerText = MENU_DATA[currentCategory].title;
+            }
+        }
+
+        function renderProducts(catKey) {
+            const grid = document.getElementById('products-target-grid');
+            grid.innerHTML = '';
+            
+            if (!MENU_DATA[catKey]) return;
+
+            const items = MENU_DATA[catKey].items.filter(item => 
+                item.name.toLowerCase().includes(searchQuery) || item.desc.toLowerCase().includes(searchQuery)
+            );
+            
+            document.getElementById('item-count-display').innerText = `${items.length} Items`;
+
+            if (items.length === 0) {
+                grid.innerHTML = '<div style="grid-column: span 2; text-align:center; padding:40px; color:#888;">No items found matching your search.</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const basePrice = item.type === 'pizza' ? item.prices.small : item.price;
+                const priceLabel = item.type === 'pizza' ? `From Br ${basePrice}` : `Br ${basePrice}`;
+                
+                // Badges HTML
+                let badgesHtml = '';
+                if (!item.available) badgesHtml += '<div class="badge-pill badge-soldout">Sold Out</div>';
+                else {
+                    if (item.badges.includes('popular')) badgesHtml += '<div class="badge-pill badge-popular"><i class="fa-solid fa-fire"></i> Popular</div>';
+                    if (item.badges.includes('new')) badgesHtml += '<div class="badge-pill badge-new">New</div>';
+                }
+
+                const card = document.createElement('div');
+                card.className = `product-card ${!item.available ? 'sold-out' : ''}`;
+                if(item.available) card.onclick = () => openModal(item);
+                
+                card.innerHTML = `
+                    <div class="card-badges">${badgesHtml}</div>
+                    <div class="img-wrapper">
+                        <div class="skeleton"></div>
+                        <img src="${item.img}" alt="${item.name}" onload="this.classList.add('loaded'); this.previousElementSibling.style.display='none';">
+                    </div>
+                    <div class="product-info">
+                        <div>
+                            <h4>${item.name}</h4>
+                            <p>${item.desc}</p>
+                        </div>
+                        <div class="product-price-row">
+                            <span class="product-price">${priceLabel}</span>
+                            <div class="add-icon-btn"><i class="fa-solid fa-plus"></i></div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Modal Logic
+        function openModal(item) {
+            modalProduct = item;
+            modalQty = 1;
+            modalSelectedAddons = [];
+            modalSize = 'small';
+            document.getElementById('modal-notes').value = '';
+
+            document.getElementById('modal-item-name').innerText = item.name;
+            document.getElementById('modal-item-desc').innerText = item.desc;
+            document.getElementById('modal-item-img').src = item.img;
+            
+            // Build Badges
+            const badgeContainer = document.getElementById('modal-badges-container');
+            let bHtml = `<div class="info-chip"><i class="fa-solid fa-fire-burner"></i> ${item.cal}</div>`;
+            if (item.allergens && item.allergens.length > 0) {
+                bHtml += `<div class="info-chip" style="color:var(--color-warning); border-color:var(--color-warning);"><i class="fa-solid fa-triangle-exclamation"></i> Contains: ${item.allergens.join(', ')}</div>`;
+            }
+            if (item.spice > 0) {
+                let peppers = '';
+                for(let i=0; i<item.spice; i++) peppers += '<i class="fa-solid fa-pepper-hot"></i> ';
+                bHtml += `<div class="info-chip" style="color:var(--color-danger); border-color:rgba(239, 68, 68, 0.4);">${peppers}</div>`;
+            }
+            badgeContainer.innerHTML = bHtml;
+
+            // Build Size Matrix
+            const sizeCont = document.getElementById('size-options-container');
+            const sizeMat = document.getElementById('pizza-size-matrix');
+            if (item.type === 'pizza') {
+                sizeCont.style.display = 'block';
+                const labels = item.sizeLabels || ['Small', 'Medium', 'Large'];
+                const keys = ['small', 'medium', 'large'];
+                sizeMat.innerHTML = keys.map((k, idx) => `
+                    <div class="size-btn ${k==='small'?'active':''}" onclick="setModalSize('${k}', this)">
+                        <div class="size-btn-name">${labels[idx]}</div>
+                        <div class="size-btn-price">+ Br ${item.prices[k]}</div>
+                    </div>
+                `).join('');
+            } else {
+                modalSize = 'flat';
+                sizeCont.style.display = 'none';
+            }
+
+            // Build Add-ons
+            const addCont = document.getElementById('addons-container');
+            const addList = document.getElementById('modal-addons-list');
+            if (item.type === 'pizza' || item.type === 'flat') {
+                addCont.style.display = 'block';
+                addList.innerHTML = ADD_ONS.map(add => `
+                    <div class="addon-item" onclick="toggleAddon('${add.id}', this)">
+                        <div class="addon-info">
+                            <h5>${add.name}</h5>
+                            <div class="addon-price">+ Br ${add.price}</div>
+                        </div>
+                        <div class="custom-checkbox"><i class="fa-solid fa-check"></i></div>
+                    </div>
+                `).join('');
+            } else {
+                addCont.style.display = 'none';
+            }
+
+            updateModalPrice();
+            document.getElementById('modal-qty-display').innerText = modalQty;
+            
+            const overlay = document.getElementById('product-modal');
+            overlay.classList.add('open');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.remove('open');
+            setTimeout(() => { modalProduct = null; }, 300); // Wait for animation
+        }
+
+        function setModalSize(sz, el) {
+            modalSize = sz;
+            const parent = document.getElementById('pizza-size-matrix');
+            parent.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            updateModalPrice();
+        }
+
+        function toggleAddon(id, el) {
+            const idx = modalSelectedAddons.indexOf(id);
+            if (idx > -1) {
+                modalSelectedAddons.splice(idx, 1);
+                el.classList.remove('selected');
+            } else {
+                modalSelectedAddons.push(id);
+                el.classList.add('selected');
+            }
+            updateModalPrice();
+        }
+
+        function mutateModalQty(change) {
+            if (modalQty + change > 0) {
+                modalQty += change;
+                document.getElementById('modal-qty-display').innerText = modalQty;
+                updateModalPrice();
+            }
+        }
+
+        function updateModalPrice() {
+            if (!modalProduct) return;
+            let base = modalProduct.type === 'pizza' ? modalProduct.prices[modalSize] : modalProduct.price;
+            let addonsPrice = modalSelectedAddons.reduce((sum, id) => {
+                const ao = ADD_ONS.find(a => a.id === id);
+                return sum + (ao ? ao.price : 0);
+            }, 0);
+            
+            const total = (base + addonsPrice) * modalQty;
+            document.getElementById('modal-total-price').innerText = `Br ${total.toFixed(2)}`;
+        }
+
+        function addModalItemToCart() {
+            let basePrice = modalProduct.type === 'pizza' ? modalProduct.prices[modalSize] : modalProduct.price;
+            
+            let addonDetails = modalSelectedAddons.map(id => {
+                const ao = ADD_ONS.find(a => a.id === id);
+                return { name: ao.name, price: ao.price };
+            });
+            let addonsTotal = addonDetails.reduce((sum, a) => sum + a.price, 0);
+            
+            const notes = document.getElementById('modal-notes').value.trim();
+
+            // Generate unique ID based on selections so identical configurations stack
+            const hashId = `${modalProduct.id}-${modalSize}-${modalSelectedAddons.sort().join('-')}-${notes}`;
+
+            const item = {
+                cartId: hashId,
+                id: modalProduct.id,
+                name: modalProduct.name,
+                size: modalSize === 'flat' ? null : modalSize,
+                basePrice: basePrice,
+                unitPrice: basePrice + addonsTotal,
+                qty: modalQty,
+                img: modalProduct.img,
+                addons: addonDetails,
+                notes: notes
+            };
+
+            const existIdx = cart.findIndex(i => i.cartId === item.cartId);
+            if (existIdx > -1) cart[existIdx].qty += item.qty;
+            else cart.push(item);
+
+            saveCart();
+            closeProductModal();
+            updateCartBadge();
+            renderCartItems();
+        }
+
+        // Cart & Checkout
+        function saveCart() { localStorage.setItem('pizzaHutCart2026', JSON.stringify(cart)); }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cart-badge-count');
+            const total = cart.reduce((sum, i) => sum + i.qty, 0);
+            if(total > 0) { badge.style.display = 'flex'; badge.innerText = total; }
+            else { badge.style.display = 'none'; }
+        }
+
+        function removeCartItem(idx) {
+            cart.splice(idx, 1);
+            saveCart(); updateCartBadge(); renderCartItems();
+        }
+        
+        function mutateCartQty(idx, change) {
+            if (cart[idx].qty + change > 0) cart[idx].qty += change;
+            else cart.splice(idx, 1);
+            saveCart(); updateCartBadge(); renderCartItems();
+        }
+
+        function setPayment(method, el) {
+            selectedPayment = method;
+            document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function setTip(amt, el) {
+            tipAmount = amt;
+            document.querySelectorAll('.tip-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderCartItems(); // update receipt
+        }
+
+        function applyPromo() {
+            const code = document.getElementById('promo-code').value.toUpperCase();
+            if (code === 'WINGS26' || code === 'PIZZA50') {
+                activeDiscount = 150; // Mock 150 Br discount
+                document.getElementById('row-discount').style.display = 'flex';
+                renderCartItems();
+                alert(`Promo Applied! Br 150 off.`);
+            } else {
+                alert('Invalid Promo Code');
+            }
+        }
+
+        function renderCartItems() {
+            const root = document.getElementById('cart-items-root');
+            const opsSec = document.getElementById('cart-ops-section');
+            const checkoutBtn = document.getElementById('btn-checkout-submit');
+            
+            root.innerHTML = '';
+            
+            if (cart.length === 0) {
+                root.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-cart-arrow-down"></i>
+                        <h3 style="font-size:18px; color:#fff; margin-bottom:8px;">Your tray is empty</h3>
+                        <p style="font-size:13px;">Looks like you haven't added anything delicious yet.</p>
+                    </div>`;
+                opsSec.style.display = 'none';
+                checkoutBtn.style.display = 'none';
+                return;
+            }
+
+            opsSec.style.display = 'block';
+            checkoutBtn.style.display = 'flex';
+
+            let subtotal = 0;
+            cart.forEach((item, idx) => {
+                const itemTotal = item.unitPrice * item.qty;
+                subtotal += itemTotal;
+                
+                let metaText = item.size ? `Size: ${item.size.toUpperCase()}` : '';
+                if(item.addons.length > 0) metaText += ` | +${item.addons.length} Add-ons`;
+                if(item.notes) metaText += ` | Notes: ${item.notes.substring(0,20)}...`;
+
+                root.innerHTML += `
+                    <div class="cart-item">
+                        <img src="${item.img}" class="cart-item-img">
+                        <div class="cart-item-details">
+                            <div class="cart-item-title">${item.name}</div>
+                            <div class="cart-item-meta">${metaText}</div>
+                            <div class="cart-item-bottom">
+                                <div class="cart-qty-mini">
+                                    <button class="qty-btn" style="width:20px;height:20px;font-size:12px;" onclick="mutateCartQty(${idx}, -1)"><i class="fa-solid fa-minus"></i></button>
+                                    <span style="font-size:12px; font-weight:700; width:12px; text-align:center;">${item.qty}</span>
+                                    <button class="qty-btn" style="width:20px;height:20px;font-size:12px;" onclick="mutateCartQty(${idx}, 1)"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                                <div class="cart-item-price">Br ${itemTotal.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        <button class="cart-remove-btn" onclick="removeCartItem(${idx})" style="position:absolute; top:12px; right:12px;">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            });
+
+            // Receipt Math
+            const vat = subtotal * 0.15;
+            const deliveryFee = orderType === 'delivery' ? 100 : 0;
+            const finalTotal = (subtotal + vat + deliveryFee + tipAmount) - activeDiscount;
+
+            document.getElementById('summary-subtotal').innerText = `Br ${subtotal.toFixed(2)}`;
+            document.getElementById('summary-tax').innerText = `Br ${vat.toFixed(2)}`;
+            document.getElementById('summary-delivery').innerText = `Br ${deliveryFee.toFixed(2)}`;
+            document.getElementById('summary-tip').innerText = `Br ${tipAmount.toFixed(2)}`;
+            if(activeDiscount > 0) document.getElementById('summary-discount').innerText = `- Br ${activeDiscount.toFixed(2)}`;
+            document.getElementById('summary-total').innerText = `Br ${Math.max(0, finalTotal).toFixed(2)}`;
+        }
+
+        function submitOrder() {
+            const name = document.getElementById('cust-name').value.trim();
+            const phone = document.getElementById('cust-phone').value.trim();
+            const address = document.getElementById('cust-address').value.trim();
+            const branch = document.getElementById('branch-select').value;
+            
+            if (!name || !phone) return alert("Please provide your Name and Phone Number.");
+            if (orderType === 'delivery' && !address) return alert("Please provide a delivery address.");
+
+            let subtotal = 0;
+            let msg = `🍕 *NEW ORDER - ${branch}*\n`;
+            msg += `📋 Type: *${orderType.toUpperCase()}*\n`;
+            msg += `💳 Payment: *${selectedPayment}*\n\n`;
+            
+            msg += `👤 *Customer Details*\n`;
+            msg += `Name: ${name}\nPhone: ${phone}\n`;
+            if(orderType === 'delivery') msg += `Address: ${address}\n`;
+            msg += `\n🛒 *Order Items*\n`;
+
+            cart.forEach(item => {
+                const iTotal = item.unitPrice * item.qty;
+                subtotal += iTotal;
+                msg += `▪️ ${item.qty}x ${item.name} `;
+                if(item.size) msg += `(${item.size.toUpperCase()}) `;
+                msg += `- Br ${iTotal}\n`;
+                
+                if(item.addons.length > 0) {
+                    msg += `   └ Add-ons: ${item.addons.map(a => a.name).join(', ')}\n`;
+                }
+                if(item.notes) msg += `   └ Notes: ${item.notes}\n`;
+            });
+
+            const vat = subtotal * 0.15;
+            const dFee = orderType === 'delivery' ? 100 : 0;
+            const total = (subtotal + vat + dFee + tipAmount) - activeDiscount;
+
+            msg += `\n💰 *Receipt Breakdown*\n`;
+            msg += `Subtotal: Br ${subtotal.toFixed(2)}\n`;
+            msg += `VAT (15%): Br ${vat.toFixed(2)}\n`;
+            if(dFee > 0) msg += `Delivery: Br ${dFee.toFixed(2)}\n`;
+            if(tipAmount > 0) msg += `Tip: Br ${tipAmount.toFixed(2)}\n`;
+            if(activeDiscount > 0) msg += `Discount: -Br ${activeDiscount.toFixed(2)}\n`;
+            msg += `\n💵 *TOTAL TO PAY: Br ${Math.max(0, total).toFixed(2)}*\n`;
+
+            // Clear Cart
+            cart = []; saveCart(); renderCartItems(); updateCartBadge();
+            navigateTo('home');
+
+            // Send to Telegram
+            const botUser = "your_restaurant_admin_bot"; // Replace with real bot username
+            window.open(`https://t.me/${botUser}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // Navigation
+        function navigateTo(viewId) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
+            
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            document.getElementById(`nav-${viewId}`).classList.add('active');
+            
+            const header = document.getElementById('app-header');
+            if(viewId === 'cart') header.style.display = 'none';
+            else header.style.display = 'flex';
+            
+            window.scrollTo(0,0);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
