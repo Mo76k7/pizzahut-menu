@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza Hut Addis Ababa — Interactive Menu</title>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --color-primary: #EE1945;       /* Pizza Hut Red */
+            --color-primary-dark: #B80F32;
+            --color-accent: #FFAA00;        /* Cheese Gold */
+            --color-bg: #111111;            /* Deep Charcoal Black */
+            --color-card: #1A1A1A;          /* Light Charcoal Card Body */
+            --color-text-main: #FFFFFF;     /* White Text */
+            --color-text-muted: #AAAAAA;    /* Balanced Muted Grey */
+            --font-display: 'Barlow Condensed', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+            --shadow-md: 0 8px 30px rgba(0,0,0,0.5);
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #080808;
+            font-family: var(--font-sans);
+            color: var(--color-text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Phone frame layout */
+        .phone-wrapper {
+            width: 100%;
+            max-width: 412px;
+            height: 892px;
+            background-color: var(--color-bg);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border-radius: 40px;
+            border: 8px solid #222;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top global navigation bar */
+        .app-header {
+            padding: 20px 20px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--color-bg);
+            z-index: 10;
+            border-bottom: 1px solid #222;
+        }
+        .header-left .location-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--color-text-muted);
+        }
+        .header-left .location-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+        
+        /* Utility Bar for Fasting & Search */
+        .utility-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: #151515;
+            border-bottom: 1px solid #222;
+            gap: 12px;
+        }
+        
+        .search-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-container i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-muted);
+            font-size: 12px;
+        }
+        
+        .search-input {
+            width: 100%;
+            background: #222;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 8px 12px 8px 32px;
+            border-radius: 30px;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .search-input:focus {
+            border-color: var(--color-primary);
+        }
+
+        .fasting-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--color-accent);
+            text-transform: uppercase;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--color-primary); }
+        input:checked + .slider:before { transform: translateX(16px); }
+
+        /* Core scrollable frame wrapper */
+        .view-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 20px 90px;
+            scrollbar-width: none;
+        }
+        .view-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .app-view {
+            display: none;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .app-view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .display-title {
+            font-family: var(--font-display);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-main);
+        }
+        .section-header {
+            margin: 20px 0 12px;
+        }
+        .section-header h2 {
+            font-size: 20px;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            color: var(--color-accent);
+            letter-spacing: 0.5px;
+        }
+
+        /* Horizontal Category Continuous Auto Scrolling Navigation Bar */
+        .category-scroll-container {
+            width: 100%;
+            overflow: hidden;
+            position: sticky;
+            top: 0;
+            background: var(--color-bg);
+            z-index: 5;
+            padding: 6px 0;
+        }
+
+        .category-scroll {
+            display: flex;
+            gap: 10px;
+            width: max-content;
+            animation: continuousScroll 18s linear infinite;
+        }
+
+        .category-scroll-container:hover .category-scroll {
+            animation-play-state: paused;
+        }
+
+        @keyframes continuousScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .cat-pill {
+            background: var(--color-card);
+            padding: 10px 16px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            border: 1px solid #222;
+        }
+        .cat-pill.active {
+            background: var(--color-primary);
+            color: #FFF;
+            border-color: var(--color-primary);
+        }
+
+        /* Dynamic Product Grid Component */
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .product-card {
+            background: var(--color-card);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid #222;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+        }
+        .product-card:active {
+            transform: scale(0.98);
+        }
+        
+        .img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            background: #222;
+            overflow: hidden;
+        }
+        
+        .product-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+        
+        .product-info {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+        }
+        .product-info h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #FFF;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+        .product-info p {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+        .product-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+        .product-price {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--color-accent);
+        }
+        .add-icon-btn {
+            color: var(--color-primary);
+            font-size: 18px;
+        }
+
+        /* Modal Box */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+        }
+        .modal-sheet {
+            width: 100%;
+            background: #161616;
+            border-top-left-radius: var(--radius-lg);
+            border-top-right-radius: var(--radius-lg);
+            padding: 24px;
+            max-height: 85%;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out forwards;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .modal-close-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-close-btn {
+            background: #222;
+            border: none;
+            color: #FFF;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .modal-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            margin-bottom: 14px;
+        }
+        .modal-desc {
+            font-size: 12px;
+            color: var(--color-text-muted);
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+        .options-group-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .selector-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .selector-btn {
+            flex: 1;
+            background: #222;
+            border: 1px solid #333;
+            color: #FFF;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .selector-btn.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        /* Action Buttons */
+        .btn-primary {
+            background: var(--color-primary);
+            color: #FFF;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            width: 100%;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .btn-primary:hover { background: var(--color-primary-dark); }
+        
+        .btn-secondary {
+            background: #222;
+            color: var(--color-text-main);
+            border: 1px solid #333;
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            width: 100%;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .btn-secondary:hover { background: #2a2a2a; }
+
+        /* Bottom Navigator Bar */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #111111;
+            border-top: 1px solid #222;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 10px 24px;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--color-text-muted);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            gap: 4px;
+            cursor: pointer;
+            position: relative;
+        }
+        .nav-item i { font-size: 18px; }
+        .nav-item.active { color: var(--color-primary); }
+        .badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            background: var(--color-accent);
+            color: #000;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 10px;
+            font-weight: 800;
+        }
+
+        /* Cart View Markup */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--color-card);
+            padding: 10px;
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            border: 1px solid #222;
+        }
+        .cart-item img { width: 50px; height: 50px; object-fit: cover; border-radius: var(--radius-sm); }
+        .cart-item-info { flex: 1; }
+        .cart-item-title { font-size: 13px; font-weight: 700; }
+        .cart-item-meta { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
+        .cart-item-price { font-size: 13px; color: var(--color-accent); font-weight: 800; margin-top: 2px; }
+        .qty-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #222;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+        .qty-btn {
+            background: transparent;
+            border: none;
+            color: #FFF;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .remove-btn {
+            background: transparent;
+            border: none;
+            color: var(--color-primary);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .summary-block {
+            background: var(--color-card);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-top: 15px;
+            border: 1px solid #222;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: var(--color-text-muted);
+        }
+        .summary-row.total {
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            font-weight: 800;
+            color: #FFF;
+            font-size: 15px;
+            margin-bottom: 0;
+        }
+        
+        .empty-cart-msg {
+            text-align: center;
+            color: var(--color-text-muted);
+            padding: 40px 0;
+            font-size: 14px;
+        }
+
+        .kitchen-info-note {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            text-align: center;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-wrapper">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <p class="location-label">Addis Ababa Branch</p>
+                <div class="location-value">
+                    <i class="fa-solid fa-location-dot"></i> 
+                    <select id="branch-select" style="background:transparent; border:none; color:inherit; font-weight:inherit; font-size:inherit; outline:none; cursor:pointer;">
+                        <option value="Bole Road" style="background:#111;">Bole Road</option>
+                        <option value="Bethel Square" style="background:#111;">Bethel Square</option>
+                        <option value="CMC" style="background:#111;">CMC Branch</option>
+                        <option value="Ayat Zone 8" style="background:#111;">Ayat Zone 8</option>
+                    </select>
+                </div>
+            </div>
+            <div style="font-family: var(--font-display); font-weight:900; color:var(--color-primary); font-size:20px; letter-spacing: -1px;">PIZZA HUT</div>
+        </header>
+        
+        <!-- Utility Bar -->
+        <div class="utility-bar" id="utility-bar">
+            <div class="search-container">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" class="search-input" id="menu-search" placeholder="Search menu...">
+            </div>
+            <div class="fasting-toggle-container">
+                <span>Fasting</span>
+                <label class="switch">
+                    <input type="checkbox" id="fasting-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Viewport container -->
+        <main class="view-container" id="view-viewport">
+            
+            <!-- VIEW 1: CATEGORIES & MENU PRODUCTS -->
+            <div id="view-home" class="app-view active">
+                <h1 class="display-title" style="font-size: 26px; margin-top: 8px; color: #FFF;">Explore Our <br><span style="color:var(--color-primary)">Delicious Menu</span></h1>
+                
+                <!-- Continuous Auto-Scrolling Category Bar Wrapper -->
+                <div class="category-scroll-container">
+                    <div class="category-scroll" id="categories-bar">
+                        <!-- Loaded dynamically via scripts -->
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <h2 id="current-category-title">Veg Pizza</h2>
+                </div>
+
+                <!-- Products grid -->
+                <div class="product-grid" id="products-target-grid">
+                    <!-- Dynamic rendering target -->
+                </div>
+            </div>
+
+            <!-- VIEW 2: CART VIEW SYSTEM -->
+            <div id="view-cart" class="app-view">
+                <h1 class="display-title" style="font-size: 24px; margin-bottom: 16px; border-bottom:1px solid #222; padding-bottom:8px;">Your Tray</h1>
+                
+                <div id="cart-items-root"></div>
+
+                <div class="summary-block" id="cart-summary-block">
+                    <div class="summary-row total"><span>Total Order</span><span id="summary-total">Br 0.00</span></div>
+                </div>
+
+                <button class="btn-primary" id="checkout-btn" onclick="submitOrderToTelegram()">
+                    <i class="fa-brands fa-telegram"></i> Send Order to Kitchen
+                </button>
+
+                <button class="btn-secondary" onclick="navigateTo('home')">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Menu
+                </button>
+
+                <div class="kitchen-info-note">
+                    Kitchen: @lil_fx0 (+251907496428)
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Customization Modal -->
+        <div class="modal-overlay" id="product-modal">
+            <div class="modal-sheet">
+                <div class="modal-close-header">
+                    <h3 class="display-title" id="modal-item-name" style="font-size: 20px;">Item Title</h3>
+                    <button class="modal-close-btn" onclick="closeProductModal()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <img src="" id="modal-item-img" class="modal-img" alt="Product Showcase">
+                <p id="modal-item-desc" class="modal-desc">Product description layout.</p>
+                
+                <div id="pizza-options-container">
+                    <!-- Sizing options -->
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-top: 1px solid #222; padding-top:16px;">
+                    <div class="qty-selector">
+                        <button class="qty-btn" onclick="mutateModalQuantity(-1)">-</button>
+                        <span id="modal-qty-display" style="font-weight:700; font-size:14px; min-width:14px; text-align:center;">1</span>
+                        <button class="qty-btn" onclick="mutateModalQuantity(1)">+</button>
+                    </div>
+                    <button class="btn-primary" style="margin:0; width:auto; flex:1; margin-left:16px;" onclick="addModalItemToCart()">
+                        Add — Br <span id="modal-total-price-display">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Global Bottom Navigation Bar -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" id="nav-home" onclick="navigateTo('home')">
+                <i class="fa-solid fa-pizza-slice"></i>
+                <span>Menu</span>
+            </div>
+            <div class="nav-item" id="nav-cart" onclick="navigateTo('cart')">
+                <i class="fa-solid fa-basket-shopping"></i>
+                <span>Tray</span>
+                <span class="badge" id="cart-badge-count" style="display:none;">0</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // Core Database Schema Structure
+        const MENU_DATA = {
+            "veg-pizza": {
+                title: "Veg Pizza",
+                items: [
+                    { id: "v1", name: "MARGHERITA PIZZA", desc: "Tomato Sauce, Mozzarella Cheese", prices: { small: 495, medium: 770, large: 1120 }, img: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "v2", name: "CHEESE PIZZA", desc: "Tomato Sauce, Mozzarella Cheese, Cheddar Cheese", prices: { small: 475, medium: 740, large: 1100 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "v3", name: "HOT & SPICY VEG", desc: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Green Chilli", prices: { small: 550, medium: 875, large: 1315 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "v4", name: "MUSHROOM LOVERS", desc: "Tomato Sauce, Mozzarella Cheese, Mushroom, Olives", prices: { small: 585, medium: 940, large: 1245 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "v5", name: "TROPICAL VEGGIE", desc: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Pineapple", prices: { small: 585, medium: 905, large: 1390 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "v6", name: "VEGGIE SUPREME", desc: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Tomato & Olives", prices: { small: 540, medium: 830, large: 1245 }, img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=400&q=80", type: "pizza" }
+                ]
+            },
+            "meat-pizza": {
+                title: "Meat Pizza",
+                items: [
+                    { id: "m1", name: "HAWAIIAN PIZZA", desc: "Tomato Sauce, Mozzarella Cheese, Turkey Ham, Pineapple", prices: { small: 700, medium: 965, large: 1315 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "m2", name: "ITALIAN MEAT", desc: "Tomato Sauce, Mozzarella Cheese, Italian Meat Roll, Onion, Tomato, Green Chilli", prices: { small: 775, medium: 1070, large: 1535 }, img: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "m3", name: "MEAT LOVERS", desc: "Tomato Sauce, Mozzarella Cheese, Pepperoni, Turkey Ham, Beef", prices: { small: 765, medium: 1150, large: 1535 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "m4", name: "PEPPERONI LOVERS", desc: "Tomato Sauce, Mozzarella Cheese, Pepperoni", prices: { small: 685, medium: 965, large: 1410 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "m5", name: "BBQ DOUBLE MEAT", desc: "BBQ Sauce, Mozzarella Cheese, Turkey Ham, Beef", prices: { small: 765, medium: 1150, large: 1535 }, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "m6", name: "SUPER SUPREME", desc: "Tomato Sauce, Mozzarella Cheese, Beef, Pepperoni, Turkey Ham, Chicken, Onion, Tomato, Capsicum, Olives", prices: { small: 795, medium: 1200, large: 1535 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80", type: "pizza" }
+                ]
+            },
+            "chicken-pizza": {
+                title: "Chicken Pizza",
+                items: [
+                    { id: "c1", name: "HOT & SPICY CHICKEN", desc: "Tomato Sauce, Mozzarella Cheese, Chicken, Onion, Tomato, Green Chilli", prices: { small: 665, medium: 1055, large: 1550 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "c2", name: "SWEET CHILLI CHICKEN", desc: "Tomato Sauce, Mozzarella Cheese, Chicken", prices: { small: 700, medium: 1070, large: 1505 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "c3", name: "BBQ CHICKEN", desc: "BBQ Sauce, Mozzarella Cheese, Turkey Ham, Chicken", prices: { small: 740, medium: 1165, large: 1535 }, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "c4", name: "CHICKEN & MUSHROOM", desc: "Tomato Sauce, Mozzarella Cheese, Chicken, Mushroom", prices: { small: 665, medium: 1055, large: 1505 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "c5", name: "CHICKEN FAJITA", desc: "Tomato Sauce, Mozzarella Cheese, Chicken, Onion, Tomato", prices: { small: 665, medium: 1000, large: 1535 }, img: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "c6", name: "CHICKEN SUPREME", desc: "Tomato Sauce, Mozzarella Cheese, Onion, Mozzarella, Chicken, Capsicum", prices: { small: 730, medium: 1130, large: 1535 }, img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=400&q=80", type: "pizza" }
+                ]
+            },
+            "fasting-pizza": {
+                title: "Fasting Pizza",
+                items: [
+                    { id: "f1", name: "TUNA PIZZA", desc: "Fasting Sauce, Tuna, Onion, Capsicum, Olives & Green Chilli", prices: { small: 540, medium: 740, large: 1165 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "f2", name: "VEGGIE BLAST", desc: "Fasting Sauce, Pineapple, Onion, Olives & Green Chilli, Capsicum, Mushroom & Green Chilli", prices: { small: 480, medium: 795, large: 1100 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=400&q=80", type: "pizza" },
+                    { id: "f3", name: "PINEAPPLE LOVERS", desc: "Fasting Sauce, Pineapple, Onion & Green Chilli", prices: { small: 520, medium: 740, large: 1100 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=80", type: "pizza" }
+                ]
+            },
+            "sides": {
+                title: "Sides",
+                items: [
+                    { id: "s1", name: "FRENCH FRIES", desc: "Golden standard crisps", price: 355, img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=400&q=80", type: "flat" },
+                    { id: "s2", name: "CHILLI FRIES", desc: "French fries tossed in spice blend", price: 450, img: "https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&w=400&q=80", type: "flat" }
+                ]
+            }
+        };
+
+        // Target Kitchen Details
+        const KITCHEN_TELEGRAM_HANDLE = "lil_fx0";
+        const KITCHEN_PHONE = "+251907496428";
+
+        let currentCategoryKey = "veg-pizza";
+        let activeModalItem = null;
+        let selectedSize = 'medium';
+        let modalQuantity = 1;
+        let cart = [];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCategoryBar();
+            renderProducts(currentCategoryKey);
+            
+            document.getElementById('fasting-toggle').addEventListener('change', (e) => {
+                if(e.target.checked) {
+                    selectCategory('fasting-pizza');
+                } else {
+                    selectCategory('veg-pizza');
+                }
+            });
+
+            document.getElementById('menu-search').addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase().trim();
+                filterProductsBySearch(term);
+            });
+        });
+
+        // Continuous duplicates duplicated bar for seamless looping
+        function renderCategoryBar() {
+            const container = document.getElementById('categories-bar');
+            const keys = Object.keys(MENU_DATA);
+            
+            // Build original set + duplicate set for smooth looping keyframes
+            let html = '';
+            for(let i = 0; i < 2; i++) {
+                keys.forEach(key => {
+                    const activeClass = (key === currentCategoryKey && i === 0) ? 'active' : '';
+                    html += `<div class="cat-pill ${activeClass}" id="cat-btn-${key}-${i}" onclick="selectCategory('${key}')">${MENU_DATA[key].title}</div>`;
+                });
+            }
+            container.innerHTML = html;
+        }
+
+        function selectCategory(key) {
+            currentCategoryKey = key;
+            document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll(`[id^="cat-btn-${key}"]`).forEach(el => el.classList.add('active'));
+            document.getElementById('current-category-title').innerText = MENU_DATA[key].title;
+            renderProducts(key);
+        }
+
+        function renderProducts(key) {
+            const grid = document.getElementById('products-target-grid');
+            const category = MENU_DATA[key];
+            if(!category) return;
+
+            grid.innerHTML = category.items.map(item => {
+                const priceDisplay = item.type === 'pizza' ? `Br ${item.prices.medium}` : `Br ${item.price}`;
+                return `
+                    <div class="product-card" onclick="openProductModal('${key}', '${item.id}')">
+                        <div class="img-wrapper">
+                            <img src="${item.img}" alt="${item.name}" loading="lazy">
+                        </div>
+                        <div class="product-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.desc}</p>
+                            <div class="product-price-row">
+                                <span class="product-price">${priceDisplay}</span>
+                                <i class="fa-solid fa-circle-plus add-icon-btn"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterProductsBySearch(term) {
+            if(!term) {
+                renderProducts(currentCategoryKey);
+                return;
+            }
+            const grid = document.getElementById('products-target-grid');
+            let results = [];
+            Object.keys(MENU_DATA).forEach(cat => {
+                MENU_DATA[cat].items.forEach(item => {
+                    if(item.name.toLowerCase().includes(term) || item.desc.toLowerCase().includes(term)) {
+                        results.push({ item, cat });
+                    }
+                });
+            });
+
+            if(results.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:#aaa;">No matching items found</div>`;
+                return;
+            }
+
+            grid.innerHTML = results.map(({ item, cat }) => {
+                const priceDisplay = item.type === 'pizza' ? `Br ${item.prices.medium}` : `Br ${item.price}`;
+                return `
+                    <div class="product-card" onclick="openProductModal('${cat}', '${item.id}')">
+                        <div class="img-wrapper">
+                            <img src="${item.img}" alt="${item.name}">
+                        </div>
+                        <div class="product-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.desc}</p>
+                            <div class="product-price-row">
+                                <span class="product-price">${priceDisplay}</span>
+                                <i class="fa-solid fa-circle-plus add-icon-btn"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openProductModal(catKey, itemId) {
+            const item = MENU_DATA[catKey].items.find(i => i.id === itemId);
+            if(!item) return;
+
+            activeModalItem = item;
+            modalQuantity = 1;
+            selectedSize = 'medium';
+
+            document.getElementById('modal-item-name').innerText = item.name;
+            document.getElementById('modal-item-img').src = item.img;
+            document.getElementById('modal-item-desc').innerText = item.desc;
+            document.getElementById('modal-qty-display').innerText = modalQuantity;
+
+            const optionsContainer = document.getElementById('pizza-options-container');
+            if(item.type === 'pizza') {
+                optionsContainer.innerHTML = `
+                    <div class="options-group-title">Select Size</div>
+                    <div class="selector-row">
+                        <div class="selector-btn" id="size-small" onclick="setSize('small')">Small<br>Br ${item.prices.small}</div>
+                        <div class="selector-btn active" id="size-medium" onclick="setSize('medium')">Medium<br>Br ${item.prices.medium}</div>
+                        <div class="selector-btn" id="size-large" onclick="setSize('large')">Large<br>Br ${item.prices.large}</div>
+                    </div>
+                `;
+            } else {
+                optionsContainer.innerHTML = '';
+            }
+
+            updateModalPrice();
+            document.getElementById('product-modal').style.display = 'flex';
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').style.display = 'none';
+        }
+
+        function setSize(size) {
+            selectedSize = size;
+            document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`size-${size}`).classList.add('active');
+            updateModalPrice();
+        }
+
+        function mutateModalQuantity(delta) {
+            if(modalQuantity + delta >= 1) {
+                modalQuantity += delta;
+                document.getElementById('modal-qty-display').innerText = modalQuantity;
+                updateModalPrice();
+            }
+        }
+
+        function calculateItemUnitPrice(item, size) {
+            return item.type === 'pizza' ? item.prices[size] : item.price;
+        }
+
+        function updateModalPrice() {
+            if(!activeModalItem) return;
+            const unit = calculateItemUnitPrice(activeModalItem, selectedSize);
+            document.getElementById('modal-total-price-display').innerText = (unit * modalQuantity).toFixed(2);
+        }
+
+        function addModalItemToCart() {
+            const unitPrice = calculateItemUnitPrice(activeModalItem, selectedSize);
+            const cartItem = {
+                id: activeModalItem.id + (activeModalItem.type === 'pizza' ? `-${selectedSize}` : ''),
+                name: activeModalItem.name,
+                size: activeModalItem.type === 'pizza' ? selectedSize : null,
+                unitPrice: unitPrice,
+                quantity: modalQuantity,
+                img: activeModalItem.img
+            };
+
+            const existingIndex = cart.findIndex(c => c.id === cartItem.id);
+            if(existingIndex > -1) {
+                cart[existingIndex].quantity += modalQuantity;
+            } else {
+                cart.push(cartItem);
+            }
+
+            closeProductModal();
+            updateCartBadge();
+        }
+
+        function updateCartBadge() {
+            const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-badge-count');
+            if(totalQty > 0) {
+                badge.innerText = totalQty;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function navigateTo(viewName) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            if(viewName === 'home') {
+                document.getElementById('view-home').classList.add('active');
+                document.getElementById('nav-home').classList.add('active');
+            } else if(viewName === 'cart') {
+                document.getElementById('view-cart').classList.add('active');
+                document.getElementById('nav-cart').classList.add('active');
+                renderCartView();
+            }
+        }
+
+        function renderCartView() {
+            const root = document.getElementById('cart-items-root');
+            const checkoutBtn = document.getElementById('checkout-btn');
+
+            if(cart.length === 0) {
+                root.innerHTML = `<div class="empty-cart-msg">Your tray is empty.<br>Select items from the menu to add them here!</div>`;
+                document.getElementById('summary-total').innerText = 'Br 0.00';
+                checkoutBtn.style.opacity = '0.5';
+                checkoutBtn.style.pointerEvents = 'none';
+                return;
+            }
+
+            checkoutBtn.style.opacity = '1';
+            checkoutBtn.style.pointerEvents = 'auto';
+
+            let grandTotal = 0;
+            root.innerHTML = cart.map((item, index) => {
+                const itemTotal = item.unitPrice * item.quantity;
+                grandTotal += itemTotal;
+                const sizeLabel = item.size ? ` (${item.size.toUpperCase()})` : '';
+
+                return `
+                    <div class="cart-item">
+                        <img src="${item.img}" alt="${item.name}">
+                        <div class="cart-item-info">
+                            <div class="cart-item-title">${item.name}${sizeLabel}</div>
+                            <div class="cart-item-meta">Br ${item.unitPrice} each</div>
+                            <div class="cart-item-price">Br ${itemTotal.toFixed(2)}</div>
+                        </div>
+                        <div class="qty-selector">
+                            <button class="qty-btn" onclick="updateCartItemQty(${index}, -1)">-</button>
+                            <span style="font-size:12px; font-weight:700;">${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateCartItemQty(${index}, 1)">+</button>
+                        </div>
+                        <button class="remove-btn" onclick="removeCartItem(${index})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('summary-total').innerText = `Br ${grandTotal.toFixed(2)}`;
+        }
+
+        function updateCartItemQty(index, delta) {
+            if(cart[index].quantity + delta > 0) {
+                cart[index].quantity += delta;
+            } else {
+                cart.splice(index, 1);
+            }
+            updateCartBadge();
+            renderCartView();
+        }
+
+        function removeCartItem(index) {
+            cart.splice(index, 1);
+            updateCartBadge();
+            renderCartView();
+        }
+
+        function submitOrderToTelegram() {
+            if(cart.length === 0) return;
+
+            const selectedBranch = document.getElementById('branch-select').value;
+            let grandTotal = 0;
+
+            let orderSummary = `🍕 *NEW KITCHEN ORDER*\n`;
+            orderSummary += `📍 *Branch:* ${selectedBranch}\n`;
+            orderSummary += `───────────────────\n`;
+
+            cart.forEach((item, idx) => {
+                const itemTotal = item.unitPrice * item.quantity;
+                grandTotal += itemTotal;
+                const sizeStr = item.size ? ` [${item.size.toUpperCase()}]` : '';
+                orderSummary += `${idx + 1}. *${item.name}*${sizeStr} x${item.quantity} - Br ${itemTotal.toFixed(2)}\n`;
+            });
+
+            orderSummary += `───────────────────\n`;
+            orderSummary += `💰 *TOTAL AMOUNT:* Br ${grandTotal.toFixed(2)}\n`;
+            orderSummary += `📞 *Kitchen Line:* ${KITCHEN_PHONE}\n`;
+
+            const encodedMessage = encodeURIComponent(orderSummary);
+            
+            // Directly target the kitchen account (@lil_fx0)
+            const telegramUrl = `https://t.me/${KITCHEN_TELEGRAM_HANDLE}?text=${encodedMessage}`;
+            window.open(telegramUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
