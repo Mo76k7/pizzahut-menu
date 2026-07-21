@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza Hut Addis Ababa — Interactive Menu</title>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --color-primary: #EE1945;        /* Pizza Hut Red */
+            --color-primary-dark: #B80F32;
+            --color-accent: #FFAA00;         /* Cheese Gold */
+            --color-bg: #111111;             /* Deep Charcoal Black */
+            --color-card: #1A1A1A;           /* Light Charcoal Card Body */
+            --color-text-main: #FFFFFF;      /* White Text */
+            --color-text-muted: #AAAAAA;     /* Balanced Muted Grey */
+            --font-display: 'Barlow Condensed', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+            --shadow-md: 0 8px 30px rgba(0,0,0,0.5);
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #080808;
+            font-family: var(--font-sans);
+            color: var(--color-text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Phone frame layout */
+        .phone-wrapper {
+            width: 100%;
+            max-width: 412px;
+            height: 892px;
+            background-color: var(--color-bg);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border-radius: 40px;
+            border: 8px solid #222;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 1. GLASSMORPHISM FLOATING HEADER */
+        .app-header {
+            padding: 16px 20px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(17, 17, 17, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 10;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+        }
+        .header-left .location-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--color-text-muted);
+        }
+        .header-left .location-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+        
+        /* 5. GRADIENT TEXT ACCENT */
+        .brand-logo-text {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #EE1945 0%, #FFAA00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Utility Bar for Fasting & Search */
+        .utility-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            background: #151515;
+            border-bottom: 1px solid #222;
+            gap: 12px;
+        }
+        
+        .search-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-container i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-muted);
+            font-size: 12px;
+        }
+        
+        .search-input {
+            width: 100%;
+            background: #222;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 8px 12px 8px 32px;
+            border-radius: 30px;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .search-input:focus {
+            border-color: var(--color-primary);
+        }
+
+        .fasting-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--color-accent);
+            text-transform: uppercase;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--color-primary); }
+        input:checked + .slider:before { transform: translateX(16px); }
+
+        /* 4. DIETARY & INGREDIENT FILTER CHIPS */
+        .filter-chips-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 8px 20px;
+            background: #111;
+            scrollbar-width: none;
+            border-bottom: 1px solid #1e1e1e;
+        }
+        .filter-chips-container::-webkit-scrollbar { display: none; }
+        
+        .chip {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            color: var(--color-text-muted);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chip.active {
+            background: rgba(238, 25, 69, 0.15);
+            border-color: var(--color-primary);
+            color: #FFF;
+        }
+
+        /* Core scrollable frame wrapper */
+        .view-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 20px 100px;
+            scrollbar-width: none;
+        }
+        .view-container::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .app-view {
+            display: none;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .app-view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .display-title {
+            font-family: var(--font-display);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-main);
+        }
+        .section-header {
+            margin: 16px 0 12px;
+        }
+        .section-header h2 {
+            font-size: 20px;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            color: var(--color-accent);
+            letter-spacing: 0.5px;
+        }
+
+        /* Category Bar */
+        .category-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            position: sticky;
+            top: 0;
+            background: var(--color-bg);
+            z-index: 5;
+            padding: 6px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        .category-scroll-container::-webkit-scrollbar { display: none; }
+
+        .category-scroll {
+            display: flex;
+            gap: 10px;
+            width: max-content;
+        }
+
+        .cat-pill {
+            background: var(--color-card);
+            padding: 8px 14px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            border: 1px solid #222;
+        }
+        .cat-pill.active {
+            background: var(--color-primary);
+            color: #FFF;
+            border-color: var(--color-primary);
+        }
+
+        /* Dynamic Product Grid Component */
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .product-card {
+            background: var(--color-card);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid #222;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s;
+            position: relative;
+        }
+        .product-card:active {
+            transform: scale(0.97);
+        }
+        
+        /* 3. VISUAL BADGING & DYNAMIC TAGS */
+        .card-tag {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #FFF;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .card-tag.bestseller { background: rgba(238, 25, 69, 0.85); color: #FFF; }
+        .card-tag.fasting { background: rgba(0, 168, 89, 0.85); color: #FFF; }
+        .card-tag.spicy { background: rgba(255, 120, 0, 0.85); color: #FFF; }
+
+        .img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            background: #222;
+            overflow: hidden;
+        }
+        
+        .product-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+
+        /* 2. SKELETON SCREEN ANIMATION */
+        .skeleton {
+            background: linear-gradient(90deg, #1f1f1f 25%, #2a2a2a 50%, #1f1f1f 75%);
+            background-size: 200% 100%;
+            animation: skeletonLoading 1.5s infinite;
+        }
+        @keyframes skeletonLoading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .product-info {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+        }
+        .product-info h4 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #FFF;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+        .product-info p {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+        .product-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+        .product-price {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--color-accent);
+        }
+        
+        /* 5. PRICE STRIKETHROUGH FOR DEALS */
+        .old-price {
+            font-size: 10px;
+            color: #777;
+            text-decoration: line-through;
+            margin-left: 4px;
+            font-weight: 500;
+        }
+        
+        .add-icon-btn {
+            color: var(--color-primary);
+            font-size: 18px;
+        }
+
+        /* Tray Header Bar */
+        .tray-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 10px;
+        }
+        .btn-back-menu {
+            background: #1A1A1A;
+            border: 1px solid #333;
+            color: var(--color-text-main);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
+        }
+        .btn-back-menu:hover {
+            background: #252525;
+            color: var(--color-primary);
+        }
+
+        /* Table Number Selector Component */
+        .table-selector-card {
+            background: var(--color-card);
+            border: 1px solid #222;
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .table-selector-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .table-input-field {
+            background: #222;
+            border: 1px solid #333;
+            color: #FFF;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 700;
+            width: 90px;
+            text-align: center;
+            outline: none;
+        }
+        .table-input-field:focus {
+            border-color: var(--color-primary);
+        }
+
+        /* Modal Box */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+        }
+        .modal-sheet {
+            width: 100%;
+            background: #161616;
+            border-top-left-radius: var(--radius-lg);
+            border-top-right-radius: var(--radius-lg);
+            padding: 24px;
+            max-height: 85%;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out forwards;
+            border-top: 1px solid #333;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .modal-close-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-close-btn {
+            background: #222;
+            border: none;
+            color: #FFF;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .modal-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            margin-bottom: 14px;
+        }
+        .modal-desc {
+            font-size: 12px;
+            color: var(--color-text-muted);
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+        .options-group-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .selector-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        /* 2. SIZE SELECTION BOUNCE INTERACTION */
+        .selector-btn {
+            flex: 1;
+            background: #222;
+            border: 1px solid #333;
+            color: #FFF;
+            padding: 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .selector-btn.active {
+            background: var(--color-primary);
+            border-color: var(--color-primary);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(238, 25, 69, 0.4);
+        }
+
+        /* 6. ENHANCED TRAY EXPERIENCE STYLING */
+        .instructions-box {
+            width: 100%;
+            background: #222;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-sans);
+            font-size: 12px;
+            outline: none;
+            resize: none;
+            margin-top: 8px;
+        }
+        .instructions-box:focus {
+            border-color: var(--color-primary);
+        }
+
+        .prep-time-banner {
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid rgba(255, 170, 0, 0.25);
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--color-accent);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        /* Action Buttons */
+        .btn-primary {
+            background: var(--color-primary);
+            color: #FFF;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            width: 100%;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .btn-primary:hover { background: var(--color-primary-dark); }
+
+        /* 1. GLASSMORPHISM FLOATING BOTTOM NAV */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(17, 17, 17, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 10px 24px;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--color-text-muted);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            gap: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+        .nav-item i { font-size: 18px; }
+        .nav-item.active { color: var(--color-primary); }
+
+        /* 2. CART FLOATING PILL ANIMATION */
+        .badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            background: var(--color-accent);
+            color: #000;
+            font-size: 9px;
+            padding: 2px 5px;
+            border-radius: 10px;
+            font-weight: 800;
+        }
+        
+        .pulse-badge {
+            animation: pulse 0.4s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+
+        /* 2. FLOATING MINI-BANNER TRAY INTERACTION */
+        .floating-cart-pill {
+            position: absolute;
+            bottom: 75px;
+            left: 20px;
+            right: 20px;
+            background: var(--color-primary);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(238, 25, 69, 0.4);
+            cursor: pointer;
+            z-index: 90;
+            animation: slideUpPill 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slideUpPill {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Cart View Markup */
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--color-card);
+            padding: 10px;
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            border: 1px solid #222;
+        }
+        .cart-item img { width: 50px; height: 50px; object-fit: cover; border-radius: var(--radius-sm); }
+        .cart-item-info { flex: 1; }
+        .cart-item-title { font-size: 13px; font-weight: 700; }
+        .cart-item-meta { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
+        .cart-item-price { font-size: 13px; color: var(--color-accent); font-weight: 800; margin-top: 2px; }
+        .qty-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #222;
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+        .qty-btn {
+            background: transparent;
+            border: none;
+            color: #FFF;
+            font-size: 14px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .remove-btn {
+            background: transparent;
+            border: none;
+            color: var(--color-primary);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .summary-block {
+            background: var(--color-card);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-top: 15px;
+            border: 1px solid #222;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: var(--color-text-muted);
+        }
+        .summary-row.total {
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            font-weight: 800;
+            color: #FFF;
+            font-size: 15px;
+            margin-bottom: 0;
+        }
+        
+        .empty-cart-msg {
+            text-align: center;
+            color: var(--color-text-muted);
+            padding: 40px 0;
+            font-size: 14px;
+        }
+
+        .kitchen-info-note {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            text-align: center;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-wrapper">
+        <!-- 1. Glassmorphism Floating Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <p class="location-label">Addis Ababa Branch</p>
+                <div class="location-value">
+                    <i class="fa-solid fa-location-dot"></i> 
+                    <select id="branch-select" style="background:transparent; border:none; color:inherit; font-weight:inherit; font-size:inherit; outline:none; cursor:pointer;">
+                        <option value="Bole Road" style="background:#111;">Bole Road</option>
+                        <option value="Bethel Square" style="background:#111;">Bethel Square</option>
+                        <option value="CMC" style="background:#111;">CMC Branch</option>
+                        <option value="Ayat Zone 8" style="background:#111;">Ayat Zone 8</option>
+                    </select>
+                </div>
+            </div>
+            <!-- 5. Gradient Text Accent Title -->
+            <div class="brand-logo-text">PIZZA HUT</div>
+        </header>
+        
+        <!-- Utility Bar -->
+        <div class="utility-bar" id="utility-bar">
+            <div class="search-container">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" class="search-input" id="menu-search" placeholder="Search menu...">
+            </div>
+            <div class="fasting-toggle-container">
+                <span>Fasting</span>
+                <label class="switch">
+                    <input type="checkbox" id="fasting-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 4. Interactive Dietary Filter Chips -->
+        <div class="filter-chips-container" id="filter-chips">
+            <div class="chip active" data-filter="all">All Items</div>
+            <div class="chip" data-filter="bestseller">🔥 Bestsellers</div>
+            <div class="chip" data-filter="spicy">🌶️ Spicy</div>
+            <div class="chip" data-filter="cheese">🧀 Extra Cheese</div>
+            <div class="chip" data-filter="mushroom">🍄 Mushroom</div>
+        </div>
+
+        <!-- Viewport container -->
+        <main class="view-container" id="view-viewport">
+            
+            <!-- VIEW 1: CATEGORIES & MENU PRODUCTS -->
+            <div id="view-home" class="app-view active">
+                <h1 class="display-title" style="font-size: 24px; margin-top: 12px; color: #FFF;">
+                    Explore Our <br><span style="color:var(--color-primary)">Delicious Menu</span>
+                </h1>
+                
+                <!-- Category Bar Container -->
+                <div class="category-scroll-container">
+                    <div class="category-scroll" id="categories-bar">
+                        <!-- Loaded dynamically via JavaScript -->
+                    </div>
+                </div>
+
+                <div class="section-header">
+                    <h2 id="current-category-title">Veg Pizza</h2>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="product-grid" id="products-target-grid">
+                    <!-- Dynamic rendering target -->
+                </div>
+            </div>
+
+            <!-- VIEW 2: CART VIEW SYSTEM -->
+            <div id="view-cart" class="app-view">
+                <div class="tray-header-bar">
+                    <button class="btn-back-menu" onclick="navigateTo('home')">
+                        <i class="fa-solid fa-arrow-left"></i> Back to Menu
+                    </button>
+                    <h1 class="display-title" style="font-size: 20px;">Your Tray</h1>
+                </div>
+
+                <!-- 6. Estimated Preparation Time Bar -->
+                <div class="prep-time-banner">
+                    <i class="fa-solid fa-stopwatch"></i>
+                    <span>⏱️ Estimated Kitchen Prep Time: 15–20 Mins</span>
+                </div>
+
+                <!-- Table Number Selector Card -->
+                <div class="table-selector-card">
+                    <div class="table-selector-label">
+                        <i class="fa-solid fa-chair"></i> Table Number
+                    </div>
+                    <input type="text" id="table-number-input" class="table-input-field" placeholder="e.g. 05" value="01">
+                </div>
+                
+                <div id="cart-items-root"></div>
+
+                <!-- 6. Special Kitchen Instructions Input Box -->
+                <div style="margin-top: 14px;">
+                    <label style="font-size: 11px; font-weight:700; text-transform:uppercase; color:var(--color-accent);">
+                        <i class="fa-solid fa-pen-to-square"></i> Kitchen Instructions
+                    </label>
+                    <textarea id="special-instructions" class="instructions-box" rows="2" placeholder="e.g. Extra crispy crust, sauce on the side..."></textarea>
+                </div>
+
+                <div class="summary-block" id="cart-summary-block">
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="summary-subtotal">Br 0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>VAT (15%)</span>
+                        <span id="summary-vat">Br 0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span id="summary-total" style="color:var(--color-accent);">Br 0.00</span>
+                    </div>
+                    <button class="btn-primary" onclick="placeOrder()">
+                        Send Order to Kitchen <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                    <p class="kitchen-info-note">Orders are sent straight to our kitchen queue</p>
+                </div>
+            </div>
+
+            <!-- VIEW 3: ORDER CONFIRMATION / TRACKER -->
+            <div id="view-status" class="app-view">
+                <div style="text-align: center; padding: 40px 10px;">
+                    <i class="fa-solid fa-circle-check" style="font-size: 60px; color: #00A859; margin-bottom: 16px;"></i>
+                    <h1 class="display-title" style="font-size: 24px;">Order Sent!</h1>
+                    <p style="color: var(--color-text-muted); font-size: 13px; margin-top: 8px;" id="order-status-msg">
+                        Your table order has been transmitted directly to the kitchen staff.
+                    </p>
+
+                    <div style="background: var(--color-card); border-radius: var(--radius-md); padding: 20px; margin-top: 24px; text-align: left; border: 1px solid #222;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
+                            <span style="font-size: 12px; color: var(--color-text-muted);">Status</span>
+                            <span style="font-size: 12px; font-weight: 700; color: var(--color-accent);">🔥 Preparing</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
+                            <span style="font-size: 12px; color: var(--color-text-muted);">Estimated Time</span>
+                            <span style="font-size: 12px; font-weight: 700; color: #FFF;">15-20 Mins</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="font-size: 12px; color: var(--color-text-muted);">Table</span>
+                            <span style="font-size: 12px; font-weight: 700; color: #FFF;" id="status-table-num">Table 01</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="navigateTo('home')" style="margin-top: 30px;">
+                        Order More Items
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- 2. FLOATING MINI-BANNER CART PILL -->
+        <div id="floating-cart-pill" class="floating-cart-pill" style="display: none;" onclick="navigateTo('cart')">
+            <span id="pill-items-count">2 Items Added</span>
+            <span id="pill-total-price">Br 1,540.00 → View Tray</span>
+        </div>
+
+        <!-- 1. GLASSMORPHISM FLOATING BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" id="nav-home" onclick="navigateTo('home')">
+                <i class="fa-solid fa-utensils"></i>
+                <span>Menu</span>
+            </div>
+            <div class="nav-item" id="nav-cart" onclick="navigateTo('cart')">
+                <i class="fa-solid fa-basket-shopping"></i>
+                <span>Tray</span>
+                <span class="badge" id="cart-badge" style="display:none;">0</span>
+            </div>
+            <div class="nav-item" id="nav-status" onclick="navigateTo('status')">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>Status</span>
+            </div>
+        </nav>
+
+        <!-- ITEM CUSTOMIZATION MODAL -->
+        <div class="modal-overlay" id="item-modal">
+            <div class="modal-sheet">
+                <div class="modal-close-header">
+                    <h3 class="display-title" id="modal-title" style="font-size: 18px;">Customize Item</h3>
+                    <button class="modal-close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <img id="modal-img" src="" alt="" class="modal-img">
+                <p class="modal-desc" id="modal-desc"></p>
+                
+                <div id="crust-options-wrapper" style="display:none;">
+                    <div class="options-group-title">Select Crust</div>
+                    <div class="selector-row" id="crust-selector">
+                        <div class="selector-btn active" data-crust="Pan">Pan</div>
+                        <div class="selector-btn" data-crust="Thin">Thin</div>
+                        <div class="selector-btn" data-crust="Stuffed">Stuffed</div>
+                    </div>
+                </div>
+
+                <div id="size-options-wrapper">
+                    <div class="options-group-title">Select Size</div>
+                    <!-- 2. SIZE SELECTION BOUNCE INTERACTION -->
+                    <div class="selector-row" id="size-selector">
+                        <div class="selector-btn" data-size="Small">Small</div>
+                        <div class="selector-btn active" data-size="Medium">Medium</div>
+                        <div class="selector-btn" data-size="Large">Large</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size: 12px; color: var(--color-text-muted); font-weight:700;">Unit Price</span>
+                    <!-- 5. GRADIENT ACCENT FOR PRICE -->
+                    <span id="modal-price" style="font-size: 18px; font-weight:900; color:var(--color-accent);">Br 0.00</span>
+                </div>
+
+                <button class="btn-primary" onclick="confirmAddToCart()">
+                    Add To Tray <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /* Database & State */
+        const MENU_DATA = [
+            {
+                id: 'c1',
+                name: 'Veg Pizza',
+                icon: 'fa-leaf',
+                items: [
+                    { id: 'v1', name: 'Veggie Feast', desc: 'Loaded with crisp onions, green peppers, mushrooms, and sweet corn.', price: { Small: 450, Medium: 780, Large: 1100 }, oldPrice: { Medium: 850 }, img: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=500&auto=format&fit=crop&q=60', fasting: true, tags: ['fasting', 'mushroom'] },
+                    { id: 'v2', name: 'Margherita Supreme', desc: 'Classic blend of rich tomato sauce and double layer mozzarella.', price: { Small: 400, Medium: 680, Large: 980 }, img: 'https://images.unsplash.com/photo-1604382355076-af4b0eb60143?w=500&auto=format&fit=crop&q=60', fasting: false, tags: ['cheese', 'bestseller'] },
+                    { id: 'v3', name: 'Spicy Veggie Delight', desc: 'Green chilies, spicy jalapenos, bell peppers, and crushed chili flakes.', price: { Small: 470, Medium: 800, Large: 1150 }, img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&auto=format&fit=crop&q=60', fasting: true, tags: ['spicy', 'fasting'] }
+                ]
+            },
+            {
+                id: 'c2',
+                name: 'Meat Pizza',
+                icon: 'fa-drumstick-bite',
+                items: [
+                    { id: 'm1', name: 'Super Supreme', desc: 'Pepperoni, beef topping, savory ham, mushrooms, onions, and olives.', price: { Small: 600, Medium: 980, Large: 1380 }, oldPrice: { Medium: 1100 }, img: 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=500&auto=format&fit=crop&q=60', fasting: false, tags: ['bestseller', 'mushroom'] },
+                    { id: 'm2', name: 'Pepperoni Lover\'s', desc: 'Loaded with double pepperoni slices and extra mozzarella cheese.', price: { Small: 580, Medium: 950, Large: 1320 }, img: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=500&auto=format&fit=crop&q=60', fasting: false, tags: ['bestseller', 'cheese'] },
+                    { id: 'm3', name: 'Spicy Beef Feast', desc: 'Seasoned ground beef, hot chili oil base, jalapenos, and red onions.', price: { Small: 560, Medium: 920, Large: 1290 }, img: 'https://images.unsplash.com/photo-1588315029754-2dd089d39a1a?w=500&auto=format&fit=crop&q=60', fasting: false, tags: ['spicy'] }
+                ]
+            },
+            {
+                id: 'c3',
+                name: 'Chicken Pizza',
+                icon: 'fa-kiwi-bird',
+                items: [
+                    { id: 'k1', name: 'BBQ Chicken Supreme', desc: 'Tender grilled chicken, tangy BBQ sauce, sweet corn, and red onions.', price: { Small: 550, Medium: 910, Large: 1280 }, img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&auto=format&fit=crop&q=60', fasting: false, tags: ['bestseller'] },
+                    { id: 'k2', name: 'Chicken Fiery Spicy', desc: 'Spicy marinated chicken, jalapenos, fresh tomatoes, and spicy mayo.', price: { Small: 560, Medium: 930, Large: 1300 }, img: 'https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?w=500&auto=format&fit=crop&q=60', fasting: false, tags: ['spicy'] }
+                ]
+            },
+            {
+                id: 'c4',
+                name: 'Drinks & Sides',
+                icon: 'fa-wine-glass',
+                items: [
+                    { id: 'd1', name: 'Garlic Breadstix', desc: 'Freshly baked dough with garlic butter, Italian herbs, and marinara dip.', price: { Fixed: 280 }, img: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=500&auto=format&fit=crop&q=60', fasting: true, tags: ['fasting'] },
+                    { id: 'd2', name: 'Coca-Cola (500ml)', desc: 'Chilled bottle Coca-Cola beverage.', price: { Fixed: 90 }, img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500&auto=format&fit=crop&q=60', fasting: true, tags: ['fasting'] }
+                ]
+            }
+        ];
+
+        let activeCategoryIndex = 0;
+        let cart = [];
+        let isFastingOnly = false;
+        let activeTagFilter = 'all';
+        let searchQuery = '';
+        let activeModalItem = null;
+        let selectedSize = 'Medium';
+        let selectedCrust = 'Pan';
+
+        // DOM Elements
+        const categoriesBar = document.getElementById('categories-bar');
+        const currentCategoryTitle = document.getElementById('current-category-title');
+        const productsTargetGrid = document.getElementById('products-target-grid');
+        const cartBadge = document.getElementById('cart-badge');
+        const floatingCartPill = document.getElementById('floating-cart-pill');
+        const pillItemsCount = document.getElementById('pill-items-count');
+        const pillTotalPrice = document.getElementById('pill-total-price');
+        const fastingToggle = document.getElementById('fasting-toggle');
+        const menuSearch = document.getElementById('menu-search');
+        const filterChips = document.getElementById('filter-chips');
+
+        // Modal Elements
+        const itemModal = document.getElementById('item-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalImg = document.getElementById('modal-img');
+        const modalDesc = document.getElementById('modal-desc');
+        const modalPrice = document.getElementById('modal-price');
+        const crustOptionsWrapper = document.getElementById('crust-options-wrapper');
+        const sizeOptionsWrapper = document.getElementById('size-options-wrapper');
+
+        // Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCategories();
+            renderProducts();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            fastingToggle.addEventListener('change', (e) => {
+                isFastingOnly = e.target.checked;
+                renderProducts();
+            });
+
+            menuSearch.addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                renderProducts();
+            });
+
+            filterChips.addEventListener('click', (e) => {
+                if(e.target.classList.contains('chip')) {
+                    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                    e.target.classList.add('active');
+                    activeTagFilter = e.target.dataset.filter;
+                    renderProducts();
+                }
+            });
+
+            // Size Selector interactions inside Modal
+            document.getElementById('size-selector').addEventListener('click', (e) => {
+                if(e.target.classList.contains('selector-btn')) {
+                    document.querySelectorAll('#size-selector .selector-btn').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    selectedSize = e.target.dataset.size;
+                    updateModalPrice();
+                }
+            });
+
+            // Crust Selector interactions inside Modal
+            document.getElementById('crust-selector').addEventListener('click', (e) => {
+                if(e.target.classList.contains('selector-btn')) {
+                    document.querySelectorAll('#crust-selector .selector-btn').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    selectedCrust = e.target.dataset.crust;
+                }
+            });
+        }
+
+        function renderCategories() {
+            categoriesBar.innerHTML = MENU_DATA.map((cat, idx) => `
+                <div class="cat-pill ${idx === activeCategoryIndex ? 'active' : ''}" onclick="selectCategory(${idx})">
+                    <i class="fa-solid ${cat.icon}"></i>
+                    <span>${cat.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function selectCategory(index) {
+            activeCategoryIndex = index;
+            renderCategories();
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const category = MENU_DATA[activeCategoryIndex];
+            currentCategoryTitle.textContent = category.name;
+
+            let filteredItems = category.items.filter(item => {
+                if (isFastingOnly && !item.fasting) return false;
+                if (searchQuery && !item.name.toLowerCase().includes(searchQuery) && !item.desc.toLowerCase().includes(searchQuery)) return false;
+                if (activeTagFilter !== 'all') {
+                    if (!item.tags || !item.tags.includes(activeTagFilter)) return false;
+                }
+                return true;
+            });
+
+            if (filteredItems.length === 0) {
+                productsTargetGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; color: var(--color-text-muted); padding: 40px 0;">
+                        <i class="fa-solid fa-pizza-slice" style="font-size: 32px; margin-bottom: 10px; opacity:0.5;"></i>
+                        <p>No delicious items match your filter selection.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            productsTargetGrid.innerHTML = filteredItems.map(item => {
+                const basePrice = item.price.Medium || item.price.Fixed;
+                const oldPrice = item.oldPrice && item.oldPrice.Medium ? item.oldPrice.Medium : null;
+
+                // 3. VISUAL BADGING & TAGS
+                let tagMarkup = '';
+                if(item.tags && item.tags.includes('bestseller')) {
+                    tagMarkup = `<div class="card-tag bestseller">🔥 Bestseller</div>`;
+                } else if(item.fasting) {
+                    tagMarkup = `<div class="card-tag fasting">🌱 Fasting</div>`;
+                } else if(item.tags && item.tags.includes('spicy')) {
+                    tagMarkup = `<div class="card-tag spicy">🌶️ Spicy</div>`;
+                }
+
+                return `
+                    <div class="product-card" onclick="openItemModal('${item.id}')">
+                        ${tagMarkup}
+                        <div class="img-wrapper skeleton">
+                            <img src="${item.img}" alt="${item.name}" onload="this.parentElement.classList.remove('skeleton')">
+                        </div>
+                        <div class="product-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.desc}</p>
+                            <div class="product-price-row">
+                                <span class="product-price">
+                                    Br ${basePrice.toFixed(2)}
+                                    ${oldPrice ? `<span class="old-price">Br ${oldPrice.toFixed(2)}</span>` : ''}
+                                </span>
+                                <i class="fa-solid fa-circle-plus add-icon-btn"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openItemModal(itemId) {
+            let foundItem = null;
+            MENU_DATA.forEach(cat => {
+                const fit = cat.items.find(i => i.id === itemId);
+                if(fit) foundItem = fit;
+            });
+
+            if(!foundItem) return;
+
+            activeModalItem = foundItem;
+            modalTitle.textContent = foundItem.name;
+            modalImg.src = foundItem.img;
+            modalDesc.textContent = foundItem.desc;
+
+            if(foundItem.price.Fixed) {
+                crustOptionsWrapper.style.display = 'none';
+                sizeOptionsWrapper.style.display = 'none';
+                selectedSize = 'Fixed';
+            } else {
+                crustOptionsWrapper.style.display = 'block';
+                sizeOptionsWrapper.style.display = 'block';
+                selectedSize = 'Medium';
+                // Reset active states
+                document.querySelectorAll('#size-selector .selector-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.size === 'Medium');
+                });
+            }
+
+            updateModalPrice();
+            itemModal.style.display = 'flex';
+        }
+
+        function updateModalPrice() {
+            if(!activeModalItem) return;
+            const price = activeModalItem.price[selectedSize] || activeModalItem.price.Fixed;
+            modalPrice.textContent = `Br ${price.toFixed(2)}`;
+        }
+
+        function closeModal() {
+            itemModal.style.display = 'none';
+            activeModalItem = null;
+        }
+
+        function confirmAddToCart() {
+            if(!activeModalItem) return;
+
+            const unitPrice = activeModalItem.price[selectedSize] || activeModalItem.price.Fixed;
+            const existingIndex = cart.findIndex(ci => ci.id === activeModalItem.id && ci.size === selectedSize && ci.crust === (selectedSize === 'Fixed' ? '' : selectedCrust));
+
+            if(existingIndex > -1) {
+                cart[existingIndex].qty += 1;
+            } else {
+                cart.push({
+                    id: activeModalItem.id,
+                    name: activeModalItem.name,
+                    img: activeModalItem.img,
+                    size: selectedSize,
+                    crust: selectedSize === 'Fixed' ? '' : selectedCrust,
+                    price: unitPrice,
+                    qty: 1
+                });
+            }
+
+            closeModal();
+            updateCartUI();
+            
+            // 2. Cart Pulse Badge Animation
+            cartBadge.classList.add('pulse-badge');
+            setTimeout(() => cartBadge.classList.remove('pulse-badge'), 400);
+        }
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((acc, item) => acc + item.qty, 0);
+            const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+
+            // Update Badge
+            if(totalCount > 0) {
+                cartBadge.textContent = totalCount;
+                cartBadge.style.display = 'block';
+
+                // 2. Floating Pill Interaction
+                pillItemsCount.textContent = `${totalCount} Item${totalCount > 1 ? 's' : ''} Added`;
+                pillTotalPrice.textContent = `Br ${subtotal.toFixed(2)} → View Tray`;
+                
+                // Display floating pill only if currently on home menu view
+                if(document.getElementById('view-home').classList.contains('active')) {
+                    floatingCartPill.style.display = 'flex';
+                } else {
+                    floatingCartPill.style.display = 'none';
+                }
+            } else {
+                cartBadge.style.display = 'none';
+                floatingCartPill.style.display = 'none';
+            }
+
+            renderCartView();
+        }
+
+        function renderCartView() {
+            const cartRoot = document.getElementById('cart-items-root');
+            const summaryBlock = document.getElementById('cart-summary-block');
+
+            if(cart.length === 0) {
+                cartRoot.innerHTML = `<div class="empty-cart-msg"><i class="fa-solid fa-basket-shopping" style="font-size: 32px; opacity:0.3; margin-bottom: 8px; display:block;"></i>Your tray is currently empty.</div>`;
+                summaryBlock.style.display = 'none';
+                return;
+            }
+
+            summaryBlock.style.display = 'block';
+            cartRoot.innerHTML = cart.map((item, index) => `
+                <div class="cart-item">
+                    <img src="${item.img}" alt="${item.name}">
+                    <div class="cart-item-info">
+                        <div class="cart-item-title">${item.name}</div>
+                        <div class="cart-item-meta">${item.size !== 'Fixed' ? `${item.size} • ${item.crust} Crust` : 'Standard'}</div>
+                        <div class="cart-item-price">Br ${(item.price * item.qty).toFixed(2)}</div>
+                    </div>
+                    <div class="qty-selector">
+                        <button class="qty-btn" onclick="adjustQty(${index}, -1)">-</button>
+                        <span style="font-size:12px; font-weight:700;">${item.qty}</span>
+                        <button class="qty-btn" onclick="adjustQty(${index}, 1)">+</button>
+                    </div>
+                    <button class="remove-btn" onclick="removeItem(${index})"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+            `).join('');
+
+            const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+            const vat = subtotal * 0.15;
+            const total = subtotal + vat;
+
+            document.getElementById('summary-subtotal').textContent = `Br ${subtotal.toFixed(2)}`;
+            document.getElementById('summary-vat').textContent = `Br ${vat.toFixed(2)}`;
+            document.getElementById('summary-total').textContent = `Br ${total.toFixed(2)}`;
+        }
+
+        function adjustQty(index, delta) {
+            cart[index].qty += delta;
+            if(cart[index].qty <= 0) {
+                cart.splice(index, 1);
+            }
+            updateCartUI();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function navigateTo(viewName) {
+            document.querySelectorAll('.app-view').forEach(view => view.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            document.getElementById(`nav-${viewName}`).classList.add('active');
+
+            // Hide or show top utility bars depending on view
+            const utilityBar = document.getElementById('utility-bar');
+            const filterChips = document.getElementById('filter-chips');
+
+            if(viewName === 'home') {
+                utilityBar.style.display = 'flex';
+                filterChips.style.display = 'flex';
+                if(cart.length > 0) floatingCartPill.style.display = 'flex';
+            } else {
+                utilityBar.style.display = 'none';
+                filterChips.style.display = 'none';
+                floatingCartPill.style.display = 'none';
+            }
+        }
+
+        function placeOrder() {
+            if(cart.length === 0) return;
+            const tableNum = document.getElementById('table-number-input').value || '01';
+            document.getElementById('status-table-num').textContent = `Table ${tableNum}`;
+
+            // Reset cart
+            cart = [];
+            updateCartUI();
+
+            // Navigate to status view
+            navigateTo('status');
+        }
+    </script>
+</body>
+</html>
