@@ -1,0 +1,2580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Pizza Hut Addis Ababa — Interactive Liquid Glass Menu</title>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --color-primary: #EE1945;
+            --color-primary-dark: #B80F32;
+            --color-accent: #FFAA00;
+            --color-bg: #0A0A0C;
+            --color-text-main: #FFFFFF;
+            --color-text-muted: #CBD5E1;
+            --color-success: #10B981;
+            --color-warning: #F59E0B;
+            --color-error: #EF4444;
+            --font-display: 'Barlow Condensed', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+            --font-ethiopic: 'Noto Sans Ethiopic', sans-serif;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 10px;
+            
+            --glass-bg: rgba(255, 255, 255, 0.07);
+            --glass-bg-hover: rgba(255, 255, 255, 0.12);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-border-light: rgba(255, 255, 255, 0.28);
+            --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+            --glass-blur: blur(25px) saturate(190%);
+            
+            --blob-1: #EE1945;
+            --blob-2: #FF7E5F;
+            --blob-3: #6A11CB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background-color: #040405;
+            font-family: var(--font-sans);
+            color: var(--color-text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            perspective: 1000px;
+        }
+
+        .phone-wrapper {
+            width: 100%;
+            max-width: 412px;
+            height: 892px;
+            background-color: var(--color-bg);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 80px rgba(238, 25, 69, 0.15);
+            border-radius: 40px;
+            border: 8px solid #1E1E24;
+            display: flex;
+            flex-direction: column;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+
+        .bg-mesh {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            filter: blur(55px);
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.65;
+            animation: float 18s infinite ease-in-out;
+        }
+
+        .blob-1 {
+            width: 260px;
+            height: 260px;
+            top: -5%;
+            left: -10%;
+            background: var(--blob-1);
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 240px;
+            height: 240px;
+            bottom: 10%;
+            right: -10%;
+            background: var(--blob-2);
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            width: 220px;
+            height: 220px;
+            top: 40%;
+            left: 35%;
+            background: var(--blob-3);
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(6%, 12%) scale(1.08) rotate(6deg); }
+            66% { transform: translate(-6%, 6%) scale(0.92) rotate(-6deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        }
+
+        /* Dynamic glass specular highlight with gyroscope */
+        .glass-specular-glare {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 45%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%);
+            pointer-events: none;
+            border-radius: inherit;
+            transition: transform 0.3s ease-out;
+        }
+
+        .app-header {
+            padding: 14px 16px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(18, 18, 24, 0.45);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 20;
+            position: relative;
+            gap: 8px;
+        }
+        
+        .header-left {
+            flex: 1;
+        }
+        
+        .header-left .location-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--color-text-muted);
+        }
+        .header-left .location-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .lang-toggle {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: #FFF;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        
+        .lang-toggle:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-light);
+        }
+        
+        .lang-toggle.active-lang {
+            background: var(--color-primary);
+            border-color: rgba(255,255,255,0.4);
+        }
+        
+        .utility-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            background: rgba(18, 18, 24, 0.35);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--glass-border);
+            gap: 10px;
+            z-index: 20;
+            position: relative;
+            flex-wrap: wrap;
+        }
+        
+        .search-container {
+            flex: 1;
+            min-width: 120px;
+            position: relative;
+        }
+        
+        .search-container i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-text-muted);
+            font-size: 11px;
+        }
+        
+        .search-input {
+            width: 100%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 7px 10px 7px 30px;
+            border-radius: 25px;
+            font-family: var(--font-sans);
+            font-size: 12px;
+            outline: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.25s ease;
+        }
+        
+        .search-input:focus {
+            border-color: var(--color-primary);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(238, 25, 69, 0.3);
+        }
+
+        .active-filters {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            padding: 4px 16px 6px;
+            z-index: 19;
+            position: relative;
+        }
+        
+        .filter-pill {
+            background: var(--color-primary);
+            color: #FFF;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 9px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-pill:hover {
+            background: var(--color-primary-dark);
+        }
+
+        .fasting-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 32px;
+            height: 18px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            transition: .4s;
+            border-radius: 18px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 10px;
+            width: 10px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--color-primary); border-color: var(--color-primary); }
+        input:checked + .slider:before { transform: translateX(14px); }
+
+        .view-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 16px 85px;
+            scrollbar-width: none;
+            position: relative;
+            z-index: 10;
+        }
+        .view-container::-webkit-scrollbar { display: none; }
+        
+        .app-view {
+            display: none;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .app-view.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .display-title {
+            font-family: var(--font-display);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--color-text-main);
+        }
+        
+        .section-header {
+            margin: 16px 0 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .section-header h2 {
+            font-size: 18px;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            color: var(--color-accent);
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+        
+        .sort-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--color-text-muted);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .sort-btn:hover {
+            color: #FFF;
+            border-color: var(--glass-border-light);
+        }
+
+        .category-scroll-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin: 6px 0;
+        }
+        
+        .category-scroll-container {
+            flex: 1;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .category-scroll-container::-webkit-scrollbar { display: none; }
+
+        .category-scroll {
+            display: flex;
+            gap: 8px;
+            width: max-content;
+            padding: 3px 0;
+        }
+
+        .scroll-arrow {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            color: #FFF;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+            z-index: 15;
+        }
+        
+        .scroll-arrow:hover {
+            background: var(--glass-bg-hover);
+        }
+
+        .cat-pill {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 14px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .cat-pill.active {
+            background: var(--color-primary);
+            color: #FFF;
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 20px rgba(238, 25, 69, 0.4);
+        }
+        .cat-pill:hover:not(.active) {
+            background: var(--glass-bg-hover);
+            border-color: var(--glass-border-light);
+        }
+
+        /* Inventory badge styles */
+        .inventory-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            padding: 3px 7px;
+            border-radius: 10px;
+            font-size: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            z-index: 5;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-sold-out {
+            background: rgba(239, 68, 68, 0.9);
+            color: #FFF;
+        }
+        
+        .badge-limited {
+            background: rgba(245, 158, 11, 0.9);
+            color: #000;
+            animation: pulse-badge 2s infinite;
+        }
+        
+        @keyframes pulse-badge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .product-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        .product-card.sold-out {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: grayscale(0.7);
+        }
+        .product-card:hover:not(.sold-out) {
+            border-color: var(--glass-border-light);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            transform: translateY(-2px);
+        }
+        .product-card:active:not(.sold-out) {
+            transform: scale(0.97);
+        }
+        
+        .img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            background: rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .product-badge {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: var(--color-accent);
+            color: #000;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-size: 8px;
+            font-weight: 800;
+            z-index: 5;
+            text-transform: uppercase;
+        }
+        
+        /* Dietary badges container */
+        .dietary-badges {
+            position: absolute;
+            bottom: 6px;
+            left: 6px;
+            display: flex;
+            gap: 3px;
+            z-index: 5;
+        }
+        
+        .dietary-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .product-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .product-card:hover:not(.sold-out) img {
+            transform: scale(1.06);
+        }
+        
+        .product-info {
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            justify-content: space-between;
+        }
+        .product-info h4 {
+            font-size: 12px;
+            font-weight: 700;
+            color: #FFF;
+            margin-bottom: 3px;
+            line-height: 1.2;
+        }
+        .product-info p {
+            font-size: 10px;
+            color: var(--color-text-muted);
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+        .product-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+        .product-price {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--color-accent);
+        }
+        .add-icon-btn {
+            color: var(--color-primary);
+            font-size: 16px;
+            transition: transform 0.2s ease;
+        }
+        .product-card:hover .add-icon-btn {
+            transform: scale(1.2);
+        }
+
+        /* Flying item animation */
+        .flying-item {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 10px 30px rgba(238, 25, 69, 0.5);
+        }
+
+        .floating-tray-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 16px;
+            background: rgba(238, 25, 69, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: #FFF;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            padding: 10px 16px;
+            border-radius: 30px;
+            font-family: var(--font-sans);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: 0 12px 30px rgba(238, 25, 69, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            z-index: 90;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+            transform: scale(0);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .floating-tray-btn.visible {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .floating-badge {
+            background: #FFF;
+            color: var(--color-primary);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .tray-header-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 8px;
+            gap: 8px;
+        }
+        .btn-back-menu {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--color-text-main);
+            padding: 7px 12px;
+            border-radius: 18px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-back-menu:hover {
+            background: rgba(255,255,255,0.15);
+            color: var(--color-primary);
+        }
+        
+        .btn-clear-cart {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--color-text-muted);
+            padding: 7px 12px;
+            border-radius: 18px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .btn-clear-cart:hover {
+            color: var(--color-error);
+            border-color: var(--color-error);
+        }
+
+        .table-selector-card, .instructions-card, .summary-block, .payment-card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .table-selector-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .table-selector-label, .instructions-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .table-input-field {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: #FFF;
+            padding: 5px 8px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-sans);
+            font-size: 12px;
+            font-weight: 700;
+            width: 80px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .table-input-field:focus {
+            border-color: var(--color-primary);
+        }
+
+        .instructions-textarea {
+            width: 100%;
+            height: 55px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: #FFF;
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            font-family: var(--font-sans);
+            font-size: 11px;
+            outline: none;
+            resize: none;
+            margin-top: 6px;
+            transition: border-color 0.2s;
+        }
+        .instructions-textarea:focus {
+            border-color: var(--color-primary);
+        }
+
+        /* Order Status Tracker */
+        .order-status-tracker {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px 0;
+        }
+        
+        .status-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+        
+        .status-step.completed {
+            border-color: var(--color-success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .status-step.current {
+            border-color: var(--color-accent);
+            background: rgba(255, 170, 0, 0.1);
+            animation: pulse-status 2s infinite;
+        }
+        
+        @keyframes pulse-status {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 170, 0, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(255, 170, 0, 0.6); }
+        }
+        
+        .status-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        .status-icon.done {
+            background: var(--color-success);
+            color: #FFF;
+        }
+        
+        .status-icon.active-status {
+            background: var(--color-accent);
+            color: #000;
+        }
+        
+        .status-icon.pending {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--color-text-muted);
+        }
+        
+        .status-text {
+            flex: 1;
+        }
+        
+        .status-text h4 {
+            font-size: 12px;
+            font-weight: 700;
+            color: #FFF;
+        }
+        
+        .status-text span {
+            font-size: 10px;
+            color: var(--color-text-muted);
+        }
+        
+        .status-time {
+            font-size: 9px;
+            color: var(--color-text-muted);
+            white-space: nowrap;
+        }
+
+        /* Modal with drag-to-dismiss */
+        .modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+        }
+        .modal-sheet {
+            width: 100%;
+            background: rgba(22, 22, 30, 0.9);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            border-top: 1px solid var(--glass-border-light);
+            border-top-left-radius: var(--radius-lg);
+            border-top-right-radius: var(--radius-lg);
+            padding: 20px;
+            max-height: 85%;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 -15px 40px rgba(0,0,0,0.6);
+            animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            touch-action: pan-y;
+        }
+        
+        .modal-drag-handle {
+            width: 36px;
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            margin: 0 auto 12px;
+            cursor: grab;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .modal-sheet.dismissing {
+            animation: slideDown 0.3s ease-in forwards;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(0); }
+            to { transform: translateY(100%); }
+        }
+        
+        .modal-close-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        .modal-close-btn {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: #FFF;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .modal-img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+        .modal-desc {
+            font-size: 11px;
+            color: var(--color-text-muted);
+            line-height: 1.4;
+            margin-bottom: 14px;
+        }
+        .options-group-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+        .selector-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+        .selector-btn {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            color: #FFF;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+        .selector-btn.active {
+            background: var(--color-primary);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 15px rgba(238, 25, 69, 0.4);
+        }
+        .selector-btn:hover:not(.active) {
+            background: var(--glass-bg-hover);
+        }
+
+        /* Crust options */
+        .crust-options {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        
+        .crust-btn {
+            flex: 1;
+            padding: 8px 6px;
+            border-radius: var(--radius-sm);
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            color: #FFF;
+            cursor: pointer;
+            font-size: 9px;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+        
+        .crust-btn.active {
+            background: var(--color-primary);
+            border-color: rgba(255,255,255,0.4);
+        }
+        
+        .crust-btn:hover:not(.active) {
+            background: var(--glass-bg-hover);
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: #FFF;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            width: 100%;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            box-shadow: 0 8px 25px rgba(238, 25, 69, 0.4);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover { background: var(--color-primary-dark); }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* Payment shortcuts */
+        .payment-shortcuts {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .payment-btn {
+            flex: 1;
+            min-width: 70px;
+            padding: 10px 8px;
+            border-radius: var(--radius-sm);
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: #FFF;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .payment-btn i {
+            font-size: 16px;
+        }
+        
+        .payment-btn:hover {
+            background: var(--glass-bg-hover);
+            border-color: var(--color-success);
+        }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(18, 18, 24, 0.55);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 8px 20px;
+            z-index: 100;
+        }
+
+        .liquid-nav-pill {
+            position: absolute;
+            top: 6px;
+            left: 0;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid var(--glass-border-light);
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+            z-index: 1;
+            pointer-events: none;
+            transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--color-text-muted);
+            text-decoration: none;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+            gap: 3px;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            padding: 5px 20px;
+            transition: color 0.3s ease;
+        }
+        .nav-item i { font-size: 16px; }
+        .nav-item.active { color: #FFF; }
+        .badge {
+            position: absolute;
+            top: 0px;
+            right: 14px;
+            background: var(--color-accent);
+            color: #000;
+            font-size: 8px;
+            padding: 1px 4px;
+            border-radius: 8px;
+            font-weight: 800;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            padding: 8px 10px;
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.2s ease;
+        }
+        
+        .cart-item:hover {
+            border-color: var(--glass-border-light);
+        }
+        
+        .cart-item img { 
+            width: 44px; 
+            height: 44px; 
+            object-fit: cover; 
+            border-radius: var(--radius-sm); 
+            border: 1px solid var(--glass-border); 
+        }
+        .cart-item-info { flex: 1; min-width: 0; }
+        .cart-item-title { 
+            font-size: 12px; 
+            font-weight: 700; 
+            color: #fff; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .cart-item-meta { font-size: 10px; color: var(--color-text-muted); margin-top: 1px; }
+        .cart-item-price { font-size: 12px; color: var(--color-accent); font-weight: 800; margin-top: 1px; }
+        .qty-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            padding: 3px 8px;
+            border-radius: 18px;
+        }
+        .qty-btn {
+            background: transparent;
+            border: none;
+            color: #FFF;
+            font-size: 13px;
+            cursor: pointer;
+            font-weight: 700;
+            padding: 0 2px;
+        }
+        .remove-btn {
+            background: transparent;
+            border: none;
+            color: var(--color-primary);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s ease;
+        }
+        .remove-btn:hover {
+            color: var(--color-error);
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: var(--color-text-muted);
+        }
+        .summary-row.total {
+            border-top: 1px solid var(--glass-border);
+            padding-top: 8px;
+            font-weight: 800;
+            color: #FFF;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+        
+        .summary-row.tax-row {
+            font-size: 10px;
+            font-style: italic;
+        }
+        
+        .empty-cart-state {
+            text-align: center;
+            padding: 40px 16px;
+        }
+        
+        .empty-cart-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+            opacity: 0.6;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .empty-cart-state h3 {
+            font-family: var(--font-display);
+            font-size: 18px;
+            margin-bottom: 6px;
+            color: #FFF;
+        }
+        
+        .empty-cart-state p {
+            color: var(--color-text-muted);
+            font-size: 12px;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        
+        .btn-browse-menu {
+            background: var(--color-primary);
+            color: #FFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-browse-menu:hover {
+            background: var(--color-primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .kitchen-info-note {
+            font-size: 10px;
+            color: var(--color-text-muted);
+            text-align: center;
+            margin-top: 6px;
+        }
+        
+        .popular-section {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--glass-border);
+        }
+        
+        .popular-section h3 {
+            font-family: var(--font-display);
+            font-size: 14px;
+            color: var(--color-accent);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        
+        .popular-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: var(--radius-sm);
+        }
+        
+        .popular-item:hover {
+            transform: translateX(4px);
+            background: var(--glass-bg);
+        }
+        
+        .popular-item img {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+        
+        .popular-item-info {
+            flex: 1;
+        }
+        
+        .popular-item-info h4 {
+            font-size: 11px;
+            font-weight: 600;
+            color: #FFF;
+        }
+        
+        .popular-item-info span {
+            font-size: 10px;
+            color: var(--color-accent);
+            font-weight: 700;
+        }
+        
+        .popular-item i {
+            color: var(--color-primary);
+            font-size: 12px;
+        }
+        
+        /* Split bill */
+        .split-bill-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 0;
+            font-size: 11px;
+            color: var(--color-text-muted);
+        }
+        
+        .split-count {
+            width: 40px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            color: #FFF;
+            padding: 4px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-wrapper" id="phone-wrapper">
+        <!-- Ambient Liquid Mesh Background Blobs -->
+        <div class="bg-mesh">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+        </div>
+
+        <!-- Glass Header with Language Switcher -->
+        <header class="app-header">
+            <div class="glass-specular-glare"></div>
+            <div class="header-left">
+                <p class="location-label" data-en="Addis Ababa Branch" data-am="አዲስ አበባ ቅርንጫፍ">Addis Ababa Branch</p>
+                <div class="location-value">
+                    <i class="fa-solid fa-location-dot"></i> 
+                    <select id="branch-select" style="background:transparent; border:none; color:inherit; font-weight:inherit; font-size:13px; outline:none; cursor:pointer;">
+                        <option value="Bole Road" style="background:#111;">Bole Road</option>
+                        <option value="Bethel Square" style="background:#111;">Bethel Square</option>
+                        <option value="CMC" style="background:#111;">CMC Branch</option>
+                        <option value="Ayat Zone 8" style="background:#111;">Ayat Zone 8</option>
+                    </select>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="lang-toggle active-lang" id="lang-en" onclick="switchLanguage('en')">EN</button>
+                <button class="lang-toggle" id="lang-am" onclick="switchLanguage('am')" style="font-family: var(--font-ethiopic);">አማ</button>
+                <div style="font-family: var(--font-display); font-weight:900; color:var(--color-primary); font-size:18px; letter-spacing: -1px; text-shadow: 0 2px 10px rgba(238,25,69,0.5);">PIZZA HUT</div>
+            </div>
+        </header>
+        
+        <!-- Liquid Glass Utility Bar -->
+        <div class="utility-bar" id="utility-bar">
+            <div class="search-container">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" class="search-input" id="menu-search" placeholder="Search menu...">
+            </div>
+            <div class="fasting-toggle-container">
+                <span data-en="Fasting" data-am="ጾም">Fasting</span>
+                <label class="switch">
+                    <input type="checkbox" id="fasting-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Active Filters Display -->
+        <div class="active-filters" id="active-filters" style="display:none;"></div>
+
+        <!-- Viewport container -->
+        <main class="view-container" id="view-viewport">
+            
+            <!-- VIEW 1: CATEGORIES & MENU PRODUCTS -->
+            <div id="view-home" class="app-view active">
+                <h1 class="display-title" style="font-size: 22px; margin-top: 6px; color: #FFF; text-shadow:0 2px 10px rgba(0,0,0,0.5);">
+                    <span data-en="Explore Our" data-am="የኛን ምርጥ">Explore Our</span> <br>
+                    <span style="color:var(--color-primary);" data-en="Delicious Menu" data-am="ምናሌ ይመልከቱ">Delicious Menu</span>
+                </h1>
+                
+                <!-- Category Bar with Arrows -->
+                <div class="category-scroll-wrapper">
+                    <button class="scroll-arrow" onclick="scrollCategories(-150)" aria-label="Scroll left">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <div class="category-scroll-container" id="category-scroll-container">
+                        <div class="category-scroll" id="categories-bar"></div>
+                    </div>
+                    <button class="scroll-arrow" onclick="scrollCategories(150)" aria-label="Scroll right">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="section-header">
+                    <h2 id="current-category-title">Veg Pizza</h2>
+                    <button class="sort-btn" id="sort-btn" onclick="toggleSortMenu()">
+                        <i class="fa-solid fa-arrow-up-wide-short"></i> <span data-en="Sort" data-am="አደራደር">Sort</span>
+                    </button>
+                </div>
+
+                <div class="product-grid" id="products-target-grid"></div>
+
+                <!-- Floating View Tray Button -->
+                <button class="floating-tray-btn" id="floating-tray-btn" onclick="navigateTo('cart')">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span>View Tray</span>
+                    <span class="floating-badge" id="floating-badge-count">0</span>
+                </button>
+            </div>
+
+            <!-- VIEW 2: CART VIEW SYSTEM -->
+            <div id="view-cart" class="app-view">
+                <div class="tray-header-bar">
+                    <button class="btn-back-menu" onclick="navigateTo('home')">
+                        <i class="fa-solid fa-arrow-left"></i> <span data-en="Back" data-am="ተመለስ">Back</span>
+                    </button>
+                    <h1 class="display-title" style="font-size: 18px;" data-en="Your Tray" data-am="ትሪዎ">Your Tray</h1>
+                    <button class="btn-clear-cart" id="btn-clear-cart" onclick="clearCart()" style="display:none;">
+                        <i class="fa-solid fa-trash"></i> <span data-en="Clear" data-am="አጥፋ">Clear</span>
+                    </button>
+                </div>
+
+                <div id="cart-items-root"></div>
+
+                <!-- Dynamic Cart Form Section -->
+                <div id="cart-form-section" style="display:none;">
+                    <div class="table-selector-card">
+                        <div class="glass-specular-glare"></div>
+                        <div class="table-selector-label">
+                            <i class="fa-solid fa-chair"></i> <span data-en="Table Number" data-am="የጠረጴዛ ቁጥር">Table Number</span>
+                        </div>
+                        <input type="text" id="table-number-input" class="table-input-field" placeholder="01" value="01">
+                    </div>
+                    
+                    <!-- Split Bill Toggle -->
+                    <div class="split-bill-toggle" style="padding: 8px 12px; background: var(--glass-bg); border-radius: var(--radius-md); margin-bottom: 12px; border: 1px solid var(--glass-border);">
+                        <i class="fa-solid fa-users"></i>
+                        <span data-en="Split bill among" data-am="ሂሳብ አካፍል">Split bill among</span>
+                        <input type="number" class="split-count" id="split-count" value="1" min="1" max="20" onchange="updateSplitDisplay()">
+                        <span data-en="people" data-am="ሰዎች">people</span>
+                        <span id="split-per-person" style="color: var(--color-accent); font-weight: 700; font-size: 11px; margin-left: auto;"></span>
+                    </div>
+
+                    <div class="instructions-card">
+                        <div class="glass-specular-glare"></div>
+                        <div class="instructions-label">
+                            <i class="fa-solid fa-pen-to-square"></i> <span data-en="Extra Instructions" data-am="ተጨማሪ መመሪያ">Extra Instructions</span>
+                        </div>
+                        <textarea id="extra-instructions-input" class="instructions-textarea" placeholder="e.g. No onions, Extra cheese..."></textarea>
+                    </div>
+
+                    <div class="summary-block" id="cart-summary-block">
+                        <div class="glass-specular-glare"></div>
+                        <div class="summary-row"><span data-en="Subtotal" data-am="ድምር">Subtotal</span><span id="summary-subtotal">Br 0.00</span></div>
+                        <div class="summary-row tax-row"><span data-en="VAT (15%)" data-am="ቫት (15%)">VAT (15%)</span><span id="summary-vat">Br 0.00</span></div>
+                        <div class="summary-row tax-row"><span data-en="Service Charge (10%)" data-am="የአገልግሎት ክፍያ (10%)">Service Charge (10%)</span><span id="summary-service">Br 0.00</span></div>
+                        <div class="summary-row total"><span data-en="Total" data-am="ጠቅላላ">Total</span><span id="summary-total">Br 0.00</span></div>
+                    </div>
+
+                    <button class="btn-primary" id="checkout-btn" onclick="submitOrderToTelegram()">
+                        <i class="fa-brands fa-telegram"></i> <span data-en="Send Order to Kitchen" data-am="ለኩሽና ላክ">Send Order to Kitchen</span>
+                    </button>
+                    
+                    <!-- Payment Shortcuts -->
+                    <div class="payment-shortcuts">
+                        <button class="payment-btn" onclick="handlePayment('telebirr')">
+                            <i class="fa-solid fa-mobile-screen"></i> Telebirr
+                        </button>
+                        <button class="payment-btn" onclick="handlePayment('cbe')">
+                            <i class="fa-solid fa-building-columns"></i> CBE Birr
+                        </button>
+                        <button class="payment-btn" onclick="handlePayment('chapa')">
+                            <i class="fa-solid fa-credit-card"></i> Chapa
+                        </button>
+                        <button class="payment-btn" onclick="handlePayment('cash')">
+                            <i class="fa-solid fa-money-bill"></i> Cash
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Order Status Tracker (hidden by default) -->
+                <div id="order-status-section" style="display:none;">
+                    <div class="order-status-tracker" id="order-status-tracker"></div>
+                </div>
+
+                <div class="kitchen-info-note">
+                    Kitchen: @MO76k7 (0923845344)
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Glass Customization Modal Sheet with Drag Handle -->
+        <div class="modal-overlay" id="product-modal">
+            <div class="modal-sheet" id="modal-sheet">
+                <div class="glass-specular-glare"></div>
+                <div class="modal-drag-handle" id="modal-drag-handle"></div>
+                <div class="modal-close-header">
+                    <h3 class="display-title" id="modal-item-name" style="font-size: 18px;">Item Title</h3>
+                    <button class="modal-close-btn" onclick="closeProductModal()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <img src="" id="modal-item-img" class="modal-img" alt="Product Showcase">
+                <p id="modal-item-desc" class="modal-desc">Product description layout.</p>
+                
+                <!-- Crust Options -->
+                <div id="crust-options-container" style="display:none;">
+                    <div class="options-group-title">Crust Type</div>
+                    <div class="crust-options">
+                        <div class="crust-btn active" id="crust-regular" onclick="setCrust('regular')">Regular</div>
+                        <div class="crust-btn" id="crust-thin" onclick="setCrust('thin')">Thin Crust</div>
+                        <div class="crust-btn" id="crust-thick" onclick="setCrust('thick')">Thick Crust</div>
+                        <div class="crust-btn" id="crust-stuffed" onclick="setCrust('stuffed')">Stuffed</div>
+                    </div>
+                </div>
+                
+                <div id="pizza-options-container"></div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; border-top: 1px solid var(--glass-border); padding-top:14px;">
+                    <div class="qty-selector">
+                        <button class="qty-btn" onclick="mutateModalQuantity(-1)">-</button>
+                        <span id="modal-qty-display" style="font-weight:700; font-size:13px; min-width:12px; text-align:center;">1</span>
+                        <button class="qty-btn" onclick="mutateModalQuantity(1)">+</button>
+                    </div>
+                    <button class="btn-primary" style="margin:0; width:auto; flex:1; margin-left:12px;" onclick="addModalItemToCart()">
+                        Add — Br <span id="modal-total-price-display">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation Bar -->
+        <nav class="bottom-nav">
+            <div class="glass-specular-glare"></div>
+            <div class="liquid-nav-pill" id="liquid-pill"></div>
+
+            <div class="nav-item active" id="nav-home" onclick="navigateTo('home')">
+                <i class="fa-solid fa-pizza-slice"></i>
+                <span data-en="Menu" data-am="ምናሌ">Menu</span>
+            </div>
+            <div class="nav-item" id="nav-cart" onclick="navigateTo('cart')">
+                <i class="fa-solid fa-basket-shopping"></i>
+                <span data-en="Tray" data-am="ትሪ">Tray</span>
+                <span class="badge" id="cart-badge-count" style="display:none;">0</span>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // ==================== CORE DATA ====================
+        const MENU_DATA = {
+            "veg-pizza": {
+                title: { en: "Veg Pizza", am: "የአትክልት ፒዛ" },
+                items: [
+                    { id: "v1", name: { en: "MARGHERITA PIZZA", am: "ማርጋሪታ ፒዛ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese", am: "የቲማቲም ሶስ፣ ሞዛሬላ አይብ" }, prices: { small: 495, medium: 770, large: 1120 }, img: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["classic", "cheesy"], popular: true, dietary: ["vegetarian"], inventory: "available" },
+                    { id: "v2", name: { en: "CHEESE PIZZA", am: "የአይብ ፒዛ" }, desc: { en: "Tomato Sauce, Mozzarella, Cheddar", am: "የቲማቲም ሶስ፣ ሞዛሬላ፣ ቼዳር" }, prices: { small: 475, medium: 740, large: 1100 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["classic", "cheesy"], popular: true, dietary: ["vegetarian"], inventory: "available" },
+                    { id: "v3", name: { en: "HOT & SPICY VEG", am: "ቅመም አትክልት" }, desc: { en: "Tomato Sauce, Mozzarella, Onion, Capsicum, Green Chilli", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ አረንጓዴ ቃሪያ" }, prices: { small: 550, medium: 875, large: 1315 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["spicy"], dietary: ["vegetarian", "spicy"], inventory: "available" },
+                    { id: "v4", name: { en: "MUSHROOM LOVERS", am: "እንጉዳይ ወዳጆች" }, desc: { en: "Tomato Sauce, Mozzarella, Mushroom, Olives", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ እንጉዳይ፣ ወይራ" }, prices: { small: 585, medium: 940, large: 1245 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["premium"], dietary: ["vegetarian"], inventory: "available" },
+                    { id: "v5", name: { en: "TROPICAL VEGGIE", am: "ትሮፒካል አትክልት" }, desc: { en: "Tomato Sauce, Mozzarella, Onion, Capsicum, Pineapple", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ አናናስ" }, prices: { small: 585, medium: 905, large: 1390 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["sweet"], dietary: ["vegetarian"], inventory: "limited" },
+                    { id: "v6", name: { en: "VEGGIE SUPREME", am: "ልዩ አትክልት" }, desc: { en: "Tomato Sauce, Mozzarella, Onion, Capsicum, Tomato & Olives", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ ቲማቲም እና ወይራ" }, prices: { small: 540, medium: 830, large: 1245 }, img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["premium"], dietary: ["vegetarian"], inventory: "available" }
+                ]
+            },
+            "meat-pizza": {
+                title: { en: "Meat Pizza", am: "የስጋ ፒዛ" },
+                items: [
+                    { id: "m1", name: { en: "HAWAIIAN PIZZA", am: "ሃዋያን ፒዛ" }, desc: { en: "Tomato Sauce, Mozzarella, Turkey Ham, Pineapple", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ የቱርክ ስጋ፣ አናናስ" }, prices: { small: 700, medium: 965, large: 1315 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["sweet"], dietary: [], popular: true, inventory: "available" },
+                    { id: "m2", name: { en: "ITALIAN MEAT", am: "ጣሊያናዊ ስጋ" }, desc: { en: "Tomato Sauce, Mozzarella, Italian Meat Roll, Onion, Tomato, Green Chilli", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ጣሊያናዊ ስጋ፣ ሽንኩርት፣ ቲማቲም፣ አረንጓዴ ቃሪያ" }, prices: { small: 775, medium: 1070, large: 1535 }, img: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["spicy", "premium"], dietary: ["spicy"], inventory: "available" },
+                    { id: "m3", name: { en: "MEAT LOVERS", am: "የስጋ ወዳጆች" }, desc: { en: "Tomato Sauce, Mozzarella, Pepperoni, Turkey Ham, Beef", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ፔፐሮኒ፣ የቱርክ ስጋ፣ የበሬ ስጋ" }, prices: { small: 765, medium: 1150, large: 1535 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["premium"], dietary: [], popular: true, inventory: "available" },
+                    { id: "m4", name: { en: "PEPPERONI LOVERS", am: "ፔፐሮኒ ወዳጆች" }, desc: { en: "Tomato Sauce, Mozzarella, Pepperoni", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ፔፐሮኒ" }, prices: { small: 685, medium: 965, large: 1410 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["classic"], dietary: [], popular: true, inventory: "available" },
+                    { id: "m5", name: { en: "BBQ DOUBLE MEAT", am: "ቢቢኪው ድርብ ስጋ" }, desc: { en: "BBQ Sauce, Mozzarella, Turkey Ham, Beef", am: "ቢቢኪው ሶስ፣ ሞዛሬላ፣ የቱርክ ስጋ፣ የበሬ ስጋ" }, prices: { small: 765, medium: 1150, large: 1535 }, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["premium"], dietary: [], inventory: "available" },
+                    { id: "m6", name: { en: "SUPER SUPREME", am: "ሱፐር ሱፕሪም" }, desc: { en: "Tomato Sauce, Mozzarella, Beef, Pepperoni, Turkey Ham, Chicken, Onion, Tomato, Capsicum, Olives", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ የበሬ ስጋ፣ ፔፐሮኒ፣ የቱርክ ስጋ፣ ዶሮ፣ ሽንኩርት፣ ቲማቲም፣ ቃሪያ፣ ወይራ" }, prices: { small: 795, medium: 1200, large: 1535 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["premium", "popular"], dietary: [], popular: true, inventory: "sold-out" }
+                ]
+            },
+            "chicken-pizza": {
+                title: { en: "Chicken Pizza", am: "የዶሮ ፒዛ" },
+                items: [
+                    { id: "c1", name: { en: "HOT & SPICY CHICKEN", am: "ቅመም ዶሮ" }, desc: { en: "Tomato Sauce, Mozzarella, Chicken, Onion, Tomato, Green Chilli", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ፣ ሽንኩርት፣ ቲማቲም፣ አረንጓዴ ቃሪያ" }, prices: { small: 665, medium: 1055, large: 1550 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["spicy"], dietary: ["spicy"], popular: true, inventory: "available" },
+                    { id: "c2", name: { en: "SWEET CHILLI CHICKEN", am: "ጣፋጭ ቃሪያ ዶሮ" }, desc: { en: "Tomato Sauce, Mozzarella, Chicken", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ" }, prices: { small: 700, medium: 1070, large: 1505 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["spicy", "sweet"], dietary: ["spicy"], inventory: "available" },
+                    { id: "c3", name: { en: "BBQ CHICKEN", am: "ቢቢኪው ዶሮ" }, desc: { en: "BBQ Sauce, Mozzarella, Turkey Ham, Chicken", am: "ቢቢኪው ሶስ፣ ሞዛሬላ፣ የቱርክ ስጋ፣ ዶሮ" }, prices: { small: 740, medium: 1165, large: 1535 }, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["premium"], dietary: [], popular: true, inventory: "available" },
+                    { id: "c4", name: { en: "CHICKEN & MUSHROOM", am: "ዶሮ እና እንጉዳይ" }, desc: { en: "Tomato Sauce, Mozzarella, Chicken, Mushroom", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ፣ እንጉዳይ" }, prices: { small: 665, medium: 1055, large: 1505 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["premium"], dietary: [], inventory: "available" },
+                    { id: "c5", name: { en: "CHICKEN FAJITA", am: "ዶሮ ፋጂታ" }, desc: { en: "Tomato Sauce, Mozzarella, Chicken, Onion, Tomato", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ፣ ሽንኩርት፣ ቲማቲም" }, prices: { small: 665, medium: 1000, large: 1535 }, img: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["classic"], dietary: [], inventory: "available" },
+                    { id: "c6", name: { en: "CHICKEN SUPREME", am: "ልዩ ዶሮ" }, desc: { en: "Tomato Sauce, Mozzarella, Onion, Chicken, Capsicum", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ዶሮ፣ ቃሪያ" }, prices: { small: 730, medium: 1130, large: 1535 }, img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["premium"], dietary: [], inventory: "limited" }
+                ]
+            },
+            "fasting-pizza": {
+                title: { en: "Fasting Pizza", am: "የጾም ፒዛ" },
+                items: [
+                    { id: "f1", name: { en: "TUNA PIZZA", am: "ቱና ፒዛ" }, desc: { en: "Fasting Sauce, Tuna, Onion, Capsicum, Olives & Green Chilli", am: "የጾም ሶስ፣ ቱና፣ ሽንኩርት፣ ቃሪያ፣ ወይራ እና አረንጓዴ ቃሪያ" }, prices: { small: 540, medium: 740, large: 1165 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["fasting"], dietary: ["fasting", "spicy"], popular: true, inventory: "available" },
+                    { id: "f2", name: { en: "VEGGIE BLAST", am: "አትክልት ፍንዳታ" }, desc: { en: "Fasting Sauce, Pineapple, Onion, Olives, Capsicum, Mushroom & Green Chilli", am: "የጾም ሶስ፣ አናናስ፣ ሽንኩርት፣ ወይራ፣ ቃሪያ፣ እንጉዳይ እና አረንጓዴ ቃሪያ" }, prices: { small: 480, medium: 795, large: 1100 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["fasting", "spicy"], dietary: ["fasting", "spicy", "vegetarian"], inventory: "available" },
+                    { id: "f3", name: { en: "PINEAPPLE LOVERS", am: "አናናስ ወዳጆች" }, desc: { en: "Fasting Sauce, Pineapple, Onion & Green Chilli", am: "የጾም ሶስ፣ አናናስ፣ ሽንኩርት እና አረንጓዴ ቃሪያ" }, prices: { small: 520, medium: 740, large: 1100 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=80", type: "pizza", tags: ["fasting", "sweet"], dietary: ["fasting", "vegetarian"], inventory: "available" }
+                ]
+            },
+            "sides": {
+                title: { en: "Sides", am: "ተጨማሪዎች" },
+                items: [
+                    { id: "s1", name: { en: "FRENCH FRIES", am: "የተጠበሰ ድንች" }, desc: { en: "Golden standard crisps", am: "ወርቃማ ጥብስ ድንች" }, price: 355, img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=400&q=80", type: "flat", tags: ["classic"], dietary: ["vegetarian", "fasting"], popular: true, inventory: "available" },
+                    { id: "s2", name: { en: "CHILLI FRIES", am: "ቅመም ድንች" }, desc: { en: "French fries tossed in spice blend", am: "የተጠበሰ ድንች በቅመም የተዘጋጀ" }, price: 450, img: "https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&w=400&q=80", type: "flat", tags: ["spicy"], dietary: ["spicy", "vegetarian", "fasting"], inventory: "available" }
+                ]
+            }
+        };
+
+        const KITCHEN_TELEGRAM_HANDLE = "MO76k7";
+        const KITCHEN_PHONE = "0923845344";
+        const VAT_RATE = 0.15;
+        const SERVICE_RATE = 0.10;
+
+        let currentCategoryKey = "veg-pizza";
+        let activeModalItem = null;
+        let selectedSize = 'medium';
+        let selectedCrust = 'regular';
+        let modalQuantity = 1;
+        let cart = [];
+        let currentSortOrder = 'default';
+        let activeFilters = new Set();
+        let currentLanguage = 'en';
+        let orderStatusInterval = null;
+
+        // ==================== INITIALIZATION ====================
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCategoryBar();
+            renderProducts(currentCategoryKey);
+            updateLiquidNavPill(document.getElementById('nav-home'), false);
+            
+            // Check for fasting days (Wednesday & Friday)
+            checkFastingDay();
+            
+            document.getElementById('fasting-toggle').addEventListener('change', (e) => {
+                hapticFeedback('light');
+                if(e.target.checked) {
+                    selectCategory('fasting-pizza');
+                } else {
+                    selectCategory('veg-pizza');
+                }
+            });
+
+            document.getElementById('menu-search').addEventListener('input', debounce((e) => {
+                const term = e.target.value.toLowerCase().trim();
+                if (term) {
+                    filterProductsBySearch(term);
+                } else {
+                    renderProducts(currentCategoryKey);
+                    updateActiveFiltersDisplay();
+                }
+            }, 300));
+            
+            document.getElementById('product-modal').addEventListener('click', function(e) {
+                if (e.target === this) closeProductModal();
+            });
+            
+            // Setup drag-to-dismiss for modal
+            setupModalDragToDismiss();
+            
+            // Setup gyroscope for glass effect
+            setupGyroscopeEffect();
+            
+            // Setup split bill listener
+            document.getElementById('split-count').addEventListener('input', updateSplitDisplay);
+        });
+
+        // ==================== FASTING DAY DETECTION ====================
+        function checkFastingDay() {
+            const today = new Date().getDay(); // 3=Wed, 5=Fri
+            if (today === 3 || today === 5) {
+                document.getElementById('fasting-toggle').checked = true;
+                selectCategory('fasting-pizza');
+                showToast('Today is a fasting day — showing fasting menu');
+            }
+        }
+
+        // ==================== LANGUAGE SWITCHER ====================
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('.lang-toggle').forEach(btn => btn.classList.remove('active-lang'));
+            document.getElementById(`lang-${lang}`).classList.add('active-lang');
+            
+            // Update all translatable elements
+            document.querySelectorAll('[data-en][data-am]').forEach(el => {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+                const text = el.getAttribute(`data-${lang}`);
+                if (text) el.textContent = text;
+            });
+            
+            // Update placeholders
+            document.querySelectorAll('input[data-en]').forEach(input => {
+                const placeholder = input.getAttribute(`data-${lang}-placeholder`) || input.getAttribute(`data-${lang}`);
+                if (placeholder) input.placeholder = placeholder;
+            });
+            
+            // Re-render UI
+            renderCategoryBar();
+            renderProducts(currentCategoryKey);
+            updateActiveFiltersDisplay();
+            if (document.getElementById('view-cart').classList.contains('active')) {
+                renderCartView();
+            }
+        }
+
+        // ==================== GYROSCOPE GLASS EFFECT ====================
+        function setupGyroscopeEffect() {
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', (e) => {
+                    const phone = document.getElementById('phone-wrapper');
+                    if (!phone) return;
+                    const gamma = e.gamma || 0; // Left-right tilt (-90 to 90)
+                    const beta = e.beta || 0;   // Front-back tilt (-180 to 180)
+                    
+                    const rotateY = gamma * 0.1;
+                    const rotateX = beta * 0.08;
+                    
+                    phone.style.transform = `perspective(1000px) rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+                });
+            }
+        }
+
+        // ==================== MODAL DRAG TO DISMISS ====================
+        function setupModalDragToDismiss() {
+            const modalSheet = document.getElementById('modal-sheet');
+            const dragHandle = document.getElementById('modal-drag-handle');
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+            
+            dragHandle.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+                isDragging = true;
+                modalSheet.style.transition = 'none';
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const diff = currentY - startY;
+                if (diff > 0) {
+                    modalSheet.style.transform = `translateY(${diff}px)`;
+                }
+            });
+            
+            document.addEventListener('touchend', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                modalSheet.style.transition = 'transform 0.3s ease-out';
+                const diff = currentY - startY;
+                if (diff > 100) {
+                    closeProductModal();
+                } else {
+                    modalSheet.style.transform = 'translateY(0)';
+                }
+            });
+        }
+
+        // ==================== HAPTIC FEEDBACK ====================
+        function hapticFeedback(intensity = 'light') {
+            if (navigator.vibrate) {
+                const patterns = {
+                    light: 10,
+                    medium: [10, 30, 10],
+                    heavy: [15, 20, 15, 20, 15]
+                };
+                navigator.vibrate(patterns[intensity] || 10);
+            }
+        }
+
+        // ==================== TOAST NOTIFICATION ====================
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+                background: var(--color-primary); color: #FFF; padding: 8px 16px;
+                border-radius: 20px; font-size: 11px; font-weight: 700; z-index: 999;
+                animation: fadeIn 0.3s ease-out, fadeOut 0.3s ease-in 2.5s forwards;
+                pointer-events: none; white-space: nowrap;
+            `;
+            toast.textContent = message;
+            document.querySelector('.phone-wrapper').appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ==================== DEBOUNCE UTILITY ====================
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // ==================== FLYING ITEM ANIMATION ====================
+        function triggerFlyingAnimation(imgSrc, startElement) {
+            const rect = startElement.getBoundingClientRect();
+            const trayBtn = document.getElementById('floating-tray-btn');
+            const trayRect = trayBtn.getBoundingClientRect();
+            
+            const flyingImg = document.createElement('img');
+            flyingImg.src = imgSrc;
+            flyingImg.className = 'flying-item';
+            flyingImg.style.cssText = `
+                left: ${rect.left + rect.width/2 - 25}px;
+                top: ${rect.top + rect.height/2 - 25}px;
+                position: fixed;
+            `;
+            
+            document.body.appendChild(flyingImg);
+            
+            requestAnimationFrame(() => {
+                flyingImg.style.left = `${trayRect.left + trayRect.width/2 - 25}px`;
+                flyingImg.style.top = `${trayRect.top + trayRect.height/2 - 25}px`;
+                flyingImg.style.transform = 'scale(0.3)';
+                flyingImg.style.opacity = '0.5';
+            });
+            
+            setTimeout(() => {
+                flyingImg.remove();
+                updateCartBadge();
+            }, 600);
+        }
+
+        // ==================== NAVIGATION ====================
+        function updateLiquidNavPill(activeNavItem, smooth = true) {
+            const pill = document.getElementById('liquid-pill');
+            if(!pill || !activeNavItem) return;
+            pill.style.transition = smooth 
+                ? "transform 0.45s cubic-bezier(0.34, 1.25, 0.64, 1), width 0.45s cubic-bezier(0.34, 1.25, 0.64, 1)" 
+                : "none";
+            pill.style.width = `${activeNavItem.offsetWidth}px`;
+            pill.style.transform = `translateX(${activeNavItem.offsetLeft}px)`;
+        }
+
+        function scrollCategories(amount) {
+            document.getElementById('category-scroll-container').scrollBy({ left: amount, behavior: 'smooth' });
+        }
+
+        function navigateTo(viewName) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            if(viewName === 'home') {
+                document.getElementById('view-home').classList.add('active');
+                updateLiquidNavPill(document.getElementById('nav-home'), true);
+                document.getElementById('nav-home').classList.add('active');
+            } else if(viewName === 'cart') {
+                document.getElementById('view-cart').classList.add('active');
+                updateLiquidNavPill(document.getElementById('nav-cart'), true);
+                document.getElementById('nav-cart').classList.add('active');
+                renderCartView();
+            }
+        }
+
+        // ==================== CATEGORY BAR ====================
+        function renderCategoryBar() {
+            const container = document.getElementById('categories-bar');
+            const keys = Object.keys(MENU_DATA);
+            let html = '';
+            keys.forEach(key => {
+                const activeClass = (key === currentCategoryKey) ? 'active' : '';
+                const title = typeof MENU_DATA[key].title === 'object' 
+                    ? MENU_DATA[key].title[currentLanguage] 
+                    : MENU_DATA[key].title;
+                html += `<div class="cat-pill ${activeClass}" id="cat-btn-${key}" onclick="selectCategory('${key}')">${title}</div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function selectCategory(key) {
+            hapticFeedback('light');
+            currentCategoryKey = key;
+            document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('active'));
+            const targetPill = document.getElementById(`cat-btn-${key}`);
+            if (targetPill) {
+                targetPill.classList.add('active');
+                targetPill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+            const title = typeof MENU_DATA[key].title === 'object' 
+                ? MENU_DATA[key].title[currentLanguage] 
+                : MENU_DATA[key].title;
+            document.getElementById('current-category-title').innerText = title;
+            document.getElementById('menu-search').value = '';
+            activeFilters.clear();
+            currentSortOrder = 'default';
+            updateActiveFiltersDisplay();
+            renderProducts(key);
+        }
+
+        // ==================== SORTING ====================
+        function getSortedItems(items) {
+            let sortedItems = [...items];
+            switch(currentSortOrder) {
+                case 'price-asc':
+                    sortedItems.sort((a, b) => (a.type === 'pizza' ? a.prices.medium : a.price) - (b.type === 'pizza' ? b.prices.medium : b.price));
+                    break;
+                case 'price-desc':
+                    sortedItems.sort((a, b) => (b.type === 'pizza' ? b.prices.medium : b.price) - (a.type === 'pizza' ? a.prices.medium : a.price));
+                    break;
+                case 'name-asc':
+                    sortedItems.sort((a, b) => {
+                        const nameA = typeof a.name === 'object' ? a.name[currentLanguage] : a.name;
+                        const nameB = typeof b.name === 'object' ? b.name[currentLanguage] : b.name;
+                        return nameA.localeCompare(nameB);
+                    });
+                    break;
+                case 'popular':
+                    sortedItems.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0));
+                    break;
+                default:
+                    sortedItems.sort((a, b) => {
+                        if (a.popular && !b.popular) return -1;
+                        if (!a.popular && b.popular) return 1;
+                        const nameA = typeof a.name === 'object' ? a.name[currentLanguage] : a.name;
+                        const nameB = typeof b.name === 'object' ? b.name[currentLanguage] : b.name;
+                        return nameA.localeCompare(nameB);
+                    });
+            }
+            return sortedItems;
+        }
+
+        function toggleSortMenu() {
+            const sortOptions = ['default', 'popular', 'price-asc', 'price-desc', 'name-asc'];
+            const currentIndex = sortOptions.indexOf(currentSortOrder);
+            currentSortOrder = sortOptions[(currentIndex + 1) % sortOptions.length];
+            const sortBtn = document.getElementById('sort-btn');
+            const sortLabels = {
+                'default': currentLanguage === 'am' ? 'ታዋቂ' : 'Popular',
+                'popular': currentLanguage === 'am' ? 'ታዋቂ' : 'Popular',
+                'price-asc': 'Price ↑',
+                'price-desc': 'Price ↓',
+                'name-asc': 'A-Z'
+            };
+            sortBtn.innerHTML = `<i class="fa-solid fa-arrow-up-wide-short"></i> ${sortLabels[currentSortOrder]}`;
+            renderProducts(currentCategoryKey);
+        }
+
+        // ==================== PRODUCT RENDERING ====================
+        function getItemName(item) {
+            return typeof item.name === 'object' ? item.name[currentLanguage] : item.name;
+        }
+        
+        function getItemDesc(item) {
+            return typeof item.desc === 'object' ? item.desc[currentLanguage] : item.desc;
+        }
+        
+        function getDietaryIcons(item) {
+            if (!item.dietary) return '';
+            let icons = '';
+            if (item.dietary.includes('spicy')) icons += '<div class="dietary-icon">🌶️</div>';
+            if (item.dietary.includes('vegetarian')) icons += '<div class="dietary-icon">🌱</div>';
+            if (item.dietary.includes('fasting')) icons += '<div class="dietary-icon">✝️</div>';
+            return icons;
+        }
+
+        function renderProducts(key) {
+            const grid = document.getElementById('products-target-grid');
+            const category = MENU_DATA[key];
+            if(!category) return;
+
+            const sortedItems = getSortedItems(category.items);
+
+            grid.innerHTML = sortedItems.map(item => {
+                const priceDisplay = item.type === 'pizza' ? `Br ${item.prices.medium}` : `Br ${item.price}`;
+                const badge = item.popular ? '<div class="product-badge">★ Popular</div>' : '';
+                const dietaryIcons = getDietaryIcons(item);
+                const soldOutClass = item.inventory === 'sold-out' ? 'sold-out' : '';
+                let inventoryBadge = '';
+                if (item.inventory === 'sold-out') inventoryBadge = '<div class="inventory-badge badge-sold-out">Sold Out</div>';
+                if (item.inventory === 'limited') inventoryBadge = '<div class="inventory-badge badge-limited">Limited</div>';
+                
+                return `
+                    <div class="product-card ${soldOutClass}" onclick="${item.inventory !== 'sold-out' ? `openProductModal('${key}', '${item.id}')` : ''}" id="card-${item.id}">
+                        <div class="glass-specular-glare"></div>
+                        <div class="img-wrapper">
+                            ${badge}
+                            ${inventoryBadge}
+                            ${dietaryIcons ? `<div class="dietary-badges">${dietaryIcons}</div>` : ''}
+                            <img src="${item.img}" alt="${getItemName(item)}" loading="lazy">
+                        </div>
+                        <div class="product-info">
+                            <h4>${getItemName(item)}</h4>
+                            <p>${getItemDesc(item)}</p>
+                            <div class="product-price-row">
+                                <span class="product-price">${priceDisplay}</span>
+                                ${item.inventory !== 'sold-out' ? '<i class="fa-solid fa-circle-plus add-icon-btn"></i>' : '<span style="color:#EF4444;font-size:10px;">N/A</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== SEARCH ====================
+        function filterProductsBySearch(term) {
+            const grid = document.getElementById('products-target-grid');
+            let results = [];
+            
+            Object.keys(MENU_DATA).forEach(cat => {
+                MENU_DATA[cat].items.forEach(item => {
+                    const name = getItemName(item).toLowerCase();
+                    const desc = getItemDesc(item).toLowerCase();
+                    if(name.includes(term) || desc.includes(term) || (item.tags && item.tags.some(tag => tag.includes(term)))) {
+                        results.push({ item, cat });
+                    }
+                });
+            });
+
+            if(results.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:40px 20px; color:var(--color-text-muted);">
+                        <i class="fa-solid fa-magnifying-glass" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5; display: block;"></i>
+                        <h3 style="font-family:var(--font-display); font-size:18px; margin-bottom:8px; color:#FFF;">${currentLanguage === 'am' ? 'ምንም አልተገኘም' : 'No Items Found'}</h3>
+                        <p style="font-size:13px;">${currentLanguage === 'am' ? '"አይብ"፣ "ቅመም" ወይም "ዶሮ" ብለው ይፈልጉ' : 'Try searching for "cheese", "spicy", or "chicken"'}</p>
+                    </div>`;
+                return;
+            }
+
+            const sortedResults = getSortedItems(results.map(r => r.item));
+            grid.innerHTML = sortedResults.map(item => {
+                const priceDisplay = item.type === 'pizza' ? `Br ${item.prices.medium}` : `Br ${item.price}`;
+                const parentCat = results.find(r => r.item.id === item.id)?.cat || currentCategoryKey;
+                const soldOutClass = item.inventory === 'sold-out' ? 'sold-out' : '';
+                
+                return `
+                    <div class="product-card ${soldOutClass}" onclick="${item.inventory !== 'sold-out' ? `openProductModal('${parentCat}', '${item.id}')` : ''}">
+                        <div class="glass-specular-glare"></div>
+                        <div class="img-wrapper">
+                            ${item.popular ? '<div class="product-badge">★ Popular</div>' : ''}
+                            ${item.inventory === 'sold-out' ? '<div class="inventory-badge badge-sold-out">Sold Out</div>' : ''}
+                            ${item.inventory === 'limited' ? '<div class="inventory-badge badge-limited">Limited</div>' : ''}
+                            <img src="${item.img}" alt="${getItemName(item)}">
+                        </div>
+                        <div class="product-info">
+                            <h4>${getItemName(item)}</h4>
+                            <p>${getItemDesc(item)}</p>
+                            <div class="product-price-row">
+                                <span class="product-price">${priceDisplay}</span>
+                                ${item.inventory !== 'sold-out' ? '<i class="fa-solid fa-circle-plus add-icon-btn"></i>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateActiveFiltersDisplay() {
+            const filterContainer = document.getElementById('active-filters');
+            if (activeFilters.size === 0 && !document.getElementById('menu-search').value) {
+                filterContainer.style.display = 'none';
+                return;
+            }
+            filterContainer.style.display = 'flex';
+            let filterHTML = '';
+            if (document.getElementById('fasting-toggle').checked) {
+                filterHTML += `<div class="filter-pill" onclick="clearFastingFilter()"><span>${currentLanguage === 'am' ? 'የጾም ምናሌ' : 'Fasting Menu'}</span><i class="fa-solid fa-xmark"></i></div>`;
+            }
+            if (document.getElementById('menu-search').value) {
+                filterHTML += `<div class="filter-pill" onclick="clearSearchFilter()"><span>${currentLanguage === 'am' ? 'ፍለጋ' : 'Search'}: "${document.getElementById('menu-search').value}"</span><i class="fa-solid fa-xmark"></i></div>`;
+            }
+            filterContainer.innerHTML = filterHTML;
+        }
+
+        function clearFastingFilter() {
+            document.getElementById('fasting-toggle').checked = false;
+            selectCategory('veg-pizza');
+            updateActiveFiltersDisplay();
+        }
+
+        function clearSearchFilter() {
+            document.getElementById('menu-search').value = '';
+            renderProducts(currentCategoryKey);
+            updateActiveFiltersDisplay();
+        }
+
+        // ==================== MODAL LOGIC ====================
+        function openProductModal(catKey, itemId) {
+            const item = MENU_DATA[catKey].items.find(i => i.id === itemId);
+            if(!item || item.inventory === 'sold-out') return;
+
+            hapticFeedback('medium');
+            activeModalItem = item;
+            modalQuantity = 1;
+            selectedSize = 'medium';
+            selectedCrust = 'regular';
+
+            document.getElementById('modal-item-name').innerText = getItemName(item);
+            document.getElementById('modal-item-img').src = item.img;
+            document.getElementById('modal-item-desc').innerText = getItemDesc(item);
+            document.getElementById('modal-qty-display').innerText = modalQuantity;
+
+            // Crust options (only for pizza)
+            const crustContainer = document.getElementById('crust-options-container');
+            if(item.type === 'pizza') {
+                crustContainer.style.display = 'block';
+                resetCrustSelection();
+            } else {
+                crustContainer.style.display = 'none';
+            }
+
+            // Size options
+            const optionsContainer = document.getElementById('pizza-options-container');
+            if(item.type === 'pizza') {
+                optionsContainer.innerHTML = `
+                    <div class="options-group-title">${currentLanguage === 'am' ? 'መጠን ይምረጡ' : 'Select Size'}</div>
+                    <div class="selector-row">
+                        <div class="selector-btn" id="size-small" onclick="setSize('small')">Small<br>Br ${item.prices.small}</div>
+                        <div class="selector-btn active" id="size-medium" onclick="setSize('medium')">Medium<br>Br ${item.prices.medium}</div>
+                        <div class="selector-btn" id="size-large" onclick="setSize('large')">Large<br>Br ${item.prices.large}</div>
+                    </div>
+                `;
+            } else {
+                optionsContainer.innerHTML = '';
+            }
+
+            updateModalPrice();
+            document.getElementById('product-modal').style.display = 'flex';
+            document.getElementById('modal-sheet').classList.remove('dismissing');
+        }
+
+        function closeProductModal() {
+            const modalSheet = document.getElementById('modal-sheet');
+            modalSheet.classList.add('dismissing');
+            setTimeout(() => {
+                document.getElementById('product-modal').style.display = 'none';
+                modalSheet.classList.remove('dismissing');
+                modalSheet.style.transform = '';
+            }, 280);
+        }
+
+        function setSize(size) {
+            hapticFeedback('light');
+            selectedSize = size;
+            document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('active'));
+            const sizeBtn = document.getElementById(`size-${size}`);
+            if (sizeBtn) sizeBtn.classList.add('active');
+            updateModalPrice();
+        }
+        
+        function setCrust(crust) {
+            hapticFeedback('light');
+            selectedCrust = crust;
+            document.querySelectorAll('.crust-btn').forEach(b => b.classList.remove('active'));
+            const crustBtn = document.getElementById(`crust-${crust}`);
+            if (crustBtn) crustBtn.classList.add('active');
+            
+            // Add slight price adjustment for premium crusts
+            updateModalPrice();
+        }
+        
+        function resetCrustSelection() {
+            document.querySelectorAll('.crust-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('crust-regular').classList.add('active');
+            selectedCrust = 'regular';
+        }
+
+        function mutateModalQuantity(delta) {
+            if(modalQuantity + delta >= 1 && modalQuantity + delta <= 10) {
+                modalQuantity += delta;
+                document.getElementById('modal-qty-display').innerText = modalQuantity;
+                updateModalPrice();
+            }
+        }
+
+        function calculateItemUnitPrice(item, size) {
+            let basePrice = item.type === 'pizza' ? item.prices[size] : item.price;
+            // Premium crust surcharge
+            if (item.type === 'pizza' && (selectedCrust === 'stuffed' || selectedCrust === 'thick')) {
+                basePrice += size === 'small' ? 40 : size === 'medium' ? 60 : 80;
+            }
+            return basePrice;
+        }
+
+        function updateModalPrice() {
+            if(!activeModalItem) return;
+            const unit = calculateItemUnitPrice(activeModalItem, selectedSize);
+            document.getElementById('modal-total-price-display').innerText = (unit * modalQuantity).toFixed(2);
+        }
+
+        function addModalItemToCart() {
+            const unitPrice = calculateItemUnitPrice(activeModalItem, selectedSize);
+            const cartItem = {
+                id: activeModalItem.id + (activeModalItem.type === 'pizza' ? `-${selectedSize}-${selectedCrust}` : ''),
+                name: getItemName(activeModalItem),
+                nameEn: typeof activeModalItem.name === 'object' ? activeModalItem.name.en : activeModalItem.name,
+                nameAm: typeof activeModalItem.name === 'object' ? activeModalItem.name.am : activeModalItem.name,
+                size: activeModalItem.type === 'pizza' ? selectedSize : null,
+                crust: activeModalItem.type === 'pizza' ? selectedCrust : null,
+                unitPrice: unitPrice,
+                quantity: modalQuantity,
+                img: activeModalItem.img
+            };
+
+            const existingIndex = cart.findIndex(c => c.id === cartItem.id);
+            if(existingIndex > -1) {
+                cart[existingIndex].quantity += modalQuantity;
+            } else {
+                cart.push(cartItem);
+            }
+
+            // Trigger flying animation
+            const card = document.getElementById(`card-${activeModalItem.id}`);
+            if (card) {
+                triggerFlyingAnimation(activeModalItem.img, card);
+            }
+
+            closeProductModal();
+            updateCartBadge();
+            showToast(currentLanguage === 'am' ? 'ወደ ትሪ ተጨምሯል!' : 'Added to tray!');
+        }
+
+        // ==================== CART LOGIC ====================
+        function updateCartBadge() {
+            const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-badge-count');
+            const floatBtn = document.getElementById('floating-tray-btn');
+            const floatBadge = document.getElementById('floating-badge-count');
+
+            if(totalQty > 0) {
+                badge.innerText = totalQty;
+                badge.style.display = 'block';
+                floatBadge.innerText = totalQty;
+                floatBtn.classList.add('visible');
+            } else {
+                badge.style.display = 'none';
+                floatBtn.classList.remove('visible');
+            }
+        }
+
+        function renderCartView() {
+            const root = document.getElementById('cart-items-root');
+            const formSection = document.getElementById('cart-form-section');
+            const clearBtn = document.getElementById('btn-clear-cart');
+            const statusSection = document.getElementById('order-status-section');
+
+            if (cart.length === 0) {
+                clearBtn.style.display = 'none';
+                formSection.style.display = 'none';
+                statusSection.style.display = 'none';
+                if (orderStatusInterval) clearInterval(orderStatusInterval);
+                
+                root.innerHTML = `
+                    <div class="empty-cart-state">
+                        <div class="empty-cart-icon">🛒</div>
+                        <h3>${currentLanguage === 'am' ? 'ትሪዎ ባዶ ነው' : 'Your Tray is Empty'}</h3>
+                        <p>${currentLanguage === 'am' ? 'እስካሁን ምንም አላከሉም። ምናሌያችንን ይመልከቱ እና የሚወዱትን ያግኙ!' : 'Looks like you haven\'t added anything yet. Browse our menu and find your perfect meal!'}</p>
+                        <button class="btn-browse-menu" onclick="navigateTo('home')">
+                            <i class="fa-solid fa-pizza-slice"></i> ${currentLanguage === 'am' ? 'ምናሌ ይመልከቱ' : 'Browse Menu'}
+                        </button>
+                        <div class="popular-section">
+                            <h3>${currentLanguage === 'am' ? '🔥 ታዋቂ ምርጫዎች' : '🔥 Popular Picks'}</h3>
+                            ${getPopularItemsHTML()}
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            clearBtn.style.display = 'block';
+            formSection.style.display = 'block';
+            statusSection.style.display = 'none';
+            if (orderStatusInterval) clearInterval(orderStatusInterval);
+
+            let grandTotal = 0;
+            root.innerHTML = cart.map((item, index) => {
+                const itemTotal = item.unitPrice * item.quantity;
+                grandTotal += itemTotal;
+                const sizeLabel = item.size ? ` [${item.size.toUpperCase()}]` : '';
+                const crustLabel = item.crust && item.crust !== 'regular' ? ` - ${item.crust}` : '';
+                const displayName = currentLanguage === 'am' ? (item.nameAm || item.name) : (item.nameEn || item.name);
+
+                return `
+                    <div class="cart-item">
+                        <img src="${item.img}" alt="${displayName}">
+                        <div class="cart-item-info">
+                            <div class="cart-item-title">${displayName}${sizeLabel}${crustLabel}</div>
+                            <div class="cart-item-meta">Br ${item.unitPrice} each</div>
+                            <div class="cart-item-price">Br ${itemTotal.toFixed(2)}</div>
+                        </div>
+                        <div class="qty-selector">
+                            <button class="qty-btn" onclick="updateCartItemQty(${index}, -1)">-</button>
+                            <span style="font-size:11px; font-weight:700;">${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateCartItemQty(${index}, 1)">+</button>
+                        </div>
+                        <button class="remove-btn" onclick="removeCartItem(${index})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+            }).join('');
+
+            // Calculate with VAT and service
+            const vat = grandTotal * VAT_RATE;
+            const service = grandTotal * SERVICE_RATE;
+            const total = grandTotal + vat + service;
+
+            document.getElementById('summary-subtotal').innerText = `Br ${grandTotal.toFixed(2)}`;
+            document.getElementById('summary-vat').innerText = `Br ${vat.toFixed(2)}`;
+            document.getElementById('summary-service').innerText = `Br ${service.toFixed(2)}`;
+            document.getElementById('summary-total').innerText = `Br ${total.toFixed(2)}`;
+            
+            updateSplitDisplay();
+        }
+        
+        function updateSplitDisplay() {
+            const splitCount = parseInt(document.getElementById('split-count').value) || 1;
+            const grandTotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+            const vat = grandTotal * VAT_RATE;
+            const service = grandTotal * SERVICE_RATE;
+            const total = grandTotal + vat + service;
+            const perPerson = total / splitCount;
+            
+            const splitDisplay = document.getElementById('split-per-person');
+            if (splitDisplay) {
+                splitDisplay.innerText = `Br ${perPerson.toFixed(2)} / person`;
+            }
+        }
+
+        function getPopularItemsHTML() {
+            const popularItems = [];
+            Object.keys(MENU_DATA).forEach(cat => {
+                MENU_DATA[cat].items.forEach(item => {
+                    if (item.popular && item.inventory !== 'sold-out') {
+                        popularItems.push({ ...item, cat });
+                    }
+                });
+            });
+            
+            const shuffled = popularItems.sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, 3);
+            
+            return selected.map(item => {
+                const price = item.type === 'pizza' ? `Br ${item.prices.medium}` : `Br ${item.price}`;
+                return `
+                    <div class="popular-item" onclick="openProductModal('${item.cat}', '${item.id}'); navigateTo('home');">
+                        <img src="${item.img}" alt="${getItemName(item)}">
+                        <div class="popular-item-info">
+                            <h4>${getItemName(item)}</h4>
+                            <span>${price}</span>
+                        </div>
+                        <i class="fa-solid fa-circle-plus"></i>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateCartItemQty(index, delta) {
+            hapticFeedback('light');
+            if(cart[index].quantity + delta > 0) {
+                cart[index].quantity += delta;
+            } else {
+                cart.splice(index, 1);
+            }
+            updateCartBadge();
+            renderCartView();
+        }
+
+        function removeCartItem(index) {
+            hapticFeedback('medium');
+            cart.splice(index, 1);
+            updateCartBadge();
+            renderCartView();
+        }
+
+        function clearCart() {
+            if (confirm(currentLanguage === 'am' ? 'ሁሉንም እቃዎች ከትሪ ያስወግዳሉ?' : 'Remove all items from your tray?')) {
+                hapticFeedback('heavy');
+                cart = [];
+                updateCartBadge();
+                renderCartView();
+            }
+        }
+
+        // ==================== ORDER SUBMISSION & STATUS ====================
+        function getNextDailyOrderNumber() {
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const savedDate = localStorage.getItem('ph_order_date');
+            let currentSeq = parseInt(localStorage.getItem('ph_order_seq') || '0', 10);
+            if (savedDate !== todayStr) {
+                currentSeq = 1;
+                localStorage.setItem('ph_order_date', todayStr);
+            } else {
+                currentSeq += 1;
+            }
+            localStorage.setItem('ph_order_seq', currentSeq.toString());
+            return currentSeq.toString().padStart(2, '0');
+        }
+
+        function submitOrderToTelegram() {
+            if(cart.length === 0) return;
+            hapticFeedback('heavy');
+
+            const selectedBranch = document.getElementById('branch-select').value;
+            const tableNum = document.getElementById('table-number-input').value.trim() || 'N/A';
+            const extraInstructions = document.getElementById('extra-instructions-input').value.trim();
+            const splitCount = parseInt(document.getElementById('split-count').value) || 1;
+            const orderNo = getNextDailyOrderNumber();
+            let grandTotal = 0;
+
+            let orderSummary = `🍕 *NEW KITCHEN ORDER*\n\n`;
+            orderSummary += `📋 *Order No:* ${orderNo}\n`;
+            orderSummary += `📍 *Branch:* ${selectedBranch}\n`;
+            orderSummary += `🪑 *Table Number:* ${tableNum}\n`;
+            if (splitCount > 1) orderSummary += `👥 *Split Bill:* ${splitCount} people\n`;
+            orderSummary += `───────────────────\n`;
+
+            cart.forEach((item, idx) => {
+                const itemTotal = item.unitPrice * item.quantity;
+                grandTotal += itemTotal;
+                const sizeStr = item.size ? ` [${item.size.toUpperCase()}]` : '';
+                const crustStr = item.crust && item.crust !== 'regular' ? ` (${item.crust})` : '';
+                orderSummary += `${idx + 1}. *${item.nameEn || item.name}*${sizeStr}${crustStr} x${item.quantity} - Br ${itemTotal.toFixed(2)}\n`;
+            });
+
+            const vat = grandTotal * VAT_RATE;
+            const service = grandTotal * SERVICE_RATE;
+            const total = grandTotal + vat + service;
+
+            if (extraInstructions) {
+                orderSummary += `───────────────────\n`;
+                orderSummary += `📝 *Extra Instructions:*\n${extraInstructions}\n`;
+            }
+
+            orderSummary += `───────────────────\n`;
+            orderSummary += `💰 Subtotal: Br ${grandTotal.toFixed(2)}\n`;
+            orderSummary += `🧾 VAT (15%): Br ${vat.toFixed(2)}\n`;
+            orderSummary += `🍽️ Service (10%): Br ${service.toFixed(2)}\n`;
+            orderSummary += `💵 *TOTAL:* Br ${total.toFixed(2)}\n`;
+            if (splitCount > 1) orderSummary += `👤 Per Person: Br ${(total/splitCount).toFixed(2)}\n`;
+            orderSummary += `\n🧑‍🍳 *Kitchen:* @${KITCHEN_TELEGRAM_HANDLE}\n`;
+            orderSummary += `📞 *Phone:* ${KITCHEN_PHONE}\n`;
+
+            const encodedMessage = encodeURIComponent(orderSummary);
+            const telegramUrl = `https://t.me/${KITCHEN_TELEGRAM_HANDLE}?text=${encodedMessage}`;
+            window.open(telegramUrl, '_blank');
+            
+            // Start order status tracking
+            startOrderTracking();
+        }
+        
+        function startOrderTracking() {
+            const statusSection = document.getElementById('order-status-section');
+            const formSection = document.getElementById('cart-form-section');
+            const clearBtn = document.getElementById('btn-clear-cart');
+            
+            statusSection.style.display = 'block';
+            formSection.style.display = 'none';
+            clearBtn.style.display = 'none';
+            
+            const statuses = [
+                { label: { en: 'Order Received', am: 'ትዕዛዝ ደርሷል' }, icon: '📋', time: 'Just now' },
+                { label: { en: 'Preparing', am: 'በመዘጋጀት ላይ' }, icon: '👨‍🍳', time: '~5 min' },
+                { label: { en: 'In the Oven', am: 'በምድጃ ውስጥ' }, icon: '🔥', time: '~10 min' },
+                { label: { en: 'Ready to Serve', am: 'ለማቅረብ ዝግጁ' }, icon: '✅', time: '~15 min' }
+            ];
+            
+            let currentStep = 0;
+            
+            function renderStatus() {
+                const tracker = document.getElementById('order-status-tracker');
+                tracker.innerHTML = statuses.map((status, index) => {
+                    let statusClass = 'pending';
+                    let iconClass = 'pending';
+                    if (index < currentStep) {
+                        statusClass = 'completed';
+                        iconClass = 'done';
+                    } else if (index === currentStep) {
+                        statusClass = 'current';
+                        iconClass = 'active-status';
+                    }
+                    return `
+                        <div class="status-step ${statusClass}">
+                            <div class="status-icon ${iconClass}">${index < currentStep ? '✓' : status.icon}</div>
+                            <div class="status-text">
+                                <h4>${status.label[currentLanguage]}</h4>
+                                <span>${index <= currentStep ? status.time : ''}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            renderStatus();
+            
+            if (orderStatusInterval) clearInterval(orderStatusInterval);
+            orderStatusInterval = setInterval(() => {
+                if (currentStep < statuses.length - 1) {
+                    currentStep++;
+                    renderStatus();
+                    if (currentStep === statuses.length - 1) {
+                        showToast(currentLanguage === 'am' ? 'ትዕዛዝዎ ዝግጁ ነው!' : 'Your order is ready!');
+                        setTimeout(() => {
+                            if (confirm(currentLanguage === 'am' ? 'ትሪዎን ያጸዳሉ?' : 'Clear your tray?')) {
+                                cart = [];
+                                updateCartBadge();
+                                renderCartView();
+                                const statusSection = document.getElementById('order-status-section');
+                                statusSection.style.display = 'none';
+                                if (orderStatusInterval) clearInterval(orderStatusInterval);
+                            }
+                        }, 2000);
+                    }
+                }
+            }, 5000); // Advance every 5 seconds (simulated)
+        }
+
+        // ==================== PAYMENT HANDLING ====================
+        function handlePayment(method) {
+            hapticFeedback('medium');
+            const messages = {
+                telebirr: { en: 'Opening Telebirr...', am: 'ቴሌብር በመክፈት ላይ...' },
+                cbe: { en: 'Opening CBE Birr...', am: 'ሲቢኢ ብር በመክፈት ላይ...' },
+                chapa: { en: 'Opening Chapa...', am: 'ቻፓ በመክፈት ላይ...' },
+                cash: { en: 'Pay with cash at counter', am: 'በጥሬ ገንዘብ ይክፈሉ' }
+            };
+            showToast(messages[method][currentLanguage]);
+            
+            // Simulate payment gateway redirect
+            const grandTotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+            const total = grandTotal * (1 + VAT_RATE + SERVICE_RATE);
+            
+            if (method === 'cash') {
+                showToast(currentLanguage === 'am' ? `እባክዎ Br ${total.toFixed(2)} በጠረጴዛው ይክፈሉ` : `Please pay Br ${total.toFixed(2)} at the counter`);
+            }
+        }
+
+        // ==================== INITIAL SETUP COMPLETE ====================
+        console.log('🍕 Pizza Hut Addis Ababa — Premium Interactive Menu Ready');
+        console.log('Features: Bilingual EN/AM, Haptic Feedback, Gyroscope Glass, Drag-to-Dismiss, Flying Animations, Split Bill, Order Tracking, VAT/Service, Dietary Badges, Inventory Management');
+    </script>
+</body>
+</html>
