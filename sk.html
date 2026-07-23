@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- 
+  ========================================================
+  PREMIUM DIGITAL MENU SYSTEM & RESTAURANT PORTFOLIO PITCH
+  Developer: Mohamed
+  Client Target: Pizza Hut Addis Ababa
+  Design System: Skeuomorphic / Physical Realism
+  Tech Stack: Vanilla JS, CSS3, HTML5
+  Features: Bilingual (EN/AM), Physical Gestures,
+  Cart Flying Animations, Dynamic Fasting System, Split Bill.
+  ========================================================
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Skeuomorphic Menu — Premium Pitch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* =========================================================
+           1. CSS ROOT & SKEUOMORPHIC VARIABLES
+           ========================================================= */
+        :root {
+            /* Physical Material Colors */
+            --leather-dark: #1a110a;
+            --leather-light: #2c1e14;
+            --paper-bg: #F5F2EB;
+            --paper-texture: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.05"/></svg>');
+            
+            --metal-light: #e6e6e6;
+            --metal-mid: #b3b3b3;
+            --metal-dark: #737373;
+
+            /* Brand Colors Mapped to Physical Ink/Plastic */
+            --primary-plastic: #d92534;
+            --primary-plastic-dark: #a11420;
+            --primary-ink: #9c1521;
+            
+            --accent-gold: #c29b4e;
+            --accent-gold-dark: #8c6a2c;
+            
+            --ink-main: #2b2b2b;
+            --ink-muted: #666666;
+
+            /* Typography */
+            --font-serif: 'Playfair Display', serif; /* Classic printed menu font */
+            --font-sans: 'Source Sans Pro', sans-serif;
+            
+            /* Shadows for 3D depth */
+            --shadow-drop-heavy: 0 10px 20px rgba(0,0,0,0.5), 0 4px 6px rgba(0,0,0,0.3);
+            --shadow-drop-light: 0 4px 8px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-inset-button: inset 0 1px 1px rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.3);
+            --shadow-pressed: inset 0 3px 6px rgba(0,0,0,0.6);
+            --shadow-engraved: 0 1px 1px rgba(255,255,255,0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            /* Dark Wood Table Background */
+            background: #110d0a;
+            background-image: 
+                repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 20px),
+                linear-gradient(45deg, #18120e 0%, #0d0906 100%);
+            font-family: var(--font-sans);
+            color: var(--ink-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* =========================================================
+           2. PHYSICAL PHONE FRAME & HARDWARE
+           ========================================================= */
+        .phone-wrapper {
+            width: 100%;
+            max-width: 412px;
+            height: 892px;
+            background-color: var(--paper-bg);
+            background-image: var(--paper-texture);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.9), 
+                0 0 0 4px var(--metal-light), 
+                0 0 0 12px #333,
+                inset 0 0 20px rgba(0,0,0,0.2);
+            border-radius: 44px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Hardware Screen Glare */
+        .screen-glare {
+            position: absolute;
+            top: 0; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%);
+            pointer-events: none;
+            z-index: 999;
+            transform: rotate(-15deg) translateY(-20%);
+        }
+
+        /* =========================================================
+           3. LEATHER HEADER & UTILITIES
+           ========================================================= */
+        .app-header {
+            padding: 24px 20px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, var(--leather-dark), var(--leather-light));
+            position: relative;
+            z-index: 20;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            /* Leather Stitching */
+            border-bottom: 3px solid #111;
+        }
+        
+        .app-header::after {
+            content: '';
+            position: absolute;
+            bottom: 4px; left: 10px; right: 10px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+        }
+        
+        .header-left .location-label {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; 
+            color: #a8947f; text-shadow: 0 -1px 0 #000; font-weight: 700;
+        }
+        .header-left .location-value {
+            font-size: 15px; font-weight: 700; color: var(--accent-gold); 
+            text-shadow: 0 -1px 0 #000, 0 1px 2px rgba(0,0,0,0.5);
+            display: flex; align-items: center; gap: 6px; margin-top: 4px;
+        }
+        .location-value i { color: var(--primary-plastic); }
+
+        /* Metallic Toggle Button */
+        .lang-switch-btn {
+            background: linear-gradient(to bottom, var(--metal-light), var(--metal-mid));
+            border: 1px solid var(--metal-dark);
+            color: #333;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: var(--shadow-inset-button), 0 2px 4px rgba(0,0,0,0.4);
+            text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+            transition: all 0.1s;
+        }
+        .lang-switch-btn:active {
+            background: linear-gradient(to bottom, var(--metal-mid), var(--metal-light));
+            box-shadow: var(--shadow-pressed);
+            transform: translateY(1px);
+        }
+
+        .utility-bar {
+            display: flex; align-items: center; justify-content: space-between; padding: 12px 20px;
+            background: #d6d0c4;
+            border-bottom: 1px solid #b5ae9f;
+            border-top: 1px solid #fff;
+            gap: 12px; z-index: 19; position: relative;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        /* Physical Engraved Input */
+        .search-container { flex: 1; position: relative; }
+        .search-container i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); font-size: 12px; }
+        .search-input {
+            width: 100%; background: #e8e3d8; border: 1px solid #c2bba8; border-top-color: #9c9583;
+            color: var(--ink-main); padding: 8px 12px 8px 34px; border-radius: 20px; 
+            font-family: var(--font-sans); font-size: 14px; font-weight: 600; outline: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.8);
+        }
+        .search-input:focus { background: #fff; }
+
+        /* Physical Plastic Toggle Switch */
+        .fasting-toggle-container { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--ink-main); text-transform: uppercase; text-shadow: var(--shadow-engraved); }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #a3a3a3; border: 1px solid #808080; border-top-color:#666; border-radius: 24px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.6); transition: .3s; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background: linear-gradient(to bottom, #fff, #e0e0e0); border: 1px solid #999; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: .3s; }
+        input:checked + .slider { background-color: var(--primary-plastic-dark); border-color: #7a0c16; box-shadow: inset 0 2px 5px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.6); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* =========================================================
+           4. PAPER VIEWPORT & CATEGORY TABS
+           ========================================================= */
+        .view-container {
+            flex: 1; overflow-y: auto; padding: 16px 20px 90px; scrollbar-width: none; position: relative; z-index: 10;
+        }
+        .view-container::-webkit-scrollbar { display: none; }
+        
+        .app-view { display: none; animation: paperUnfold 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: top center; }
+        .app-view.active { display: block; }
+        @keyframes paperUnfold { from { opacity: 0; transform: scaleY(0.95) translateY(10px); } to { opacity: 1; transform: scaleY(1) translateY(0); } }
+
+        .display-title { font-family: var(--font-serif); font-weight: 700; font-style: italic; color: var(--ink-main); line-height: 1.1; }
+        
+        /* Physical Manilla Folder Tabs */
+        .category-scroll-container {
+            width: 100%; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; position: sticky; top: -16px; background: inherit; z-index: 15; padding: 16px 0 8px; touch-action: pan-x; border-bottom: 2px solid #dcd4c3; margin-bottom: 16px;
+        }
+        .category-scroll-container::-webkit-scrollbar { display: none; }
+        .category-scroll { display: flex; gap: 4px; width: max-content; padding-left: 2px; }
+
+        .cat-pill {
+            background: linear-gradient(to bottom, #e6ded0, #d1c8b4);
+            padding: 10px 18px; border-radius: 8px 8px 0 0; cursor: pointer;
+            font-size: 13px; font-weight: 700; text-transform: uppercase;
+            color: #756a59; border: 1px solid #bba37f; border-bottom: none;
+            box-shadow: inset 0 1px 1px rgba(255,255,255,0.7);
+            position: relative; top: 2px; transition: top 0.2s;
+        }
+        .cat-pill.active {
+            background: linear-gradient(to bottom, #fffdf8, #f5f2eb);
+            color: var(--primary-ink);
+            border-color: #dcd4c3;
+            top: 0;
+            padding-bottom: 12px; /* overlap border */
+            box-shadow: 0 -3px 6px rgba(0,0,0,0.05);
+        }
+
+        /* =========================================================
+           5. PRODUCT GRID & POLAROID CARDS
+           ========================================================= */
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        
+        .product-card {
+            background: #ffffff;
+            border: 1px solid #e0d9cc;
+            padding: 6px 6px 12px;
+            cursor: pointer;
+            display: flex; flex-direction: column;
+            box-shadow: var(--shadow-drop-light);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            position: relative;
+        }
+        /* Masking tape effect */
+        .product-card::before {
+            content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%) rotate(-2deg);
+            width: 40px; height: 16px; background: rgba(230, 225, 210, 0.8);
+            border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 1px 2px rgba(0,0,0,0.1); z-index: 5;
+        }
+        
+        .product-card.out-of-stock { filter: sepia(0.5) grayscale(0.8); pointer-events: none; }
+        .product-card.out-of-stock::after {
+            content: 'SOLD OUT'; position: absolute; top: 40%; left: 0; right: 0; text-align: center;
+            background: var(--primary-plastic); color: white; font-weight: 900; font-size: 16px;
+            padding: 8px 0; transform: rotate(-10deg); border: 2px dashed white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10; text-shadow: 0 2px 2px rgba(0,0,0,0.4);
+        }
+        
+        .product-card:active { transform: scale(0.97) rotate(1deg); box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
+        
+        /* Inner physical inset for image */
+        .img-wrapper { 
+            position: relative; width: 100%; height: 120px; 
+            border: 1px solid #d1c8b4; box-shadow: inset 0 2px 6px rgba(0,0,0,0.2); 
+            background: #e8e3d8; overflow: hidden; margin-bottom: 10px;
+        }
+        .product-card img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .dietary-badges { position: absolute; top: 6px; left: 6px; display: flex; gap: 4px; z-index: 2; }
+        .badge-icon { background: #fff; border: 1px solid #ccc; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        
+        .product-info { display: flex; flex-direction: column; flex: 1; justify-content: space-between; padding: 0 4px; }
+        .product-info h4 { font-family: var(--font-serif); font-size: 15px; font-weight: 700; color: var(--ink-main); margin-bottom: 4px; line-height: 1.1; }
+        .product-info p { font-size: 11px; color: var(--ink-muted); margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; font-weight: 600; }
+        
+        .product-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px dashed #d1c8b4; padding-top: 8px; }
+        .product-price { font-size: 14px; font-weight: 800; color: var(--primary-ink); }
+        .add-icon-btn { color: #5cb85c; font-size: 20px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); background: #fff; border-radius: 50%; border: 1px solid #4cae4c; }
+
+        /* =========================================================
+           6. PHYSICAL RECEIPT & CART VIEW
+           ========================================================= */
+        .receipt-card {
+            background: #fff; border: 1px solid #e0d9cc;
+            padding: 16px; margin-bottom: 16px; position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
+            /* Jagged receipt edge effect */
+            background-image: linear-gradient(#fff 50%, #fff 50%);
+        }
+        .receipt-card::after {
+            content: ""; position: absolute; bottom: -6px; left: 0; right: 0; height: 6px;
+            background-image: radial-gradient(circle at 6px 0, transparent 6px, #fff 7px);
+            background-size: 12px 10px; background-repeat: repeat-x; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+        }
+        
+        .table-input-field, .instructions-textarea, .split-input {
+            background: #fdfbf7; border: 1px inset #d1c8b4; color: var(--ink-main);
+            padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; font-size: 14px; outline: none; width: 100%;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); font-weight: 700;
+        }
+
+        .cart-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px dashed #d1c8b4; }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item img { width: 50px; height: 50px; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .cart-item-info { flex: 1; }
+        .cart-item-title { font-family: var(--font-serif); font-size: 14px; font-weight: 700; color: var(--ink-main); }
+        .cart-item-meta { font-size: 12px; color: var(--ink-muted); font-family: 'Courier New', monospace; }
+        
+        /* Mechanical Quantity Spinner */
+        .qty-selector { display: flex; align-items: center; gap: 10px; background: linear-gradient(#e6e6e6, #cccccc); border: 1px solid #999; padding: 4px 8px; border-radius: 4px; box-shadow: var(--shadow-inset-button), 0 2px 4px rgba(0,0,0,0.15); }
+        .qty-btn { background: linear-gradient(#fff, #e6e6e6); border: 1px solid #b3b3b3; color: #333; width: 24px; height: 24px; border-radius: 2px; font-size: 16px; cursor: pointer; font-weight: 900; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .qty-btn:active { background: #d9d9d9; box-shadow: var(--shadow-pressed); }
+        
+        .summary-row { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 13px; margin-bottom: 8px; color: var(--ink-muted); font-weight: 600;}
+        .summary-row.total { border-top: 2px solid var(--ink-main); padding-top: 10px; font-weight: 900; color: var(--ink-main); font-size: 16px; margin-top: 6px; font-family: var(--font-sans);}
+        
+        /* Split Bill Feature */
+        .split-bill-container { margin-top: 12px; display: none; background: #f4efdf; padding: 10px; border: 1px solid #d1c8b4; }
+        .split-bill-container.active { display: flex; justify-content: space-between; align-items: center; }
+
+        /* Payment Buttons - Physical Plastic Look */
+        .payment-gateways { display: flex; gap: 12px; margin-top: 16px; }
+        .pay-btn { 
+            flex: 1; padding: 12px; border-radius: 6px; font-weight: 800; font-size: 13px; text-align: center; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center; gap: 8px; color: #fff;
+            text-shadow: 0 -1px 1px rgba(0,0,0,0.5); border: 1px solid rgba(0,0,0,0.6);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 6px rgba(0,0,0,0.2); transition: all 0.1s;
+        }
+        .pay-btn:active { box-shadow: inset 0 3px 6px rgba(0,0,0,0.4); transform: translateY(2px); }
+        .pay-telebirr { background: linear-gradient(to bottom, #00c6ff, #0072ff); }
+        .pay-cbe { background: linear-gradient(to bottom, #6a40a8, #3b1b6e); }
+
+        /* General Primary Button (Big Red Physical Button) */
+        .btn-primary {
+            background: linear-gradient(to bottom, #f24e5d, var(--primary-plastic-dark));
+            color: #FFF; border: 1px solid #730000; border-radius: 8px;
+            padding: 16px; width: 100%; font-family: var(--font-sans); font-size: 15px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 10px rgba(161, 20, 32, 0.3), 0 2px 4px rgba(0,0,0,0.4);
+            text-shadow: 0 -1px 2px rgba(0,0,0,0.6); transition: all 0.1s;
+        }
+        .btn-primary:active { transform: translateY(4px); box-shadow: inset 0 4px 8px rgba(0,0,0,0.6), 0 1px 2px rgba(0,0,0,0.4); background: linear-gradient(to bottom, var(--primary-plastic-dark), #730000); }
+
+        /* =========================================================
+           7. MODAL (CLIPBOARD SHEET)
+           ========================================================= */
+        .modal-overlay {
+            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.7);
+            z-index: 200; display: none; align-items: flex-end; touch-action: none;
+        }
+        .modal-sheet {
+            width: 100%; background: var(--paper-bg); background-image: var(--paper-texture);
+            border-top: 8px solid var(--metal-mid); border-top-left-radius: 12px; border-top-right-radius: 12px;
+            padding: 24px; max-height: 90%; overflow-y: auto; position: relative; 
+            box-shadow: 0 -15px 40px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.8);
+            transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1);
+        }
+        .modal-sheet.open { transform: translateY(0); }
+        
+        /* Clipboard clip mechanism at top */
+        .drag-handle { 
+            width: 80px; height: 24px; background: linear-gradient(to bottom, #f2f2f2, #b3b3b3); 
+            border: 1px solid #808080; border-radius: 4px; margin: -30px auto 20px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4), inset 0 1px 0 #fff;
+            position: relative; display: flex; justify-content: center; align-items: center;
+        }
+        .drag-handle::after { content: ''; width: 60%; height: 2px; background: #666; box-shadow: 0 4px 0 #666, 0 8px 0 #666; }
+        
+        .options-group-title { font-family: var(--font-serif); font-size: 16px; font-style: italic; color: var(--primary-ink); font-weight: 700; margin-bottom: 12px; margin-top: 16px; border-bottom: 1px solid #d1c8b4; padding-bottom: 4px; }
+        .selector-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        
+        /* Segmented Metallic/Plastic Controls */
+        .selector-btn {
+            flex: 1; min-width: 30%; background: linear-gradient(to bottom, #f9f9f9, #e0e0e0); border: 1px solid #b3b3b3; color: var(--ink-main);
+            padding: 12px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 800; text-align: center;
+            box-shadow: inset 0 1px 0 #fff, 0 2px 4px rgba(0,0,0,0.1); text-shadow: 0 1px 0 #fff;
+        }
+        .selector-btn.active { 
+            background: linear-gradient(to bottom, #e0e0e0, #c2c2c2); border-color: #808080; 
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3); color: var(--primary-ink); text-shadow: none;
+        }
+
+        /* =========================================================
+           8. FLYING ANIMATION & LIVE TRACKER
+           ========================================================= */
+        .flying-item {
+            position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 3px solid #fff; object-fit: cover;
+            z-index: 9999; pointer-events: none; opacity: 1; transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.6);
+        }
+
+        .tracker-container { text-align: center; padding: 20px; background: #fff; border: 1px solid #e0d9cc; box-shadow: var(--shadow-drop-light); margin-top: 20px; }
+        .pulse-ring { width: 80px; height: 80px; background: #fdfbf7; border: 4px solid var(--primary-plastic); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: inset 0 4px 8px rgba(0,0,0,0.2), 0 4px 10px rgba(0,0,0,0.1); }
+        .pulse-ring i { font-size: 32px; color: var(--primary-plastic-dark); text-shadow: 0 2px 2px rgba(0,0,0,0.2); }
+
+        .timeline { margin-top: 30px; text-align: left; position: relative; padding-left: 24px; border-left: 4px solid #e0d9cc; }
+        .timeline-step { margin-bottom: 24px; position: relative; color: var(--ink-muted); font-weight: 600; }
+        .timeline-step::before { content: ''; position: absolute; left: -34px; top: 0; width: 16px; height: 16px; border-radius: 50%; background: #e0d9cc; border: 4px solid #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .timeline-step.active { color: var(--ink-main); font-weight: 800; }
+        .timeline-step.active::before { background: #5cb85c; }
+
+        /* =========================================================
+           9. LEATHER BOTTOM NAVIGATION
+           ========================================================= */
+        .bottom-nav {
+            position: absolute; bottom: 0; left: 0; width: 100%; 
+            background: linear-gradient(to bottom, var(--leather-light), var(--leather-dark));
+            border-top: 3px solid #111; display: flex; justify-content: space-around; padding: 12px 10px 24px; z-index: 100;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
+        }
+        /* Stitching */
+        .bottom-nav::before {
+            content: ''; position: absolute; top: 4px; left: 10px; right: 10px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.15); pointer-events: none;
+        }
+
+        .liquid-nav-pill {
+            position: absolute; top: 8px; left: 0; height: 50px; 
+            background: linear-gradient(to bottom, #4d3624, #2c1e14); 
+            border: 1px solid #111; border-top-color: #6a4a31;
+            border-radius: 8px; z-index: 1; transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 6px rgba(0,0,0,0.5);
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #8c7a6b; font-size: 11px; font-weight: 800; text-transform: uppercase; gap: 4px; padding: 8px 24px; z-index: 2; cursor: pointer; position: relative; text-shadow: 0 -1px 0 #000; transition: color 0.2s; }
+        .nav-item i { font-size: 18px; margin-bottom: 2px; }
+        .nav-item.active { color: var(--accent-gold); }
+        
+        /* Notification Badge - Red Plastic Bead */
+        .badge { position: absolute; top: 2px; right: 20px; background: radial-gradient(circle at 30% 30%, #ff6b6b, var(--primary-plastic-dark)); color: #FFF; font-size: 10px; padding: 2px 6px; border-radius: 12px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.6); border: 1px solid #730000; text-shadow: 0 -1px 1px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+    <!-- Hidden audio element for Haptic/Sound feedback -->
+    <audio id="audio-pop" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAAE=" preload="auto"></audio>
+
+    <div class="phone-wrapper" id="phone-wrapper">
+        <div class="screen-glare"></div>
+
+        <!-- Leather Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <p class="location-label" id="t-location-label">Addis Ababa Branch</p>
+                <div class="location-value">
+                    <i class="fa-solid fa-location-dot"></i> 
+                    <select id="branch-select" style="background:transparent; border:none; color:inherit; font-weight:inherit; font-size:inherit; outline:none; cursor:pointer; text-shadow: inherit;">
+                        <option value="Bole Road" style="background:#2c1e14; color:#c29b4e;">Bole Road</option>
+                        <option value="Bethel Square" style="background:#2c1e14; color:#c29b4e;">Bethel Square</option>
+                        <option value="CMC" style="background:#2c1e14; color:#c29b4e;">CMC Branch</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Metallic Bilingual Toggle -->
+            <button class="lang-switch-btn" onclick="toggleLanguage()" id="lang-btn">EN / AM</button>
+        </header>
+        
+        <!-- Physical Utility Bar -->
+        <div class="utility-bar">
+            <div class="search-container">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" class="search-input" id="menu-search" placeholder="Search menu...">
+            </div>
+            <div class="fasting-toggle-container">
+                <span id="t-fasting-toggle">Fasting</span>
+                <label class="switch">
+                    <input type="checkbox" id="fasting-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Paper Viewport container -->
+        <main class="view-container">
+            
+            <!-- VIEW 1: HOME/MENU -->
+            <div id="view-home" class="app-view active">
+                <h1 class="display-title" style="font-size: 32px; margin-top: 4px;" id="t-explore-menu">Explore Our <br><span style="color:var(--primary-ink)">Delicious Menu</span></h1>
+                
+                <div class="category-scroll-container">
+                    <div class="category-scroll" id="categories-bar"></div>
+                </div>
+
+                <h2 style="font-family: var(--font-sans); color: var(--ink-muted); font-size: 16px; text-transform: uppercase; margin: 0 0 16px; letter-spacing: 1px; font-weight: 800; border-bottom: 2px dotted #d1c8b4; padding-bottom: 4px;" id="current-category-title">Veg Pizza</h2>
+
+                <div class="product-grid" id="products-target-grid"></div>
+            </div>
+
+            <!-- VIEW 2: CART -->
+            <div id="view-cart" class="app-view">
+                <h1 class="display-title" style="font-size: 28px; margin-bottom:16px; border-bottom: 2px solid var(--ink-main); padding-bottom: 8px;" id="t-your-tray">Customer Check</h1>
+                
+                <div class="receipt-card">
+                    <div style="font-size: 13px; font-weight: 800; color: var(--ink-muted); margin-bottom:8px; text-transform: uppercase;"><i class="fa-solid fa-chair"></i> <span id="t-table-num">Table Number</span></div>
+                    <input type="text" id="table-number-input" class="table-input-field" placeholder="e.g. 05" value="01">
+                </div>
+                
+                <div id="cart-items-root" style="margin-bottom: 16px; padding: 0 16px;"></div>
+
+                <div class="receipt-card" id="instructions-card">
+                    <textarea id="extra-instructions-input" class="instructions-textarea" placeholder="Extra Kitchen Instructions..." rows="2"></textarea>
+                </div>
+
+                <div class="receipt-card" id="cart-summary-block">
+                    <div class="summary-row"><span>Subtotal</span><span id="summary-sub">Br 0.00</span></div>
+                    <div class="summary-row"><span>VAT (15%)</span><span id="summary-vat">Br 0.00</span></div>
+                    <div class="summary-row"><span>Service (10%)</span><span id="summary-service">Br 0.00</span></div>
+                    
+                    <!-- Split Bill Feature -->
+                    <div style="margin-top: 12px; border-top: 1px dashed #d1c8b4; padding-top: 12px;">
+                        <label style="font-size: 13px; display:flex; align-items:center; gap:8px; font-weight: 700;">
+                            <input type="checkbox" id="split-toggle" onchange="toggleSplitBill()" style="width:16px; height:16px; accent-color: var(--primary-plastic);"> 
+                            <span id="t-split-bill">Split the Bill?</span>
+                        </label>
+                        <div class="split-bill-container" id="split-ui">
+                            <span style="font-size: 13px; font-weight: 700;">Ways:</span>
+                            <input type="number" id="split-ways" class="split-input" style="width: 60px;" value="2" min="2" max="10" onchange="renderCartView()">
+                            <span id="split-amount" style="font-size: 16px; font-weight: 900; color: var(--primary-ink);">Br 0.00 /ea</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-row total"><span id="t-total">Grand Total</span><span id="summary-total">Br 0.00</span></div>
+                </div>
+
+                <button class="btn-primary" id="checkout-btn" onclick="processOrder()">
+                    <i class="fa-solid fa-bell-concierge"></i> <span id="t-send-kitchen">Send Order to Kitchen</span>
+                </button>
+
+                <!-- Payment Gateways -->
+                <div class="payment-gateways">
+                    <button class="pay-btn pay-telebirr"><i class="fa-solid fa-mobile-screen"></i> Telebirr</button>
+                    <button class="pay-btn pay-cbe"><i class="fa-solid fa-building-columns"></i> CBE Birr</button>
+                </div>
+            </div>
+
+            <!-- VIEW 3: LIVE TRACKER -->
+            <div id="view-tracker" class="app-view">
+                <h1 class="display-title" style="font-size: 28px; text-align: center;" id="t-order-status">Order Ticket</h1>
+                <div class="tracker-container">
+                    <div class="pulse-ring"><i class="fa-solid fa-fire-burner"></i></div>
+                    <h3 id="tracker-title" style="font-family: var(--font-serif); font-size: 22px;">Ticket Sent!</h3>
+                    <p style="font-size: 13px; color: var(--ink-muted); margin-top:5px; font-weight: 700;">Est. Time: 25 mins</p>
+                    
+                    <div class="timeline">
+                        <div class="timeline-step active" id="step-1">Ticket Printed</div>
+                        <div class="timeline-step" id="step-2">Preparing in Oven</div>
+                        <div class="timeline-step" id="step-3">Ready at Counter</div>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="navigateTo('home')" style="background: linear-gradient(to bottom, #f0f0f0, #d9d9d9); color: var(--ink-main); border-color:#999; text-shadow: 0 1px 0 #fff;"><span id="t-new-order">Start New Ticket</span></button>
+            </div>
+        </main>
+
+        <!-- Product Customizer Clipboard Modal -->
+        <div class="modal-overlay" id="product-modal">
+            <div class="modal-sheet" id="modal-sheet">
+                <div class="drag-handle"></div>
+                
+                <div style="border: 4px solid #fff; box-shadow: var(--shadow-drop-light); margin-bottom: 20px; background: #fff; padding: 4px;">
+                    <img src="" id="modal-item-img" style="width:100%; height:180px; object-fit:cover;">
+                </div>
+                <h3 class="display-title" id="modal-item-name" style="font-size: 26px;">Item</h3>
+                <p id="modal-item-desc" style="font-size:14px; color:var(--ink-muted); margin-bottom:16px; font-weight: 600;">Desc</p>
+                
+                <div id="pizza-options-container"></div>
+                
+                <!-- Extras / Customizer -->
+                <div id="extras-container" style="display:none; margin-top:16px;">
+                    <div class="options-group-title" id="t-extras">Crust & Extras</div>
+                    <div class="selector-row">
+                        <div class="selector-btn active crust-btn" onclick="setCrust('classic', this)">Classic</div>
+                        <div class="selector-btn crust-btn" onclick="setCrust('stuffed', this)">Stuffed (+Br 150)</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px; border-top: 2px dotted #d1c8b4; padding-top:20px;">
+                    <div class="qty-selector">
+                        <button class="qty-btn" onclick="mutateModalQuantity(-1)">-</button>
+                        <span id="modal-qty-display" style="font-weight:900; font-size:16px; min-width:16px; text-align:center; font-family: 'Courier New', monospace;">1</span>
+                        <button class="qty-btn" onclick="mutateModalQuantity(1)">+</button>
+                    </div>
+                    <button class="btn-primary" style="margin:0; width:auto; flex:1; margin-left:16px; padding: 12px;" onclick="addModalItemToCart(event)">
+                        <span id="t-add-btn">Add</span> — Br <span id="modal-total-price-display">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Leather Navigation -->
+        <nav class="bottom-nav">
+            <div class="liquid-nav-pill" id="liquid-pill"></div>
+            <div class="nav-item active" id="nav-home" onclick="navigateTo('home')">
+                <i class="fa-solid fa-book-open"></i>
+                <span id="t-nav-menu">Menu</span>
+            </div>
+            <div class="nav-item" id="nav-cart" onclick="navigateTo('cart')">
+                <i class="fa-solid fa-receipt"></i>
+                <span id="t-nav-tray">Check</span>
+                <span class="badge" id="cart-badge-count" style="display:none;">0</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- =========================================================
+         JAVASCRIPT LOGIC & DATABASE
+         ========================================================= -->
+    <script>
+        // --- TRANSLATION DICTIONARY (Bilingual System) ---
+        const TRANSLATIONS = {
+            en: {
+                locationLabel: "Addis Ababa Branch",
+                exploreMenu: "Explore Our <br><span style='color:var(--primary-ink)'>Delicious Menu</span>",
+                fastingToggle: "Fasting",
+                searchPlaceholder: "Search menu...",
+                yourTray: "Customer Check",
+                tableNum: "Table Number",
+                splitBill: "Split the Bill?",
+                total: "Grand Total",
+                sendKitchen: "Send Order to Kitchen",
+                orderStatus: "Order Ticket",
+                newOrder: "Start New Ticket",
+                extras: "Crust & Extras",
+                addBtn: "Add",
+                navMenu: "Menu",
+                navTray: "Check"
+            },
+            am: {
+                locationLabel: "አዲስ አበባ ቅርንጫፍ",
+                exploreMenu: "ጣፋጭ ምግባችንን <br><span style='color:var(--primary-ink)'>ይመርምሩ</span>",
+                fastingToggle: "የጾም",
+                searchPlaceholder: "ምናሌ ይፈልጉ...",
+                yourTray: "ትሪዎ",
+                tableNum: "የጠረጴዛ ቁጥር",
+                splitBill: "ሒሳብ ማካፈል?",
+                total: "አጠቃላይ ድምር",
+                sendKitchen: "ወደ ኩሽና ላክ",
+                orderStatus: "የትዕዛዝ ሁኔታ",
+                newOrder: "አዲስ ትዕዛዝ ጀምር",
+                extras: "ክረስት እና ተጨማሪ",
+                addBtn: "አክል",
+                navMenu: "ምናሌ",
+                navTray: "ትሪ"
+            }
+        };
+
+        // --- MENU DATABASE WITH INVENTORY & DIETARY DATA ---
+        const MENU_DATA = {
+            "veg-pizza": {
+                title: { en: "Veg Pizza", am: "የአትክልት ፒዛ" },
+                items: [
+                    { id: "v1", name: { en: "MARGHERITA PIZZA", am: "ማርጋሪታ ፒዛ" }, desc: "Tomato Sauce, Mozzarella Cheese", prices: { small: 495, medium: 770, large: 1120 }, img: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=400&q=80", type: "pizza", badges: ['🌱'], inStock: true },
+                    { id: "v2", name: { en: "HOT & SPICY VEG", am: "ትኩስ አትክልት" }, desc: "Tomato Sauce, Mozzarella, Green Chilli", prices: { small: 550, medium: 875, large: 1315 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=400&q=80", type: "pizza", badges: ['🌱', '🌶️'], inStock: true },
+                    { id: "v3", name: { en: "MUSHROOM LOVERS", am: "የእንጉዳይ ፒዛ" }, desc: "Tomato Sauce, Mozzarella, Mushroom", prices: { small: 585, medium: 940, large: 1245 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?auto=format&fit=crop&w=400&q=80", type: "pizza", badges: ['🌱'], inStock: false } 
+                ]
+            },
+            "meat-pizza": {
+                title: { en: "Meat Pizza", am: "የስጋ ፒዛ" },
+                items: [
+                    { id: "m1", name: { en: "PEPPERONI LOVERS", am: "ፔፐሮኒ ፒዛ" }, desc: "Tomato Sauce, Mozzarella Cheese, Pepperoni", prices: { small: 685, medium: 965, large: 1410 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=400&q=80", type: "pizza", badges: [], inStock: true },
+                    { id: "m2", name: { en: "SUPER SUPREME", am: "ሱፐር ሱፕሪም" }, desc: "Beef, Pepperoni, Chicken, Olives", prices: { small: 795, medium: 1200, large: 1535 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80", type: "pizza", badges: [], inStock: true }
+                ]
+            },
+            "fasting-pizza": {
+                title: { en: "Fasting Pizza", am: "የጾም ፒዛ" },
+                items: [
+                    { id: "f1", name: { en: "TUNA PIZZA", am: "ቱና ፒዛ" }, desc: "Fasting Sauce, Tuna, Onion", prices: { small: 540, medium: 740, large: 1165 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=400&q=80", type: "pizza", badges: ['✝️'], inStock: true },
+                    { id: "f2", name: { en: "VEGGIE BLAST", am: "የአትክልት ብላስት" }, desc: "Fasting Sauce, Pineapple, Mushroom", prices: { small: 480, medium: 795, large: 1100 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=400&q=80", type: "pizza", badges: ['✝️', '🌱'], inStock: true }
+                ]
+            }
+        };
+
+        // --- STATE VARIABLES ---
+        let currentLang = 'en';
+        let currentCategoryKey = "veg-pizza";
+        let activeModalItem = null;
+        let selectedSize = 'medium';
+        let selectedCrust = 'classic';
+        let crustPrice = 0;
+        let modalQuantity = 1;
+        let cart = [];
+        
+        // --- INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', () => {
+            checkDynamicFastingSchedule();
+            applyLanguage();
+            renderCategoryBar();
+            renderProducts(currentCategoryKey);
+            updateLiquidNavPill(document.getElementById('nav-home'), false);
+            setupDragToDismiss();
+
+            document.getElementById('menu-search').addEventListener('input', (e) => filterProductsBySearch(e.target.value.toLowerCase().trim()));
+            
+            document.getElementById('fasting-toggle').addEventListener('change', (e) => {
+                playHaptic();
+                selectCategory(e.target.checked ? 'fasting-pizza' : 'veg-pizza');
+            });
+        });
+
+        // --- FEATURES ---
+
+        function checkDynamicFastingSchedule() {
+            const day = new Date().getDay();
+            if(day === 3 || day === 5) {
+                document.getElementById('fasting-toggle').checked = true;
+                currentCategoryKey = 'fasting-pizza';
+            }
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'am' : 'en';
+            playHaptic();
+            applyLanguage();
+            renderCategoryBar();
+            renderProducts(currentCategoryKey);
+            if(cart.length > 0) renderCartView();
+        }
+
+        function applyLanguage() {
+            const dict = TRANSLATIONS[currentLang];
+            document.getElementById('t-location-label').innerText = dict.locationLabel;
+            document.getElementById('t-explore-menu').innerHTML = dict.exploreMenu;
+            document.getElementById('t-fasting-toggle').innerText = dict.fastingToggle;
+            document.getElementById('menu-search').placeholder = dict.searchPlaceholder;
+            document.getElementById('t-your-tray').innerText = dict.yourTray;
+            document.getElementById('t-table-num').innerText = dict.tableNum;
+            document.getElementById('t-split-bill').innerText = dict.splitBill;
+            document.getElementById('t-total').innerText = dict.total;
+            document.getElementById('t-send-kitchen').innerText = dict.sendKitchen;
+            document.getElementById('t-order-status').innerText = dict.orderStatus;
+            document.getElementById('t-new-order').innerText = dict.newOrder;
+            document.getElementById('t-extras').innerText = dict.extras;
+            document.getElementById('t-add-btn').innerText = dict.addBtn;
+            document.getElementById('t-nav-menu').innerText = dict.navMenu;
+            document.getElementById('t-nav-tray').innerText = dict.navTray;
+        }
+
+        function setupDragToDismiss() {
+            let startY = 0; let currentY = 0; let isDragging = false;
+            const sheet = document.getElementById('modal-sheet');
+            
+            sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; isDragging = true; sheet.style.transition = 'none'; }, {passive:true});
+            sheet.addEventListener('touchmove', e => {
+                if(!isDragging) return;
+                currentY = e.touches[0].clientY;
+                const delta = currentY - startY;
+                if(delta > 0) sheet.style.transform = `translateY(${delta}px)`;
+            }, {passive:true});
+            sheet.addEventListener('touchend', e => {
+                isDragging = false;
+                sheet.style.transition = 'transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1)';
+                if(currentY - startY > 150) closeProductModal();
+                else sheet.style.transform = 'translateY(0)';
+            });
+        }
+
+        function playHaptic() {
+            if (navigator.vibrate) navigator.vibrate(30);
+            try {
+                const audio = document.getElementById('audio-pop');
+                audio.currentTime = 0; audio.play().catch(()=>{});
+            } catch(e) {}
+        }
+
+        // --- RENDERERS ---
+
+        function renderCategoryBar() {
+            const container = document.getElementById('categories-bar');
+            let html = '';
+            Object.keys(MENU_DATA).forEach(key => {
+                const activeClass = key === currentCategoryKey ? 'active' : '';
+                html += `<div class="cat-pill ${activeClass}" id="cat-btn-${key}" onclick="selectCategory('${key}')">${MENU_DATA[key].title[currentLang]}</div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function selectCategory(key) {
+            playHaptic();
+            currentCategoryKey = key;
+            document.querySelectorAll('.cat-pill').forEach(el => el.classList.remove('active'));
+            document.getElementById(`cat-btn-${key}`).classList.add('active');
+            document.getElementById('current-category-title').innerText = MENU_DATA[key].title[currentLang];
+            renderProducts(key);
+        }
+
+        function renderProducts(key) {
+            const grid = document.getElementById('products-target-grid');
+            const category = MENU_DATA[key];
+            if(!category) return;
+
+            grid.innerHTML = category.items.map(item => {
+                const price = `Br ${item.prices.medium}`;
+                const badgesHtml = item.badges.map(b => `<div class="badge-icon">${b}</div>`).join('');
+                const cssClass = item.inStock ? 'product-card' : 'product-card out-of-stock';
+                
+                return `
+                    <div class="${cssClass}" onclick="if(${item.inStock}) openProductModal('${key}', '${item.id}')">
+                        <div class="img-wrapper">
+                            <div class="dietary-badges">${badgesHtml}</div>
+                            <img src="${item.img}" alt="${item.name[currentLang]}" loading="lazy">
+                        </div>
+                        <div class="product-info">
+                            <h4>${item.name[currentLang]}</h4>
+                            <p>${item.desc}</p>
+                            <div class="product-price-row">
+                                <span class="product-price">${price}</span>
+                                <i class="fa-solid fa-circle-plus add-icon-btn"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- MODAL & CUSTOMIZER ---
+
+        function openProductModal(catKey, itemId) {
+            playHaptic();
+            const item = MENU_DATA[catKey].items.find(i => i.id === itemId);
+            if(!item) return;
+
+            activeModalItem = item;
+            modalQuantity = 1; selectedSize = 'medium'; selectedCrust = 'classic'; crustPrice = 0;
+
+            document.getElementById('modal-item-name').innerText = item.name[currentLang];
+            document.getElementById('modal-item-img').src = item.img;
+            document.getElementById('modal-item-desc').innerText = item.desc;
+            document.getElementById('modal-qty-display').innerText = modalQuantity;
+            
+            document.querySelectorAll('.crust-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.crust-btn').classList.add('active');
+
+            const optionsContainer = document.getElementById('pizza-options-container');
+            const extrasContainer = document.getElementById('extras-container');
+            
+            if(item.type === 'pizza') {
+                optionsContainer.innerHTML = `
+                    <div class="options-group-title">Select Size</div>
+                    <div class="selector-row">
+                        <div class="selector-btn" id="size-small" onclick="setSize('small')">Small<br>Br ${item.prices.small}</div>
+                        <div class="selector-btn active" id="size-medium" onclick="setSize('medium')">Medium<br>Br ${item.prices.medium}</div>
+                        <div class="selector-btn" id="size-large" onclick="setSize('large')">Large<br>Br ${item.prices.large}</div>
+                    </div>
+                `;
+                extrasContainer.style.display = 'block';
+            } else {
+                optionsContainer.innerHTML = '';
+                extrasContainer.style.display = 'none';
+            }
+
+            updateModalPrice();
+            const modal = document.getElementById('product-modal');
+            const sheet = document.getElementById('modal-sheet');
+            modal.style.display = 'flex';
+            setTimeout(() => sheet.classList.add('open'), 10);
+        }
+
+        function closeProductModal() {
+            const sheet = document.getElementById('modal-sheet');
+            sheet.classList.remove('open');
+            setTimeout(() => document.getElementById('product-modal').style.display = 'none', 350);
+        }
+
+        function setSize(size) { playHaptic(); selectedSize = size; document.querySelectorAll('[id^="size-"]').forEach(b => b.classList.remove('active')); document.getElementById(`size-${size}`).classList.add('active'); updateModalPrice(); }
+        function setCrust(type, el) { playHaptic(); selectedCrust = type; crustPrice = type === 'stuffed' ? 150 : 0; document.querySelectorAll('.crust-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); updateModalPrice(); }
+        function mutateModalQuantity(delta) { if(modalQuantity + delta >= 1) { playHaptic(); modalQuantity += delta; document.getElementById('modal-qty-display').innerText = modalQuantity; updateModalPrice(); } }
+
+        function updateModalPrice() {
+            const unit = activeModalItem.prices[selectedSize] + crustPrice;
+            document.getElementById('modal-total-price-display').innerText = (unit * modalQuantity).toFixed(2);
+        }
+
+        function addModalItemToCart(event) {
+            playHaptic();
+            const unitPrice = activeModalItem.prices[selectedSize] + crustPrice;
+            const crustLabel = selectedCrust === 'stuffed' ? ' (Stuffed)' : '';
+            const cartItem = {
+                id: activeModalItem.id + `-${selectedSize}-${selectedCrust}`,
+                name: activeModalItem.name,
+                size: selectedSize,
+                crustLabel: crustLabel,
+                unitPrice: unitPrice,
+                quantity: modalQuantity,
+                img: activeModalItem.img
+            };
+
+            const existingIndex = cart.findIndex(c => c.id === cartItem.id);
+            if(existingIndex > -1) cart[existingIndex].quantity += modalQuantity;
+            else cart.push(cartItem);
+
+            createFlyingItem(event.clientX, event.clientY, activeModalItem.img);
+
+            closeProductModal();
+            updateCartBadge();
+        }
+
+        function createFlyingItem(startX, startY, imgSrc) {
+            const icon = document.getElementById('nav-cart');
+            const targetRect = icon.getBoundingClientRect();
+            
+            const flyer = document.createElement('img');
+            flyer.src = imgSrc;
+            flyer.classList.add('flying-item');
+            flyer.style.left = `${startX - 30}px`;
+            flyer.style.top = `${startY - 30}px`;
+            document.body.appendChild(flyer);
+
+            void flyer.offsetWidth;
+
+            flyer.style.transform = `translate(${targetRect.left - startX + 30}px, ${targetRect.top - startY + 30}px) scale(0.2)`;
+            flyer.style.opacity = '0';
+
+            setTimeout(() => {
+                flyer.remove();
+                icon.style.transform = 'scale(1.1) translateY(-4px)';
+                setTimeout(() => icon.style.transform = 'none', 200);
+            }, 600);
+        }
+
+        function updateCartBadge() {
+            const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-badge-count');
+            if(totalQty > 0) { badge.innerText = totalQty; badge.style.display = 'block'; } 
+            else { badge.style.display = 'none'; }
+        }
+
+        // --- CART, VAT & SPLIT BILL ---
+
+        function toggleSplitBill() {
+            const ui = document.getElementById('split-ui');
+            const isChecked = document.getElementById('split-toggle').checked;
+            ui.classList.toggle('active', isChecked);
+            renderCartView();
+        }
+
+        function renderCartView() {
+            const root = document.getElementById('cart-items-root');
+            if(cart.length === 0) {
+                root.innerHTML = `<div style="text-align:center; padding:40px; color:var(--ink-muted); font-family: var(--font-serif); font-style:italic;">Check is currently empty.</div>`;
+                document.getElementById('summary-sub').innerText = 'Br 0.00';
+                document.getElementById('summary-vat').innerText = 'Br 0.00';
+                document.getElementById('summary-service').innerText = 'Br 0.00';
+                document.getElementById('summary-total').innerText = 'Br 0.00';
+                document.getElementById('checkout-btn').style.opacity = '0.5';
+                document.getElementById('checkout-btn').style.pointerEvents = 'none';
+                return;
+            }
+            document.getElementById('checkout-btn').style.opacity = '1';
+            document.getElementById('checkout-btn').style.pointerEvents = 'auto';
+
+            let subtotal = 0;
+            root.innerHTML = cart.map((item, index) => {
+                const itemTotal = item.unitPrice * item.quantity;
+                subtotal += itemTotal;
+                const sizeLabel = item.size ? ` (${item.size.toUpperCase()})${item.crustLabel}` : '';
+
+                return `
+                    <div class="cart-item">
+                        <img src="${item.img}" alt="item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-title">${item.name[currentLang]}${sizeLabel}</div>
+                            <div class="cart-item-meta">Br ${item.unitPrice} each</div>
+                            <div style="font-size:14px; font-weight:800; color:var(--primary-ink); margin-top:4px;">Br ${itemTotal.toFixed(2)}</div>
+                        </div>
+                        <div class="qty-selector">
+                            <button class="qty-btn" onclick="updateCartItemQty(${index}, -1)">-</button>
+                            <span style="font-family:'Courier New', monospace; font-weight:900;">${item.quantity}</span>
+                            <button class="qty-btn" onclick="updateCartItemQty(${index}, 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const vat = subtotal * 0.15;
+            const service = subtotal * 0.10;
+            const grandTotal = subtotal + vat + service;
+
+            document.getElementById('summary-sub').innerText = `Br ${subtotal.toFixed(2)}`;
+            document.getElementById('summary-vat').innerText = `Br ${vat.toFixed(2)}`;
+            document.getElementById('summary-service').innerText = `Br ${service.toFixed(2)}`;
+            document.getElementById('summary-total').innerText = `Br ${grandTotal.toFixed(2)}`;
+
+            if(document.getElementById('split-toggle').checked) {
+                const ways = Math.max(2, parseInt(document.getElementById('split-ways').value) || 2);
+                document.getElementById('split-amount').innerText = `Br ${(grandTotal/ways).toFixed(2)} /ea`;
+            }
+        }
+
+        function updateCartItemQty(index, delta) {
+            playHaptic();
+            if(cart[index].quantity + delta > 0) cart[index].quantity += delta;
+            else cart.splice(index, 1);
+            updateCartBadge(); renderCartView();
+        }
+
+        // --- NAVIGATION & TRACKING ---
+        
+        function updateLiquidNavPill(activeNavItem, smooth = true) {
+            const pill = document.getElementById('liquid-pill');
+            if(!pill || !activeNavItem) return;
+            pill.style.transition = smooth ? "transform 0.45s, width 0.45s" : "none";
+            pill.style.width = `${activeNavItem.offsetWidth}px`;
+            pill.style.transform = `translateX(${activeNavItem.offsetLeft}px)`;
+        }
+
+        function navigateTo(viewName) {
+            playHaptic();
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            if(viewName === 'home') {
+                document.getElementById('view-home').classList.add('active');
+                const targetNav = document.getElementById('nav-home');
+                targetNav.classList.add('active'); updateLiquidNavPill(targetNav, true);
+            } else if(viewName === 'cart') {
+                document.getElementById('view-cart').classList.add('active');
+                const targetNav = document.getElementById('nav-cart');
+                targetNav.classList.add('active'); updateLiquidNavPill(targetNav, true);
+                renderCartView();
+            } else if(viewName === 'tracker') {
+                document.getElementById('view-tracker').classList.add('active');
+            }
+        }
+
+        function processOrder() {
+            if(cart.length === 0) return;
+            playHaptic();
+            
+            cart = [];
+            updateCartBadge();
+            navigateTo('tracker');
+
+            document.getElementById('step-2').classList.remove('active');
+            document.getElementById('step-3').classList.remove('active');
+            
+            setTimeout(() => { document.getElementById('step-2').classList.add('active'); playHaptic(); }, 3000);
+            setTimeout(() => { document.getElementById('step-3').classList.add('active'); playHaptic(); }, 6000);
+        }
+
+    </script>
+</body>
+</html>
