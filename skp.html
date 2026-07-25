@@ -10,11 +10,12 @@
   Features: Bilingual (EN/AM), Physical Gestures,
   Cart Flying Animations, Dynamic Fasting System, Split Bill,
   Sorting, Telegram Checkout, Floating Tray, Toast Notifications.
+  Updates: 100% Responsive, Fluid Grid, Safe-Area adaptations, No Fake Corners.
   ========================================================
 -->
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Skeuomorphic Menu — Premium Pitch</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -64,57 +65,39 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        body {
-            /* Dark Wood Table Background */
-            background: #110d0a;
-            background-image: 
-                repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 20px),
-                linear-gradient(45deg, #18120e 0%, #0d0906 100%);
+        body, html {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--leather-dark);
             font-family: var(--font-sans);
             color: var(--ink-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow: hidden;
+            overflow: hidden; /* Managed by app container */
         }
 
         /* =========================================================
-           2. PHYSICAL PHONE FRAME & HARDWARE
+           2. RESPONSIVE APP WRAPPER (Removed Fake Corners)
            ========================================================= */
         .phone-wrapper {
             width: 100%;
-            max-width: 412px;
-            height: 892px;
+            height: 100dvh;
             background-color: var(--paper-bg);
             background-image: var(--paper-texture);
             position: relative;
             overflow: hidden;
-            box-shadow: 
-                0 30px 60px rgba(0, 0, 0, 0.9), 
-                0 0 0 4px var(--metal-light), 
-                0 0 0 12px #333,
-                inset 0 0 20px rgba(0,0,0,0.2);
-            border-radius: 44px;
             display: flex;
             flex-direction: column;
-        }
-
-        /* Hardware Screen Glare */
-        .screen-glare {
-            position: absolute;
-            top: 0; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%);
-            pointer-events: none;
-            z-index: 999;
-            transform: rotate(-15deg) translateY(-20%);
+            /* Fully fluid, no rounded corners, no artificial borders */
+            margin: 0 auto;
         }
 
         /* =========================================================
            3. LEATHER HEADER & UTILITIES
            ========================================================= */
         .app-header {
-            padding: 24px 20px 16px;
+            /* Account for physical notches/safe areas */
+            padding: calc(24px + env(safe-area-inset-top)) 20px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -139,7 +122,7 @@
             color: #a8947f; text-shadow: 0 -1px 0 #000; font-weight: 700;
         }
         .header-left .location-value {
-            font-size: 15px; font-weight: 700; color: var(--accent-gold); 
+            font-size: clamp(13px, 4vw, 16px); font-weight: 700; color: var(--accent-gold); 
             text-shadow: 0 -1px 0 #000, 0 1px 2px rgba(0,0,0,0.5);
             display: flex; align-items: center; gap: 6px; margin-top: 4px;
         }
@@ -150,7 +133,7 @@
             background: linear-gradient(to bottom, var(--metal-light), var(--metal-mid));
             border: 1px solid var(--metal-dark);
             color: #333;
-            padding: 6px 12px;
+            padding: 8px 14px;
             border-radius: 4px;
             font-size: 11px;
             font-weight: 800;
@@ -175,13 +158,14 @@
         }
         
         /* Physical Engraved Input */
-        .search-container { flex: 1; position: relative; }
+        .search-container { flex: 1; position: relative; max-width: 400px;}
         .search-container i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); font-size: 12px; }
         .search-input {
             width: 100%; background: #e8e3d8; border: 1px solid #c2bba8; border-top-color: #9c9583;
-            color: var(--ink-main); padding: 8px 12px 8px 34px; border-radius: 20px; 
+            color: var(--ink-main); padding: 10px 12px 10px 34px; border-radius: 20px; 
             font-family: var(--font-sans); font-size: 14px; font-weight: 600; outline: none;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.8);
+            transition: background 0.2s;
         }
         .search-input:focus { background: #fff; }
 
@@ -198,11 +182,11 @@
            4. PAPER VIEWPORT, CATEGORY TABS & SORTING
            ========================================================= */
         .view-container {
-            flex: 1; overflow-y: auto; padding: 16px 20px 90px; scrollbar-width: none; position: relative; z-index: 10;
+            flex: 1; overflow-y: auto; padding: 16px 5% 100px; scrollbar-width: none; position: relative; z-index: 10;
         }
         .view-container::-webkit-scrollbar { display: none; }
         
-        .app-view { display: none; animation: paperUnfold 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: top center; }
+        .app-view { display: none; animation: paperUnfold 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: top center; max-width: 1200px; margin: 0 auto; }
         .app-view.active { display: block; }
         @keyframes paperUnfold { from { opacity: 0; transform: scaleY(0.95) translateY(10px); } to { opacity: 1; transform: scaleY(1) translateY(0); } }
 
@@ -229,17 +213,22 @@
             padding-bottom: 12px; box-shadow: 0 -3px 6px rgba(0,0,0,0.05);
         }
 
-        .sort-option { padding: 6px 12px; font-size: 12px; font-weight: 700; color: var(--ink-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; border-radius: 2px; }
+        .sort-option { padding: 8px 12px; font-size: 13px; font-weight: 700; color: var(--ink-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; border-radius: 2px; }
         .sort-option:hover { background: #e8e3d8; }
         .sort-option.selected { color: var(--primary-ink); font-weight: 900; background: #fdfbf7; }
 
         /* =========================================================
-           5. PRODUCT GRID & POLAROID CARDS
+           5. PRODUCT GRID & POLAROID CARDS (Fluid Layout)
            ========================================================= */
-        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .product-grid { 
+            display: grid; 
+            /* Auto-fill ensures cards dynamically fit any tablet/mobile/desktop width */
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+            gap: clamp(12px, 2vw, 20px); 
+        }
         
         .product-card {
-            background: #ffffff; border: 1px solid #e0d9cc; padding: 6px 6px 12px; cursor: pointer;
+            background: #ffffff; border: 1px solid #e0d9cc; padding: 8px 8px 14px; cursor: pointer;
             display: flex; flex-direction: column; box-shadow: var(--shadow-drop-light);
             transition: transform 0.1s ease, box-shadow 0.1s ease; position: relative;
         }
@@ -260,22 +249,22 @@
         .product-card:active { transform: scale(0.97) rotate(1deg); box-shadow: 0 2px 4px rgba(0,0,0,0.15); }
         
         .img-wrapper { 
-            position: relative; width: 100%; height: 120px; 
+            position: relative; width: 100%; height: 140px; 
             border: 1px solid #d1c8b4; box-shadow: inset 0 2px 6px rgba(0,0,0,0.2); 
             background: #e8e3d8; overflow: hidden; margin-bottom: 10px;
         }
         .product-card img { width: 100%; height: 100%; object-fit: cover; }
         
         .dietary-badges { position: absolute; bottom: 6px; left: 6px; display: flex; gap: 4px; z-index: 2; }
-        .badge-icon { background: #fff; border: 1px solid #ccc; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .badge-icon { background: #fff; border: 1px solid #ccc; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         
         .product-info { display: flex; flex-direction: column; flex: 1; justify-content: space-between; padding: 0 4px; }
-        .product-info h4 { font-family: var(--font-serif); font-size: 14px; font-weight: 700; color: var(--ink-main); margin-bottom: 4px; line-height: 1.1; }
-        .product-info p { font-size: 10px; color: var(--ink-muted); margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; font-weight: 600; }
+        .product-info h4 { font-family: var(--font-serif); font-size: clamp(14px, 2.5vw, 16px); font-weight: 700; color: var(--ink-main); margin-bottom: 4px; line-height: 1.1; }
+        .product-info p { font-size: 11px; color: var(--ink-muted); margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; font-weight: 600; }
         
         .product-price-row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px dashed #d1c8b4; padding-top: 8px; }
-        .product-price { font-size: 14px; font-weight: 800; color: var(--primary-ink); }
-        .add-icon-btn { color: #5cb85c; font-size: 20px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); background: #fff; border-radius: 50%; border: 1px solid #4cae4c; }
+        .product-price { font-size: clamp(14px, 3vw, 16px); font-weight: 800; color: var(--primary-ink); }
+        .add-icon-btn { color: #5cb85c; font-size: 24px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); background: #fff; border-radius: 50%; border: 1px solid #4cae4c; }
 
         /* =========================================================
            6. PHYSICAL RECEIPT & CART VIEW
@@ -294,32 +283,38 @@
         
         .table-input-field, .instructions-textarea, .split-input {
             background: #fdfbf7; border: 1px inset #d1c8b4; color: var(--ink-main);
-            padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; font-size: 14px; outline: none; width: 100%;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); font-weight: 700;
+            padding: 10px 14px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; font-size: 15px; outline: none; width: 100%;
+            box-sizing: border-box; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); font-weight: 700;
         }
 
-        .cart-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px dashed #d1c8b4; }
+        .cart-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px dashed #d1c8b4; flex-wrap: wrap;}
         .cart-item:last-child { border-bottom: none; }
-        .cart-item img { width: 50px; height: 50px; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .cart-item-info { flex: 1; }
-        .cart-item-title { font-family: var(--font-serif); font-size: 14px; font-weight: 700; color: var(--ink-main); }
-        .cart-item-meta { font-size: 12px; color: var(--ink-muted); font-family: 'Courier New', monospace; }
+        .cart-item img { width: 60px; height: 60px; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .cart-item-info { flex: 1; min-width: 150px; }
+        .cart-item-title { font-family: var(--font-serif); font-size: 15px; font-weight: 700; color: var(--ink-main); }
+        .cart-item-meta { font-size: 13px; color: var(--ink-muted); font-family: 'Courier New', monospace; }
         
         /* Mechanical Quantity Spinner */
-        .qty-selector { display: flex; align-items: center; gap: 10px; background: linear-gradient(#e6e6e6, #cccccc); border: 1px solid #999; padding: 4px 8px; border-radius: 4px; box-shadow: var(--shadow-inset-button), 0 2px 4px rgba(0,0,0,0.15); }
-        .qty-btn { background: linear-gradient(#fff, #e6e6e6); border: 1px solid #b3b3b3; color: #333; width: 24px; height: 24px; border-radius: 2px; font-size: 16px; cursor: pointer; font-weight: 900; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .qty-selector { display: flex; align-items: center; gap: 10px; background: linear-gradient(#e6e6e6, #cccccc); border: 1px solid #999; padding: 6px 10px; border-radius: 4px; box-shadow: var(--shadow-inset-button), 0 2px 4px rgba(0,0,0,0.15); }
+        .qty-btn { background: linear-gradient(#fff, #e6e6e6); border: 1px solid #b3b3b3; color: #333; width: 28px; height: 28px; border-radius: 2px; font-size: 18px; cursor: pointer; font-weight: 900; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
         .qty-btn:active { background: #d9d9d9; box-shadow: var(--shadow-pressed); }
         
-        .summary-row { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 13px; margin-bottom: 8px; color: var(--ink-muted); font-weight: 600;}
-        .summary-row.total { border-top: 2px solid var(--ink-main); padding-top: 10px; font-weight: 900; color: var(--ink-main); font-size: 16px; margin-top: 6px; font-family: var(--font-sans);}
+        .summary-row { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 14px; margin-bottom: 8px; color: var(--ink-muted); font-weight: 600;}
+        .summary-row.total { border-top: 2px solid var(--ink-main); padding-top: 10px; font-weight: 900; color: var(--ink-main); font-size: 18px; margin-top: 6px; font-family: var(--font-sans);}
         
         /* Split Bill Feature */
-        .split-bill-container { margin-top: 12px; display: none; background: #f4efdf; padding: 10px; border: 1px solid #d1c8b4; }
-        .split-bill-container.active { display: flex; justify-content: space-between; align-items: center; }
+        .split-bill-container { margin-top: 12px; display: none; background: #f4efdf; padding: 12px; border: 1px solid #d1c8b4; }
+        .split-bill-container.active { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 
         /* Payment Buttons - Physical Plastic Look */
+        .payment-gateways {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
         .pay-btn { 
-            flex: 1; padding: 12px; border-radius: 6px; font-weight: 800; font-size: 13px; text-align: center; cursor: pointer; 
+            padding: 14px; border-radius: 6px; font-weight: 800; font-size: 14px; text-align: center; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; gap: 8px; color: #fff;
             text-shadow: 0 -1px 1px rgba(0,0,0,0.5); border: 1px solid rgba(0,0,0,0.6);
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 6px rgba(0,0,0,0.2); transition: all 0.1s;
@@ -335,10 +330,10 @@
         .btn-primary {
             background: linear-gradient(to bottom, #f24e5d, var(--primary-plastic-dark));
             color: #FFF; border: 1px solid #730000; border-radius: 8px;
-            padding: 16px; width: 100%; font-family: var(--font-sans); font-size: 15px; font-weight: 800; text-transform: uppercase;
+            padding: 18px; width: 100%; font-family: var(--font-sans); font-size: 16px; font-weight: 800; text-transform: uppercase;
             letter-spacing: 1px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 10px rgba(161, 20, 32, 0.3), 0 2px 4px rgba(0,0,0,0.4);
-            text-shadow: 0 -1px 2px rgba(0,0,0,0.6); transition: all 0.1s;
+            text-shadow: 0 -1px 2px rgba(0,0,0,0.6); transition: all 0.1s; box-sizing: border-box;
         }
         .btn-primary:active { transform: translateY(4px); box-shadow: inset 0 4px 8px rgba(0,0,0,0.6), 0 1px 2px rgba(0,0,0,0.4); background: linear-gradient(to bottom, var(--primary-plastic-dark), #730000); }
 
@@ -346,19 +341,20 @@
            7. MODAL (CLIPBOARD SHEET)
            ========================================================= */
         .modal-overlay {
-            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.7);
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
             z-index: 200; display: none; align-items: flex-end; touch-action: none;
         }
         .modal-sheet {
-            width: 100%; background: var(--paper-bg); background-image: var(--paper-texture);
-            border-top: 8px solid var(--metal-mid); border-top-left-radius: 12px; border-top-right-radius: 12px;
-            padding: 24px; max-height: 90%; overflow-y: auto; position: relative; 
+            width: 100%; max-width: 600px; margin: 0 auto;
+            background: var(--paper-bg); background-image: var(--paper-texture);
+            border-top: 8px solid var(--metal-mid); border-top-left-radius: 20px; border-top-right-radius: 20px;
+            padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom)); 
+            max-height: 90vh; overflow-y: auto; position: relative; 
             box-shadow: 0 -15px 40px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.8);
             transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1);
         }
         .modal-sheet.open { transform: translateY(0); }
         
-        /* Clipboard clip mechanism at top */
         .drag-handle { 
             width: 80px; height: 24px; background: linear-gradient(to bottom, #f2f2f2, #b3b3b3); 
             border: 1px solid #808080; border-radius: 4px; margin: -30px auto 20px; 
@@ -368,13 +364,14 @@
         .drag-handle::after { content: ''; width: 60%; height: 2px; background: #666; box-shadow: 0 4px 0 #666, 0 8px 0 #666; }
         
         .options-group-title { font-family: var(--font-serif); font-size: 16px; font-style: italic; color: var(--primary-ink); font-weight: 700; margin-bottom: 12px; margin-top: 16px; border-bottom: 1px solid #d1c8b4; padding-bottom: 4px; }
-        .selector-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .selector-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
         
         /* Segmented Metallic/Plastic Controls */
         .selector-btn {
-            flex: 1; min-width: 22%; background: linear-gradient(to bottom, #f9f9f9, #e0e0e0); border: 1px solid #b3b3b3; color: var(--ink-main);
-            padding: 12px 6px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 800; text-align: center;
+            background: linear-gradient(to bottom, #f9f9f9, #e0e0e0); border: 1px solid #b3b3b3; color: var(--ink-main);
+            padding: 14px 6px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 800; text-align: center;
             box-shadow: inset 0 1px 0 #fff, 0 2px 4px rgba(0,0,0,0.1); text-shadow: 0 1px 0 #fff;
+            display: flex; align-items: center; justify-content: center;
         }
         .selector-btn.active { 
             background: linear-gradient(to bottom, #e0e0e0, #c2c2c2); border-color: #808080; 
@@ -385,26 +382,27 @@
            8. FLYING ANIMATION, TOASTS, FLOATING TRAY & LIVE TRACKER
            ========================================================= */
         .flying-item {
-            position: absolute; width: 60px; height: 60px; border-radius: 50%; border: 3px solid #fff; object-fit: cover;
+            position: fixed; width: 60px; height: 60px; border-radius: 50%; border: 3px solid #fff; object-fit: cover;
             z-index: 9999; pointer-events: none; opacity: 1; transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
             box-shadow: 0 15px 25px rgba(0,0,0,0.6);
         }
 
         .toast-notification {
-            position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: calc(80px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
             background: #fffdf8; border: 1px solid #d1c8b4; border-bottom: 3px solid var(--primary-plastic);
-            color: var(--ink-main); padding: 10px 20px; border-radius: 4px; font-size: 13px; font-weight: 800;
+            color: var(--ink-main); padding: 12px 24px; border-radius: 4px; font-size: 14px; font-weight: 800;
             z-index: 9999; box-shadow: var(--shadow-drop-heavy); font-family: var(--font-sans);
             animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.5s forwards;
-            pointer-events: none;
+            pointer-events: none; text-align: center; white-space: nowrap;
         }
         @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -20px); } to { opacity: 1; transform: translate(-50%, 0); } }
         @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
 
         .floating-tray-btn {
-            position: absolute; bottom: 90px; right: 20px; width: 56px; height: 56px; border-radius: 50%;
+            position: fixed; bottom: calc(90px + env(safe-area-inset-bottom)); right: clamp(20px, 5vw, 40px);
+            width: 64px; height: 64px; border-radius: 50%;
             background: linear-gradient(to bottom, #f24e5d, var(--primary-plastic-dark));
-            border: 2px solid #730000; color: #FFF; font-size: 20px; display: flex; align-items: center; justify-content: center;
+            border: 2px solid #730000; color: #FFF; font-size: 24px; display: flex; align-items: center; justify-content: center;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 10px rgba(0,0,0,0.4);
             cursor: pointer; z-index: 90; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             transform: scale(0); pointer-events: none;
@@ -413,7 +411,7 @@
         .floating-tray-btn:active { transform: scale(0.9); box-shadow: inset 0 4px 8px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.4); }
         .floating-badge {
             position: absolute; top: 0; right: 0; background: #fff; color: var(--primary-plastic-dark);
-            width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 50%; font-size: 12px; font-weight: 900; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.4); border: 1px solid #730000;
         }
 
@@ -431,9 +429,10 @@
            9. LEATHER BOTTOM NAVIGATION
            ========================================================= */
         .bottom-nav {
-            position: absolute; bottom: 0; left: 0; width: 100%; 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
             background: linear-gradient(to bottom, var(--leather-light), var(--leather-dark));
-            border-top: 3px solid #111; display: flex; justify-content: space-around; padding: 12px 10px 24px; z-index: 100;
+            border-top: 3px solid #111; display: flex; justify-content: space-around; 
+            padding: 12px 10px calc(24px + env(safe-area-inset-bottom)); z-index: 100;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
         }
         /* Stitching */
@@ -443,18 +442,18 @@
         }
 
         .liquid-nav-pill {
-            position: absolute; top: 8px; left: 0; height: 50px; 
+            position: absolute; top: 8px; left: 0; height: 55px; 
             background: linear-gradient(to bottom, #4d3624, #2c1e14); 
             border: 1px solid #111; border-top-color: #6a4a31;
             border-radius: 8px; z-index: 1; transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 6px rgba(0,0,0,0.5);
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #8c7a6b; font-size: 11px; font-weight: 800; text-transform: uppercase; gap: 4px; padding: 8px 24px; z-index: 2; cursor: pointer; position: relative; text-shadow: 0 -1px 0 #000; transition: color 0.2s; }
-        .nav-item i { font-size: 18px; margin-bottom: 2px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #8c7a6b; font-size: 11px; font-weight: 800; text-transform: uppercase; gap: 4px; padding: 10px 30px; z-index: 2; cursor: pointer; position: relative; text-shadow: 0 -1px 0 #000; transition: color 0.2s; }
+        .nav-item i { font-size: 20px; margin-bottom: 2px; }
         .nav-item.active { color: var(--accent-gold); }
         
         /* Notification Badge - Red Plastic Bead */
-        .badge { position: absolute; top: 2px; right: 20px; background: radial-gradient(circle at 30% 30%, #ff6b6b, var(--primary-plastic-dark)); color: #FFF; font-size: 10px; padding: 2px 6px; border-radius: 12px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.6); border: 1px solid #730000; text-shadow: 0 -1px 1px rgba(0,0,0,0.5); }
+        .badge { position: absolute; top: 4px; right: 20px; background: radial-gradient(circle at 30% 30%, #ff6b6b, var(--primary-plastic-dark)); color: #FFF; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.6); border: 1px solid #730000; text-shadow: 0 -1px 1px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
@@ -463,7 +462,6 @@
     <audio id="audio-pop" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAAE=" preload="auto"></audio>
 
     <div class="phone-wrapper" id="phone-wrapper">
-        <div class="screen-glare"></div>
 
         <!-- Leather Header -->
         <header class="app-header">
@@ -502,21 +500,21 @@
             
             <!-- VIEW 1: HOME/MENU -->
             <div id="view-home" class="app-view active">
-                <h1 class="display-title" style="font-size: 32px; margin-top: 4px;" id="t-explore-menu">Explore Our <br><span style="color:var(--primary-ink)">Delicious Menu</span></h1>
+                <h1 class="display-title" style="font-size: clamp(28px, 6vw, 36px); margin-top: 4px;" id="t-explore-menu">Explore Our <br><span style="color:var(--primary-ink)">Delicious Menu</span></h1>
                 
                 <div class="category-scroll-container">
                     <div class="category-scroll" id="categories-bar"></div>
                 </div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px dotted #d1c8b4; padding-bottom: 4px; margin-bottom: 16px; position: relative;">
-                    <h2 style="font-family: var(--font-sans); color: var(--ink-muted); font-size: 16px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin:0;" id="current-category-title">Veg Pizza</h2>
+                    <h2 style="font-family: var(--font-sans); color: var(--ink-muted); font-size: clamp(15px, 3vw, 18px); text-transform: uppercase; letter-spacing: 1px; font-weight: 800; margin:0;" id="current-category-title">Veg Pizza</h2>
                     <div class="sort-wrapper" id="sort-wrapper" style="position: relative;">
-                        <button class="lang-switch-btn" id="sort-btn" onclick="toggleSortDropdown()" style="display: flex; gap: 4px; align-items: center; font-size: 10px; padding: 4px 8px;">
+                        <button class="lang-switch-btn" id="sort-btn" onclick="toggleSortDropdown()" style="display: flex; gap: 6px; align-items: center; font-size: 11px; padding: 6px 10px;">
                             <i class="fa-solid fa-arrow-up-wide-short"></i>
                             <span id="sort-label">Popular</span>
-                            <i class="fa-solid fa-chevron-down" style="font-size: 8px;"></i>
+                            <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
                         </button>
-                        <div class="sort-dropdown" id="sort-dropdown" style="display: none; position: absolute; top: 100%; right: 0; background: var(--paper-bg); background-image: var(--paper-texture); border: 1px solid #bba37f; box-shadow: var(--shadow-drop-light); padding: 4px; z-index: 100; min-width: 130px; border-radius: 4px; margin-top: 4px;">
+                        <div class="sort-dropdown" id="sort-dropdown" style="display: none; position: absolute; top: 100%; right: 0; background: var(--paper-bg); background-image: var(--paper-texture); border: 1px solid #bba37f; box-shadow: var(--shadow-drop-light); padding: 4px; z-index: 100; min-width: 150px; border-radius: 4px; margin-top: 4px;">
                             <div class="sort-option selected" data-sort="default" onclick="selectSort('default', this)"><i class="fa-solid fa-star"></i> <span id="t-sort-pop">Popular</span></div>
                             <div class="sort-option" data-sort="price-asc" onclick="selectSort('price-asc', this)"><i class="fa-solid fa-arrow-up"></i> <span id="t-sort-low">Price: Low to High</span></div>
                             <div class="sort-option" data-sort="price-desc" onclick="selectSort('price-desc', this)"><i class="fa-solid fa-arrow-down"></i> <span id="t-sort-high">Price: High to Low</span></div>
@@ -531,7 +529,7 @@
             <!-- VIEW 2: CART -->
             <div id="view-cart" class="app-view">
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--ink-main); padding-bottom: 8px; margin-bottom:16px;">
-                    <h1 class="display-title" style="font-size: 28px; margin:0;" id="t-your-tray">Customer Check</h1>
+                    <h1 class="display-title" style="font-size: clamp(24px, 5vw, 32px); margin:0;" id="t-your-tray">Customer Check</h1>
                     <button id="btn-clear-cart" class="lang-switch-btn" onclick="clearCart()" style="display:none; color: #a11420; border-color: #a11420; box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), inset 0 -2px 4px rgba(161, 20, 32, 0.2);"><i class="fa-solid fa-trash"></i> <span id="t-clear">Clear</span></button>
                 </div>
                 
@@ -542,7 +540,7 @@
                     </div>
                 </div>
                 
-                <div id="cart-items-root" style="margin-bottom: 16px; padding: 0 16px;"></div>
+                <div id="cart-items-root" style="margin-bottom: 16px; padding: 0;"></div>
 
                 <div id="cart-form-bottom" style="display:none;">
                     <div class="receipt-card" id="instructions-card">
@@ -557,50 +555,52 @@
                         
                         <!-- Split Bill Feature -->
                         <div style="margin-top: 12px; border-top: 1px dashed #d1c8b4; padding-top: 12px;">
-                            <label style="font-size: 13px; display:flex; align-items:center; gap:8px; font-weight: 700;">
-                                <input type="checkbox" id="split-toggle" onchange="toggleSplitBill()" style="width:16px; height:16px; accent-color: var(--primary-plastic);"> 
+                            <label style="font-size: 13px; display:flex; align-items:center; gap:8px; font-weight: 700; cursor:pointer;">
+                                <input type="checkbox" id="split-toggle" onchange="toggleSplitBill()" style="width:18px; height:18px; accent-color: var(--primary-plastic);"> 
                                 <span id="t-split-bill">Split the Bill?</span>
                             </label>
                             <div class="split-bill-container" id="split-ui">
-                                <span style="font-size: 13px; font-weight: 700;" id="t-people">People:</span>
-                                <input type="number" id="split-ways" class="split-input" style="width: 60px;" value="2" min="2" max="20" onchange="renderCartView()">
-                                <span id="split-amount" style="font-size: 16px; font-weight: 900; color: var(--primary-ink);">Br 0.00 /ea</span>
+                                <div style="display:flex; align-items:center; gap: 8px;">
+                                    <span style="font-size: 14px; font-weight: 700;" id="t-people">People:</span>
+                                    <input type="number" id="split-ways" class="split-input" style="width: 70px;" value="2" min="2" max="20" onchange="renderCartView()">
+                                </div>
+                                <span id="split-amount" style="font-size: 18px; font-weight: 900; color: var(--primary-ink);">Br 0.00 /ea</span>
                             </div>
                         </div>
 
                         <div class="summary-row total"><span id="t-total">Grand Total</span><span id="summary-total">Br 0.00</span></div>
                     </div>
 
-                    <div class="receipt-card" style="padding: 12px;">
+                    <div class="receipt-card" style="padding: 16px;">
                         <div style="font-size: 13px; font-weight: 800; color: var(--ink-muted); text-transform: uppercase;"><i class="fa-solid fa-credit-card"></i> <span id="t-payment-method">Payment Method</span></div>
-                        <div class="payment-gateways" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+                        <div class="payment-gateways">
                             <button class="pay-btn pay-telebirr" onclick="selectPayment('telebirr', this)"><i class="fa-solid fa-mobile-screen"></i> Telebirr</button>
                             <button class="pay-btn pay-cbe" onclick="selectPayment('cbe', this)"><i class="fa-solid fa-building-columns"></i> CBE Birr</button>
                             <button class="pay-btn pay-chapa" onclick="selectPayment('chapa', this)"><i class="fa-solid fa-globe"></i> Chapa</button>
                             <button class="pay-btn pay-cash" onclick="selectPayment('cash', this)"><i class="fa-solid fa-money-bill"></i> Cash</button>
                         </div>
-                        <div class="payment-account-display" id="payment-account-display" style="display: none; margin-top: 12px; background: #fdfbf7; border: 1px inset #d1c8b4; padding: 12px; border-radius: 4px; text-align: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
-                            <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--ink-muted);" id="t-pay-to">Pay to this account</div>
-                            <div id="display-account-number" style="font-size: 20px; font-family: 'Courier New', monospace; font-weight: 900; color: var(--primary-ink); margin: 4px 0;"></div>
-                            <div id="display-account-name" style="font-size: 13px; font-weight: 600; color: var(--ink-main); margin-bottom: 8px;"></div>
-                            <button class="lang-switch-btn copy-account-btn" onclick="copyAccountNumber()"><i class="fa-solid fa-copy"></i> Copy Number</button>
+                        <div class="payment-account-display" id="payment-account-display" style="display: none; margin-top: 16px; background: #fdfbf7; border: 1px inset #d1c8b4; padding: 16px; border-radius: 4px; text-align: center; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                            <div style="font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--ink-muted);" id="t-pay-to">Pay to this account</div>
+                            <div id="display-account-number" style="font-size: 24px; font-family: 'Courier New', monospace; font-weight: 900; color: var(--primary-ink); margin: 8px 0;"></div>
+                            <div id="display-account-name" style="font-size: 14px; font-weight: 600; color: var(--ink-main); margin-bottom: 12px;"></div>
+                            <button class="lang-switch-btn copy-account-btn" onclick="copyAccountNumber()" style="font-size:13px; padding:8px 16px;"><i class="fa-solid fa-copy"></i> Copy Number</button>
                         </div>
                     </div>
 
                     <button class="btn-primary" id="checkout-btn" onclick="processOrderToTelegram()">
                         <i class="fa-brands fa-telegram"></i> <span id="t-send-kitchen">Send Order to Kitchen</span>
                     </button>
-                    <div style="font-size: 10px; color: var(--ink-muted); text-align: center; margin-top: 10px;">Kitchen: @MO76k7 (0923845344)</div>
+                    <div style="font-size: 12px; color: var(--ink-muted); text-align: center; margin-top: 14px; font-weight: 700;">Kitchen: @MO76k7 (0923845344)</div>
                 </div>
             </div>
 
             <!-- VIEW 3: LIVE TRACKER -->
             <div id="view-tracker" class="app-view">
-                <h1 class="display-title" style="font-size: 28px; text-align: center;" id="t-order-status">Order Ticket</h1>
+                <h1 class="display-title" style="font-size: clamp(24px, 5vw, 32px); text-align: center;" id="t-order-status">Order Ticket</h1>
                 <div class="tracker-container">
                     <div class="pulse-ring"><i class="fa-solid fa-fire-burner"></i></div>
-                    <h3 id="tracker-title" style="font-family: var(--font-serif); font-size: 22px;">Ticket Sent to Telegram!</h3>
-                    <p style="font-size: 13px; color: var(--ink-muted); margin-top:5px; font-weight: 700;">Est. Time: 25 mins</p>
+                    <h3 id="tracker-title" style="font-family: var(--font-serif); font-size: clamp(20px, 4vw, 24px);">Ticket Sent to Telegram!</h3>
+                    <p style="font-size: 14px; color: var(--ink-muted); margin-top:8px; font-weight: 700;">Est. Time: 25 mins</p>
                     
                     <div class="timeline">
                         <div class="timeline-step active" id="step-1">Ticket Generated</div>
@@ -618,9 +618,9 @@
                 <div class="drag-handle"></div>
                 
                 <div style="border: 4px solid #fff; box-shadow: var(--shadow-drop-light); margin-bottom: 20px; background: #fff; padding: 4px;">
-                    <img src="" id="modal-item-img" style="width:100%; height:180px; object-fit:cover; transition: transform 0.3s ease;">
+                    <img src="" id="modal-item-img" style="width:100%; height: clamp(160px, 30vh, 240px); object-fit:cover; transition: transform 0.3s ease;">
                 </div>
-                <h3 class="display-title" id="modal-item-name" style="font-size: 26px;">Item</h3>
+                <h3 class="display-title" id="modal-item-name" style="font-size: clamp(22px, 5vw, 28px);">Item</h3>
                 <p id="modal-item-desc" style="font-size:14px; color:var(--ink-muted); margin-bottom:16px; font-weight: 600;">Desc</p>
                 
                 <!-- Expanded Crust Customizer -->
@@ -636,13 +636,13 @@
 
                 <div id="pizza-options-container"></div>
 
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px; border-top: 2px dotted #d1c8b4; padding-top:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px; border-top: 2px dotted #d1c8b4; padding-top:20px; flex-wrap: wrap; gap: 16px;">
                     <div class="qty-selector">
                         <button class="qty-btn" onclick="mutateModalQuantity(-1)">-</button>
-                        <span id="modal-qty-display" style="font-weight:900; font-size:16px; min-width:16px; text-align:center; font-family: 'Courier New', monospace;">1</span>
+                        <span id="modal-qty-display" style="font-weight:900; font-size:18px; min-width:24px; text-align:center; font-family: 'Courier New', monospace;">1</span>
                         <button class="qty-btn" onclick="mutateModalQuantity(1)">+</button>
                     </div>
-                    <button class="btn-primary" style="margin:0; width:auto; flex:1; margin-left:16px; padding: 12px;" onclick="addModalItemToCart(event)">
+                    <button class="btn-primary" style="margin:0; width:auto; flex:1; min-width: 150px; padding: 14px;" onclick="addModalItemToCart(event)">
                         <span id="t-add-btn">Add</span> — Br <span id="modal-total-price-display">0</span>
                     </button>
                 </div>
@@ -814,6 +814,12 @@
                     document.getElementById('sort-dropdown').style.display = 'none';
                 }
             });
+
+            // Handle responsive resizing for the bottom liquid navigation
+            window.addEventListener('resize', debounce(() => {
+                const activeNav = document.querySelector('.nav-item.active');
+                if(activeNav) updateLiquidNavPill(activeNav, false);
+            }, 100));
         });
 
         // --- UTILS & CORE ---
@@ -988,8 +994,8 @@
                 const isSoldOut = item.inventory === 'sold-out';
                 const cssClass = isSoldOut ? 'product-card out-of-stock' : 'product-card';
 
-                const popBadge = item.popular ? `<div style="position: absolute; top: -10px; right: -10px; background: var(--primary-plastic); color: white; font-size: 9px; font-weight: 900; padding: 4px 8px; border-radius: 12px; z-index: 10; box-shadow: var(--shadow-drop-light); border: 2px solid #fff; transform: rotate(10deg);">POPULAR</div>` : '';
-                const limitedBadge = item.inventory === 'limited' ? `<div style="position: absolute; top: 6px; right: 6px; background: #c29b4e; color: #fff; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px; z-index: 10;">LIMITED</div>` : '';
+                const popBadge = item.popular ? `<div style="position: absolute; top: -10px; right: -10px; background: var(--primary-plastic); color: white; font-size: 10px; font-weight: 900; padding: 6px 10px; border-radius: 12px; z-index: 10; box-shadow: var(--shadow-drop-light); border: 2px solid #fff; transform: rotate(10deg);">POPULAR</div>` : '';
+                const limitedBadge = item.inventory === 'limited' ? `<div style="position: absolute; top: 6px; right: 6px; background: #c29b4e; color: #fff; font-size: 10px; font-weight: 900; padding: 4px 8px; border-radius: 4px; z-index: 10;">LIMITED</div>` : '';
 
                 return `
                     <div class="${cssClass}" id="card-${item.id}" ${!isSoldOut ? `onclick="openProductModal('${currentCategoryKey}', '${item.id}')"` : ''}>
@@ -1004,7 +1010,7 @@
                             <p>${getItemDesc(item)}</p>
                             <div class="product-price-row">
                                 <span class="product-price">${price}</span>
-                                ${!isSoldOut ? `<i class="fa-solid fa-circle-plus add-icon-btn"></i>` : `<span style="color:#a11420; font-size:11px; font-weight:bold;">N/A</span>`}
+                                ${!isSoldOut ? `<i class="fa-solid fa-circle-plus add-icon-btn"></i>` : `<span style="color:#a11420; font-size:12px; font-weight:bold;">N/A</span>`}
                             </div>
                         </div>
                     </div>
@@ -1024,7 +1030,7 @@
                 });
             });
             if (!results.length) {
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-muted);font-family:var(--font-serif);font-style:italic;">No items found</div>`;
+                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--ink-muted);font-family:var(--font-serif);font-style:italic;font-size:16px;">No items found</div>`;
                 return;
             }
             grid.innerHTML = getSortedItems(results.map(r => r.item)).map(item => {
@@ -1201,10 +1207,10 @@
             }));
             return items.sort(() => 0.5 - Math.random()).slice(0, 3).map(item => {
                 const p = item.type === 'pizza' ? `Br ${item.prices.medium}` : `Br ${item.price}`;
-                return `<div onclick="openProductModal('${item.cat}','${item.id}');navigateTo('home');" style="display:flex; align-items:center; gap:10px; margin-bottom:8px; background: #fffdf8; padding:6px; border:1px solid #d1c8b4; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); cursor:pointer;">
-                    <img src="${item.img}" style="width:40px; height:40px; object-fit:cover; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
-                    <div style="flex:1;"><div style="font-size:12px; font-weight:800; color:var(--ink-main);">${getItemName(item)}</div><div style="font-size:11px; color:var(--primary-ink); font-weight:700;">${p}</div></div>
-                    <i class="fa-solid fa-circle-plus" style="color: #5cb85c; margin-right:8px;"></i>
+                return `<div onclick="openProductModal('${item.cat}','${item.id}');navigateTo('home');" style="display:flex; align-items:center; gap:12px; margin-bottom:10px; background: #fffdf8; padding:8px; border:1px solid #d1c8b4; border-radius:4px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); cursor:pointer;">
+                    <img src="${item.img}" style="width:48px; height:48px; object-fit:cover; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.2);">
+                    <div style="flex:1;"><div style="font-size:14px; font-weight:800; color:var(--ink-main);">${getItemName(item)}</div><div style="font-size:13px; color:var(--primary-ink); font-weight:700;">${p}</div></div>
+                    <i class="fa-solid fa-circle-plus" style="color: #5cb85c; margin-right:8px; font-size:18px;"></i>
                 </div>`;
             }).join('');
         }
@@ -1217,10 +1223,10 @@
 
             if(cart.length === 0) {
                 formTop.style.display = 'none'; formBottom.style.display = 'none'; clearBtn.style.display = 'none';
-                root.innerHTML = `<div style="text-align:center; padding:30px 10px; color:var(--ink-muted); font-family: var(--font-serif); font-style:italic;">
-                    <div style="font-size: 40px; margin-bottom: 10px; opacity: 0.5;"><i class="fa-solid fa-basket-shopping"></i></div>
+                root.innerHTML = `<div style="text-align:center; padding:40px 20px; color:var(--ink-muted); font-family: var(--font-serif); font-style:italic;">
+                    <div style="font-size: 48px; margin-bottom: 12px; opacity: 0.5;"><i class="fa-solid fa-basket-shopping"></i></div>
                     Check is currently empty.<br><br>
-                    <h3 style="font-family: var(--font-sans); text-transform: uppercase; font-size: 14px; margin-bottom: 10px; color: var(--primary-ink); font-weight: 800; font-style: normal; margin-top: 16px;">🔥 Popular Picks</h3>
+                    <h3 style="font-family: var(--font-sans); text-transform: uppercase; font-size: 16px; margin-bottom: 12px; color: var(--primary-ink); font-weight: 800; font-style: normal; margin-top: 24px;">🔥 Popular Picks</h3>
                     <div style="text-align: left; font-style: normal; font-family: var(--font-sans);">
                         ${popularHTML()}
                     </div>
@@ -1235,7 +1241,7 @@
                 const itemTotal = item.unitPrice * item.quantity;
                 subtotal += itemTotal;
                 const sizeLabel = item.size ? ` (${item.size.toUpperCase()})` : '';
-                const crustTag = item.crust ? ` <span style="font-size:9px; background:rgba(194, 155, 78, 0.2); color:var(--accent-gold-dark); padding:2px 4px; border-radius:4px;">${item.crust}</span>` : '';
+                const crustTag = item.crust ? ` <span style="font-size:10px; background:rgba(194, 155, 78, 0.2); color:var(--accent-gold-dark); padding:2px 6px; border-radius:4px; font-weight:700;">${item.crust}</span>` : '';
                 const displayName = currentLang === 'am' ? item.nameAm : item.nameEn;
 
                 return `
@@ -1244,11 +1250,11 @@
                         <div class="cart-item-info">
                             <div class="cart-item-title">${displayName}${sizeLabel}${crustTag}</div>
                             <div class="cart-item-meta">Br ${item.unitPrice} each</div>
-                            <div style="font-size:14px; font-weight:800; color:var(--primary-ink); margin-top:4px;">Br ${itemTotal.toFixed(2)}</div>
+                            <div style="font-size:15px; font-weight:800; color:var(--primary-ink); margin-top:6px;">Br ${itemTotal.toFixed(2)}</div>
                         </div>
                         <div class="qty-selector">
                             <button class="qty-btn" onclick="updateCartItemQty(${index}, -1)">-</button>
-                            <span style="font-family:'Courier New', monospace; font-weight:900;">${item.quantity}</span>
+                            <span style="font-family:'Courier New', monospace; font-weight:900; font-size:16px;">${item.quantity}</span>
                             <button class="qty-btn" onclick="updateCartItemQty(${index}, 1)">+</button>
                         </div>
                     </div>
