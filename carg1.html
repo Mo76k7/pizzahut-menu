@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Premium Auto Marketplace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .view { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .view.active { display: block; opacity: 1; }
+        
+        /* Mobile Bottom Nav */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: white; border-top: 1px solid #e2e8f0;
+            display: flex; justify-content: space-around; padding: 10px 0;
+            z-index: 50; padding-bottom: env(safe-area-inset-bottom);
+        }
+        @media (min-width: 768px) { .bottom-nav { display: none; } }
+        
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748b; font-size: 11px; cursor: pointer; }
+        .nav-item.active { color: #0f172a; font-weight: 600; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; }
+        .cart-badge { position: absolute; top: -5px; right: -10px; background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold;}
+        
+        /* Custom UI Elements */
+        .brand-pill { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 80px; height: 80px; background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; border: 1px solid transparent; transition: all 0.2s;}
+        .brand-pill:hover, .brand-pill.active { border-color: #3b82f6; background: #eff6ff; }
+        .brand-pill img { height: 30px; margin-bottom: 8px; object-fit: contain; }
+        
+        .amazon-btn { background: #ffd814; border-color: #fcd200; color: #0f172a; border-radius: 100px; font-weight: 500; transition: background 0.2s; }
+        .amazon-btn:hover { background: #f7ca00; }
+        
+        .mode-toggle { background: #e2e8f0; border-radius: 100px; padding: 4px; display: inline-flex; position: relative;}
+        .mode-btn { padding: 8px 24px; border-radius: 100px; font-weight: 600; font-size: 14px; z-index: 10; cursor: pointer; transition: color 0.3s;}
+        .mode-btn.active { color: white; }
+        .toggle-bg { position: absolute; top: 4px; bottom: 4px; width: calc(50% - 4px); background: #0f172a; border-radius: 100px; transition: left 0.3s ease; }
+        .toggle-rent { left: 4px; }
+        .toggle-sell { left: 50%; }
+
+        /* Toast Notifications */
+        .toast-enter { transform: translateY(-100%); opacity: 0; }
+        .toast-active { transform: translateY(0); opacity: 1; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .toast-leave { transform: translateX(100%); opacity: 0; transition: all 0.3s ease-in; }
+
+        /* Mobile Filters Overlay */
+        .mobile-filters { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; }
+        .mobile-filters.active { display: block; }
+        .filters-panel { position: absolute; right: 0; top: 0; bottom: 0; width: 80%; max-width: 300px; background: white; padding: 20px; overflow-y: auto; transform: translateX(100%); transition: transform 0.3s ease; }
+        .mobile-filters.active .filters-panel { transform: translateX(0); }
+    </style>
+</head>
+<body class="text-slate-800 pb-20 md:pb-0">
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Desktop Top Navigation -->
+    <header class="bg-white sticky top-0 z-40 border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center cursor-pointer" onclick="navigate('home')">
+                    <i class="fa-solid fa-car-side text-blue-600 text-2xl mr-2"></i>
+                    <span class="font-bold text-xl tracking-tight hidden sm:block">Auto.Market</span>
+                </div>
+                
+                <div class="flex items-center space-x-2 sm:space-x-8">
+                    <div class="mode-toggle hidden sm:inline-flex" id="desktop-mode-toggle">
+                        <div class="toggle-bg toggle-rent" id="dt-bg"></div>
+                        <div class="mode-btn active" onclick="setMode('rent')">Rent</div>
+                        <div class="mode-btn" onclick="setMode('sell')">Buy</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4 sm:space-x-6">
+                    <div class="relative w-48 sm:w-64">
+                        <input type="text" id="global-search" oninput="handleSearch(this.value)" placeholder="Search cars..." class="w-full bg-slate-100 rounded-full py-2 pl-4 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        <i class="fa-solid fa-search absolute right-4 top-2.5 text-slate-400"></i>
+                    </div>
+                    <div class="relative cursor-pointer hover:text-blue-600 transition" onclick="navigate('cart')">
+                        <i class="fa-solid fa-shopping-cart text-xl"></i>
+                        <span id="cart-count-desktop" class="cart-badge hidden">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- App Container -->
+    <main id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- ================= HOME VIEW ================= -->
+        <section id="view-home" class="view active">
+            <!-- Mobile Toggle -->
+            <div class="flex justify-center sm:hidden mb-6">
+                <div class="mode-toggle">
+                    <div class="toggle-bg toggle-rent" id="mb-bg"></div>
+                    <div class="mode-btn active" onclick="setMode('rent')" id="mb-btn-rent">Rent</div>
+                    <div class="mode-btn" onclick="setMode('sell')" id="mb-btn-sell">Buy</div>
+                </div>
+            </div>
+
+            <!-- Hero Search Block -->
+            <div class="bg-slate-900 rounded-3xl p-6 md:p-12 text-white mb-8 relative overflow-hidden">
+                <div class="relative z-10">
+                    <h1 class="text-3xl md:text-5xl font-bold mb-4">Unlock Your Adventure, <br>Drive Your Dreams.</h1>
+                    <p class="text-slate-300 mb-8 max-w-lg">Discover the perfect vehicle for your next journey. Premium selection, instant confirmation.</p>
+                    
+                    <div class="bg-white rounded-xl p-2 flex flex-col md:flex-row gap-2 max-w-4xl shadow-lg">
+                        <div class="flex-1 border-b md:border-b-0 md:border-r border-slate-200 p-2 flex items-center">
+                            <i class="fa-solid fa-location-dot text-blue-500 mx-3 text-lg"></i>
+                            <div class="flex flex-col w-full">
+                                <span class="text-xs text-slate-400 font-semibold uppercase">Location</span>
+                                <input type="text" placeholder="Enter City" class="text-slate-800 text-sm focus:outline-none w-full font-medium">
+                            </div>
+                        </div>
+                        <div class="flex-1 p-2 flex items-center">
+                            <i class="fa-solid fa-magnifying-glass text-blue-500 mx-3 text-lg"></i>
+                            <div class="flex flex-col w-full">
+                                <span class="text-xs text-slate-400 font-semibold uppercase">Quick Find</span>
+                                <input type="text" id="hero-search" onkeyup="if(event.key === 'Enter') { handleSearch(this.value); navigate('listing'); }" placeholder="e.g. Tesla Model S" class="text-slate-800 text-sm focus:outline-none w-full font-medium">
+                            </div>
+                        </div>
+                        <button onclick="let v = document.getElementById('hero-search').value; handleSearch(v); navigate('listing');" class="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-8 py-3 font-semibold transition flex items-center justify-center">
+                            Search Cars
+                        </button>
+                    </div>
+                </div>
+                <div class="absolute right-[-10%] top-[-20%] opacity-20 pointer-events-none">
+                    <i class="fa-solid fa-car-side" style="font-size: 400px;"></i>
+                </div>
+            </div>
+
+            <!-- Rent/Buy by Brand -->
+            <div class="mb-8">
+                <div class="flex justify-between items-end mb-4">
+                    <h2 class="text-xl font-bold" id="brand-title">Rent by Brand</h2>
+                    <a href="#" onclick="navigate('listing')" class="text-blue-600 text-sm font-semibold hover:underline">View All &rarr;</a>
+                </div>
+                <div class="flex space-x-4 overflow-x-auto hide-scrollbar pb-2" id="brand-container">
+                    <!-- Brands injected via JS -->
+                </div>
+            </div>
+
+            <!-- Featured Vehicles -->
+            <div>
+                <h2 class="text-xl font-bold mb-4">Featured Vehicles</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="featured-container">
+                    <!-- Featured injected via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= LISTING VIEW ================= -->
+        <section id="view-listing" class="view">
+            <!-- Mobile Filter Modal Overlay -->
+            <div id="mobile-filter-modal" class="mobile-filters">
+                <div class="filters-panel flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-xl">Filters</h3>
+                        <button onclick="toggleMobileFilters()" class="text-slate-500 hover:text-slate-800 text-xl"><i class="fa-solid fa-times"></i></button>
+                    </div>
+                    <div id="mobile-filter-content" class="flex-1 overflow-y-auto space-y-6">
+                        <!-- Cloned from desktop filters via JS -->
+                    </div>
+                    <button onclick="toggleMobileFilters()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold mt-6">Apply Filters</button>
+                </div>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Sidebar Filters (Desktop) -->
+                <div class="hidden md:block w-64 flex-shrink-0 bg-white p-5 rounded-2xl border border-slate-200 h-fit sticky top-24">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-lg">Filters</h3>
+                        <button onclick="resetFilters()" class="text-xs text-blue-600 hover:underline">Reset</button>
+                    </div>
+                    
+                    <div class="space-y-6" id="desktop-filter-content">
+                        <!-- Category Filter -->
+                        <div>
+                            <h4 class="font-semibold mb-3 text-sm uppercase text-slate-500">Body Type</h4>
+                            <div class="space-y-2 text-sm" id="category-filters">
+                                <!-- Injected via JS -->
+                            </div>
+                        </div>
+                        
+                        <!-- Price Range Filter -->
+                        <div>
+                            <h4 class="font-semibold mb-3 text-sm uppercase text-slate-500">Max Price: <span id="price-display" class="text-blue-600 font-bold"></span></h4>
+                            <input type="range" id="price-slider" class="w-full accent-blue-600" oninput="updatePriceDisplay(); updateFilters();">
+                            <div class="flex justify-between text-xs text-slate-400 mt-2">
+                                <span>Min</span><span id="price-max-label">Max</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Grid -->
+                <div class="flex-1">
+                    <!-- Mobile Filter/Sort Bar -->
+                    <div class="flex md:hidden overflow-x-auto hide-scrollbar space-x-2 mb-4 pb-2">
+                        <button onclick="toggleMobileFilters()" class="bg-white border border-slate-300 rounded-full px-4 py-2 text-sm font-medium flex-shrink-0 flex items-center shadow-sm">
+                            <i class="fa-solid fa-sliders mr-2"></i> Filters
+                        </button>
+                        <button onclick="resetFilters()" class="bg-slate-100 text-slate-600 border border-slate-200 rounded-full px-4 py-2 text-sm font-medium flex-shrink-0 shadow-sm">
+                            Clear Filters
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center mb-4">
+                        <p class="text-sm text-slate-500">Showing results for <strong class="text-slate-800" id="listing-mode-text">Rentals</strong>.</p>
+                        <span class="text-xs font-semibold bg-slate-100 px-2 py-1 rounded text-slate-600" id="result-count">0 found</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="listing-container">
+                        <!-- Listings injected via JS -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="hidden flex flex-col items-center justify-center py-20 text-center">
+                        <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-car-burst text-3xl text-slate-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">No vehicles found</h3>
+                        <p class="text-slate-500 mt-2 max-w-sm">Try adjusting your filters or search query to find what you're looking for.</p>
+                        <button onclick="resetFilters()" class="mt-4 text-blue-600 font-semibold hover:underline">Clear all filters</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= DETAIL VIEW ================= -->
+        <section id="view-detail" class="view">
+            <div id="detail-container"></div>
+        </section>
+
+        <!-- ================= COMPARE VIEW ================= -->
+        <section id="view-compare" class="view">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Compare Vehicles</h2>
+                <button onclick="navigate('listing')" class="text-blue-600 font-semibold hover:underline">Add Another</button>
+            </div>
+            <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200">
+                <table class="w-full text-left border-collapse" id="compare-table">
+                    <!-- Table injected via JS -->
+                </table>
+            </div>
+        </section>
+
+        <!-- ================= CART VIEW ================= -->
+        <section id="view-cart" class="view max-w-4xl mx-auto">
+            <h2 class="text-2xl font-bold mb-6">Your Selection</h2>
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="flex-1 space-y-4" id="cart-container">
+                    <!-- Items injected via JS -->
+                </div>
+                
+                <div class="w-full md:w-80 bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit sticky top-24">
+                    <h3 class="font-bold text-lg mb-4">Order Summary</h3>
+                    <div class="space-y-3 text-sm border-b border-slate-200 pb-4 mb-4" id="cart-summary">
+                        <!-- Summary injected via JS -->
+                    </div>
+                    <div class="flex justify-between font-bold text-lg mb-6">
+                        <span>Total</span>
+                        <span id="cart-total">$0</span>
+                    </div>
+                    <button onclick="checkoutToTelegram()" class="w-full amazon-btn py-3 text-center block rounded-xl shadow-sm font-bold text-lg">
+                        <i class="fa-brands fa-telegram mr-2"></i> Send Request
+                    </button>
+                    <p class="text-xs text-center text-slate-500 mt-4">You will be redirected securely to the owner's Telegram (@MO76k7) to arrange delivery and payment.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="navigate('home')" id="nav-home">
+            <i class="fa-solid fa-house"></i><span>Home</span>
+        </div>
+        <div class="nav-item" onclick="navigate('listing')" id="nav-listing">
+            <i class="fa-solid fa-list"></i><span>Browse</span>
+        </div>
+        <div class="nav-item" onclick="navigate('compare')" id="nav-compare">
+            <i class="fa-solid fa-code-compare"></i><span>Compare</span>
+        </div>
+        <div class="nav-item relative" onclick="navigate('cart')" id="nav-cart">
+            <i class="fa-solid fa-shopping-cart"></i><span>Cart</span>
+            <span id="cart-count-mobile" class="cart-badge hidden">0</span>
+        </div>
+    </div>
+
+    <script>
+        // --- Mock Data ---
+        const cars = [
+            { id: 1, brand: 'Tesla', model: 'Model S Plaid', type: 'Sedan', price_rent: 149, price_sell: 89990, image: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=800', hp: 1020, accel: '1.99s', drivetrain: 'AWD', rating: 4.9, reviews: 342, features: ['Autopilot', 'Premium Audio', 'Glass Roof'] },
+            { id: 2, brand: 'Porsche', model: 'Taycan Turbo', type: 'Sports', price_rent: 299, price_sell: 153000, image: 'https://images.unsplash.com/photo-1614200187524-dc4b892acf16?auto=format&fit=crop&q=80&w=800', hp: 670, accel: '3.0s', drivetrain: 'AWD', rating: 4.8, reviews: 128, features: ['Sport Chrono', 'Air Suspension', 'Launch Control'] },
+            { id: 3, brand: 'BMW', model: 'M4 Competition', type: 'Coupe', price_rent: 189, price_sell: 78000, image: 'https://images.unsplash.com/photo-1603386329225-868f9b1ee6c9?auto=format&fit=crop&q=80&w=800', hp: 503, accel: '3.8s', drivetrain: 'RWD', rating: 4.7, reviews: 215, features: ['Carbon Fiber Roof', 'M Sport Exhaust', 'Track Mode'] },
+            { id: 4, brand: 'Audi', model: 'RS6 Avant', type: 'Wagon', price_rent: 210, price_sell: 116000, image: 'https://images.unsplash.com/photo-1606016159991-d17f65320c70?auto=format&fit=crop&q=80&w=800', hp: 591, accel: '3.5s', drivetrain: 'Quattro', rating: 4.9, reviews: 89, features: ['Dynamic Ride Control', 'Bang & Olufsen', 'Matrix LED'] },
+            { id: 5, brand: 'Mercedes', model: 'G63 AMG', type: 'SUV', price_rent: 350, price_sell: 179000, image: 'https://images.unsplash.com/photo-1520031441872-265e4ff70366?auto=format&fit=crop&q=80&w=800', hp: 577, accel: '4.5s', drivetrain: '4MATIC', rating: 4.6, reviews: 412, features: ['Off-Road Package', 'Massage Seats', 'Burmester'] },
+            { id: 6, brand: 'Volvo', model: 'EX30', type: 'SUV', price_rent: 89, price_sell: 34950, image: 'https://images.unsplash.com/photo-1651842068212-fbfb412215c0?auto=format&fit=crop&q=80&w=800', hp: 268, accel: '5.1s', drivetrain: 'RWD', rating: 4.5, reviews: 56, features: ['Pilot Assist', 'Harman Kardon', 'Recycled Interior'] },
+            { id: 7, brand: 'Toyota', model: 'Supra GR', type: 'Sports', price_rent: 140, price_sell: 55000, image: 'https://images.unsplash.com/photo-1611821064430-0d40221e95cr?auto=format&fit=crop&q=80&w=800&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3VwcmF8ZW58MHx8MHx8fDA%3D', hp: 382, accel: '3.9s', drivetrain: 'RWD', rating: 4.7, reviews: 194, features: ['Active Exhaust', 'JBL Audio', 'Sport Seats'] },
+            { id: 8, brand: 'Lexus', model: 'LC 500', type: 'Coupe', price_rent: 220, price_sell: 94000, image: 'https://images.unsplash.com/photo-1623910300958-857cb3e08f23?auto=format&fit=crop&q=80&w=800', hp: 471, accel: '4.4s', drivetrain: 'RWD', rating: 4.9, reviews: 76, features: ['V8 Naturally Aspirated', 'Mark Levinson', 'Carbon Roof'] }
+        ];
+
+        const brands = [
+            { name: 'Tesla', icon: 'fa-solid fa-t' },
+            { name: 'Porsche', icon: 'fa-solid fa-p' },
+            { name: 'BMW', icon: 'fa-solid fa-b' },
+            { name: 'Audi', icon: 'fa-solid fa-a' },
+            { name: 'Mercedes', icon: 'fa-solid fa-m' },
+            { name: 'Volvo', icon: 'fa-solid fa-v' }
+        ];
+
+        // --- State Management ---
+        let currentMode = 'rent';
+        let cart = [];
+        let compareList = [];
+        let searchQuery = '';
+        let activeBrand = null;
+
+        // --- Core Helpers ---
+        function formatPrice(num) {
+            return '$' + num.toLocaleString();
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const icon = type === 'success' ? '<i class="fa-solid fa-circle-check text-green-500 mr-2"></i>' : '<i class="fa-solid fa-circle-exclamation text-red-500 mr-2"></i>';
+            
+            toast.className = `bg-white px-4 py-3 rounded-xl shadow-lg border border-slate-100 flex items-center font-semibold text-sm toast-enter pointer-events-auto`;
+            toast.innerHTML = `${icon} ${message}`;
+            container.appendChild(toast);
+            
+            requestAnimationFrame(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-active');
+            });
+
+            setTimeout(() => {
+                toast.classList.remove('toast-active');
+                toast.classList.add('toast-leave');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- Filtering Logic ---
+        function initializeFilters() {
+            // Build dynamic categories based on inventory
+            const categories = [...new Set(cars.map(c => c.type))];
+            const catHTML = categories.map(cat => `
+                <label class="flex items-center cursor-pointer hover:bg-slate-50 p-1 rounded transition">
+                    <input type="checkbox" value="${cat}" class="mr-3 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-gray-300 filter-checkbox" onchange="updateFilters()"> 
+                    ${cat}
+                </label>
+            `).join('');
+            
+            document.getElementById('category-filters').innerHTML = catHTML;
+            setupPriceSlider();
+            
+            // Sync mobile filters DOM
+            document.getElementById('mobile-filter-content').innerHTML = document.getElementById('desktop-filter-content').innerHTML;
+        }
+
+        function setupPriceSlider() {
+            const prices = cars.map(c => currentMode === 'rent' ? c.price_rent : c.price_sell);
+            const max = Math.max(...prices);
+            const min = Math.min(...prices);
+            
+            // Setup dual sliders (using single for simplicity but updating max correctly)
+            const sliders = document.querySelectorAll('input[type="range"]');
+            sliders.forEach(s => {
+                s.min = 0;
+                s.max = max;
+                s.value = max;
+                s.step = currentMode === 'rent' ? 10 : 1000;
+            });
+            
+            document.querySelectorAll('#price-max-label').forEach(el => el.innerText = formatPrice(max));
+            updatePriceDisplay();
+        }
+
+        function updatePriceDisplay() {
+            // Grab the active slider value
+            const slider = document.querySelector('.mobile-filters.active') 
+                ? document.querySelector('#mobile-filter-content input[type="range"]') 
+                : document.querySelector('#desktop-filter-content input[type="range"]');
+            
+            if(slider) {
+                const val = parseInt(slider.value);
+                document.querySelectorAll('#price-display').forEach(el => el.innerText = formatPrice(val));
+                
+                // Sync the other slider
+                document.querySelectorAll('input[type="range"]').forEach(s => { if(s !== slider) s.value = val; });
+            }
+        }
+
+        function updateFilters() {
+            // Collect checked categories
+            const checkboxes = Array.from(document.querySelectorAll('#desktop-filter-content .filter-checkbox'));
+            const selectedCats = checkboxes.filter(cb => cb.checked).map(cb => cb.value);
+            
+            // Get max price
+            const maxPrice = parseInt(document.querySelector('#desktop-filter-content input[type="range"]').value);
+
+            // Filter array
+            const filtered = cars.filter(car => {
+                const searchMatch = car.brand.toLowerCase().includes(searchQuery.toLowerCase()) || car.model.toLowerCase().includes(searchQuery.toLowerCase());
+                const brandMatch = activeBrand ? car.brand === activeBrand : true;
+                const catMatch = selectedCats.length === 0 || selectedCats.includes(car.type);
+                const priceMatch = (currentMode === 'rent' ? car.price_rent : car.price_sell) <= maxPrice;
+                
+                return searchMatch && brandMatch && catMatch && priceMatch;
+            });
+
+            document.getElementById('result-count').innerText = `${filtered.length} found`;
+            
+            const container = document.getElementById('listing-container');
+            const emptyState = document.getElementById('empty-state');
+            
+            if(filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                container.innerHTML = filtered.map(car => createCarCard(car, true)).join('');
+            }
+        }
+
+        function resetFilters() {
+            searchQuery = '';
+            document.getElementById('global-search').value = '';
+            document.getElementById('hero-search').value = '';
+            activeBrand = null;
+            document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('active'));
+            
+            document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+            setupPriceSlider();
+            updateFilters();
+        }
+
+        function handleSearch(query) {
+            searchQuery = query;
+            // Sync search inputs
+            if (document.getElementById('global-search').value !== query) document.getElementById('global-search').value = query;
+            if (document.getElementById('hero-search').value !== query) document.getElementById('hero-search').value = query;
+            
+            if (document.getElementById('view-listing').classList.contains('active')) {
+                updateFilters();
+            }
+        }
+
+        function filterByBrand(brandName, element) {
+            if(activeBrand === brandName) {
+                activeBrand = null;
+                element.classList.remove('active');
+            } else {
+                activeBrand = brandName;
+                document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('active'));
+                element.classList.add('active');
+            }
+            navigate('listing');
+            updateFilters();
+        }
+
+        function toggleMobileFilters() {
+            const modal = document.getElementById('mobile-filter-modal');
+            modal.classList.toggle('active');
+            if(!modal.classList.contains('active')) {
+                // When closing modal, apply filters
+                updateFilters();
+            }
+        }
+
+        // --- Mode & Navigation ---
+        function setMode(mode) {
+            currentMode = mode;
+            
+            const dtRent = document.querySelector('#desktop-mode-toggle .mode-btn:nth-child(2)');
+            const dtSell = document.querySelector('#desktop-mode-toggle .mode-btn:nth-child(3)');
+            const dtBg = document.getElementById('dt-bg');
+            
+            const mbRent = document.getElementById('mb-btn-rent');
+            const mbSell = document.getElementById('mb-btn-sell');
+            const mbBg = document.getElementById('mb-bg');
+
+            if (mode === 'rent') {
+                dtRent.classList.add('active'); dtSell.classList.remove('active'); dtBg.classList.replace('toggle-sell', 'toggle-rent');
+                if(mbRent) { mbRent.classList.add('active'); mbSell.classList.remove('active'); mbBg.classList.replace('toggle-sell', 'toggle-rent'); }
+                
+                document.getElementById('brand-title').innerText = 'Rent by Brand';
+                document.getElementById('listing-mode-text').innerText = 'Rentals';
+            } else {
+                dtSell.classList.add('active'); dtRent.classList.remove('active'); dtBg.classList.replace('toggle-rent', 'toggle-sell');
+                if(mbRent) { mbSell.classList.add('active'); mbRent.classList.remove('active'); mbBg.classList.replace('toggle-rent', 'toggle-sell'); }
+                
+                document.getElementById('brand-title').innerText = 'Buy by Brand';
+                document.getElementById('listing-mode-text').innerText = 'Vehicles for Sale';
+            }
+            
+            setupPriceSlider();
+            renderViews();
+            updateFilters(); // Re-apply constraints
+        }
+
+        function navigate(viewId, param = null) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if(document.getElementById(`nav-${viewId}`)) document.getElementById(`nav-${viewId}`).classList.add('active');
+
+            if(viewId === 'listing') updateFilters();
+            if(viewId === 'detail' && param) renderDetail(param);
+            if(viewId === 'cart') renderCart();
+            if(viewId === 'compare') renderCompare();
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- Render Views ---
+        function renderViews() {
+            renderBrands();
+            renderFeatured();
+        }
+
+        function renderBrands() {
+            const container = document.getElementById('brand-container');
+            container.innerHTML = brands.map(b => `
+                <div class="brand-pill ${activeBrand === b.name ? 'active' : ''}" onclick="filterByBrand('${b.name}', this)">
+                    <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center mb-1 pointer-events-none">
+                        <i class="${b.icon} text-slate-700"></i>
+                    </div>
+                    <span class="text-xs font-semibold pointer-events-none">${b.name}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderFeatured() {
+            const container = document.getElementById('featured-container');
+            container.innerHTML = cars.slice(0, 3).map(car => createCarCard(car)).join('');
+        }
+
+        function createCarCard(car, isAmazonStyle = false) {
+            const price = currentMode === 'rent' ? `${formatPrice(car.price_rent)} <span class="text-xs font-normal text-slate-500">/day</span>` : formatPrice(car.price_sell);
+            
+            if (isAmazonStyle) {
+                return `
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg transition cursor-pointer flex flex-col h-full" onclick="navigate('detail', ${car.id})">
+                    <div class="relative bg-slate-100 h-48 w-full">
+                        <img src="${car.image}" alt="${car.brand}" class="w-full h-full object-cover mix-blend-multiply">
+                        <div class="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold text-slate-700 shadow-sm">${car.type}</div>
+                    </div>
+                    <div class="p-4 flex flex-col flex-1 justify-between">
+                        <div>
+                            <p class="text-xs text-slate-500 uppercase tracking-wide font-semibold">${car.brand}</p>
+                            <h3 class="font-bold text-slate-900 leading-tight text-lg">${car.model}</h3>
+                            <div class="flex items-center mt-1">
+                                <div class="text-yellow-400 text-xs"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></div>
+                                <span class="text-xs text-slate-500 ml-1">(${car.reviews})</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-100">
+                            <p class="text-2xl font-bold text-slate-900">${price}</p>
+                            <button class="w-full mt-3 amazon-btn py-2 text-sm shadow-sm" onclick="event.stopPropagation(); addToCart(${car.id})">
+                                Add to Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            return `
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group cursor-pointer" onclick="navigate('detail', ${car.id})">
+                <div class="relative overflow-hidden h-48">
+                    <img src="${car.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute top-3 left-3 bg-white px-2 py-1 rounded text-xs font-bold shadow-sm">${car.type}</div>
+                </div>
+                <div class="p-5">
+                    <h3 class="font-bold text-lg">${car.brand} ${car.model}</h3>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="text-xl font-extrabold text-blue-600">${price}</span>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderDetail(id) {
+            const car = cars.find(c => c.id === id);
+            const container = document.getElementById('detail-container');
+            const price = currentMode === 'rent' ? `${formatPrice(car.price_rent)}/day` : formatPrice(car.price_sell);
+            const btnText = currentMode === 'rent' ? 'Book Rental' : 'Proceed to Buy';
+
+            container.innerHTML = `
+                <div class="flex flex-col lg:flex-row gap-8 mb-8">
+                    <div class="flex-1 relative">
+                        <button onclick="navigate('listing')" class="absolute top-4 left-4 z-10 bg-white/90 backdrop-blur rounded-full w-10 h-10 flex items-center justify-center hover:bg-white shadow transition">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+                        <img src="${car.image}" class="w-full h-[40vh] md:h-[60vh] object-cover rounded-3xl shadow-md">
+                        
+                        <div class="absolute bottom-4 left-4 right-4 flex gap-2 md:gap-4 overflow-x-auto hide-scrollbar">
+                            <div class="bg-white/90 backdrop-blur-md border border-white/20 rounded-xl p-4 shadow-lg min-w-[120px]">
+                                <i class="fa-solid fa-gauge-high text-blue-600 mb-2 text-xl"></i>
+                                <p class="text-xs text-slate-500 font-medium">Acceleration</p>
+                                <p class="font-bold text-slate-900">${car.accel}</p>
+                            </div>
+                            <div class="bg-white/90 backdrop-blur-md border border-white/20 rounded-xl p-4 shadow-lg min-w-[120px]">
+                                <i class="fa-solid fa-horse-head text-blue-600 mb-2 text-xl"></i>
+                                <p class="text-xs text-slate-500 font-medium">Power</p>
+                                <p class="font-bold text-slate-900">${car.hp} HP</p>
+                            </div>
+                            <div class="bg-white/90 backdrop-blur-md border border-white/20 rounded-xl p-4 shadow-lg min-w-[120px]">
+                                <i class="fa-solid fa-dharmachakra text-blue-600 mb-2 text-xl"></i>
+                                <p class="text-xs text-slate-500 font-medium">Drivetrain</p>
+                                <p class="font-bold text-slate-900">${car.drivetrain}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="w-full lg:w-96 bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200 flex flex-col">
+                        <div class="mb-6">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <p class="text-sm font-bold text-blue-600 uppercase tracking-wider">${car.brand}</p>
+                                    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">${car.model}</h1>
+                                </div>
+                                <div class="bg-slate-100 text-slate-700 px-3 py-1 rounded-md text-xs font-bold border border-slate-200">
+                                    ${currentMode === 'rent' ? 'For Rent' : 'For Sale'}
+                                </div>
+                            </div>
+                            <div class="flex items-center text-sm text-slate-500 mt-2">
+                                <i class="fa-solid fa-star text-yellow-400 mr-1"></i> 
+                                <span class="font-medium">${car.rating}</span> 
+                                <span class="mx-2">•</span> 
+                                <span class="underline cursor-pointer">${car.reviews} reviews</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                            <p class="text-sm text-slate-500 font-medium mb-1">Total Price</p>
+                            <p class="text-4xl font-extrabold text-slate-900">${price}</p>
+                        </div>
+
+                        <div class="mb-6 flex-1">
+                            <h3 class="font-bold text-lg mb-4 text-slate-800">Key Features</h3>
+                            <ul class="space-y-3">
+                                ${car.features.map(f => `
+                                    <li class="flex items-center text-slate-700 font-medium">
+                                        <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
+                                            <i class="fa-solid fa-check text-blue-600 text-xs"></i>
+                                        </div>
+                                        ${f}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+
+                        <div class="space-y-3 mt-auto pt-6 border-t border-slate-100">
+                            <button onclick="addToCart(${car.id}); navigate('cart')" class="w-full amazon-btn py-4 text-lg rounded-xl shadow-md flex justify-center items-center">
+                                ${btnText}
+                            </button>
+                            <button onclick="addToCompare(${car.id})" class="w-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 py-3 rounded-xl font-semibold transition flex justify-center items-center">
+                                <i class="fa-solid fa-code-compare mr-2"></i> Compare Vehicle
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Cart, Checkout & Compare Logic ---
+        function addToCart(id) {
+            const car = cars.find(c => c.id === id);
+            cart.push({ ...car, mode: currentMode });
+            updateCartBadges();
+            showToast(`${car.brand} ${car.model} added to cart!`);
+        }
+
+        function updateCartBadges() {
+            const count = cart.length;
+            const dBadge = document.getElementById('cart-count-desktop');
+            const mBadge = document.getElementById('cart-count-mobile');
+            
+            [dBadge, mBadge].forEach(badge => {
+                if(count > 0) {
+                    badge.innerText = count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            });
+        }
+
+        function removeFromCart(index) {
+            const removed = cart[index];
+            cart.splice(index, 1);
+            updateCartBadges();
+            renderCart();
+            showToast(`${removed.brand} removed from cart.`, 'error');
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-container');
+            const summary = document.getElementById('cart-summary');
+            const totalEl = document.getElementById('cart-total');
+            
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white p-12 rounded-2xl border border-slate-200 text-center shadow-sm">
+                        <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="fa-solid fa-cart-shopping text-4xl text-slate-300"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Your cart is empty</h3>
+                        <p class="text-slate-500 mb-8 max-w-sm mx-auto">Looks like you haven't added any vehicles to your cart yet. Explore our listings to find your perfect ride.</p>
+                        <button onclick="navigate('listing')" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold transition shadow-md">Browse Inventory</button>
+                    </div>`;
+                summary.innerHTML = '<p class="text-slate-400 italic">No items selected.</p>';
+                totalEl.innerText = '$0';
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = cart.map((item, index) => {
+                const itemPrice = item.mode === 'rent' ? item.price_rent : item.price_sell;
+                total += itemPrice;
+                return `
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 flex flex-row items-center gap-6 shadow-sm hover:shadow transition">
+                    <img src="${item.image}" class="w-28 h-28 object-cover rounded-xl bg-slate-100 mix-blend-multiply">
+                    <div class="flex-1">
+                        <span class="inline-block px-2 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase rounded mb-1">${item.mode === 'rent' ? 'Rental' : 'Purchase'}</span>
+                        <h4 class="font-bold text-lg text-slate-900">${item.brand} ${item.model}</h4>
+                        <p class="text-blue-600 font-extrabold mt-1 text-lg">${formatPrice(itemPrice)}${item.mode === 'rent' ? '<span class="text-sm font-medium text-slate-500">/day</span>' : ''}</p>
+                    </div>
+                    <button onclick="removeFromCart(${index})" class="w-10 h-10 rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition flex items-center justify-center">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>`;
+            }).join('');
+
+            summary.innerHTML = cart.map(item => `
+                <div class="flex justify-between items-center">
+                    <div class="flex flex-col truncate pr-4">
+                        <span class="font-semibold text-slate-800 truncate">${item.brand} ${item.model}</span>
+                        <span class="text-xs text-slate-500 uppercase">${item.mode}</span>
+                    </div>
+                    <span class="font-bold text-slate-900">${formatPrice(item.mode === 'rent' ? item.price_rent : item.price_sell)}</span>
+                </div>
+            `).join('');
+
+            totalEl.innerText = formatPrice(total);
+        }
+
+        function checkoutToTelegram() {
+            if (cart.length === 0) return showToast('Your cart is empty!', 'error');
+            
+            let message = "🚗 *New Auto Market Request*\n\n";
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                const price = item.mode === 'rent' ? item.price_rent : item.price_sell;
+                total += price;
+                message += `${index + 1}. ${item.brand} ${item.model} [${item.mode.toUpperCase()}] - ${formatPrice(price)}\n`;
+            });
+            
+            message += `\n*Estimated Total: ${formatPrice(total)}*`;
+            message += `\n\n_Please contact me to finalize this transaction._`;
+
+            // Using window.location to bypass popup blockers reliably on mobile/desktop
+            const telegramUrl = `https://t.me/MO76k7?text=${encodeURIComponent(message)}`;
+            window.location.href = telegramUrl;
+        }
+
+        function addToCompare(id) {
+            const car = cars.find(c => c.id === id);
+            if(compareList.length >= 3) {
+                showToast('Maximum 3 cars in compare. Removed oldest.', 'error');
+                compareList.shift();
+            }
+            if(!compareList.find(c => c.id === id)) {
+                compareList.push(car);
+                showToast(`${car.model} added to comparison`);
+            }
+            navigate('compare');
+        }
+
+        function renderCompare() {
+            const table = document.getElementById('compare-table');
+            if (compareList.length === 0) {
+                table.innerHTML = `<tr><td class="p-12 text-center text-slate-500 bg-white rounded-xl">No vehicles selected for comparison. <br><br><button onclick="navigate('listing')" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">Add Vehicles</button></td></tr>`;
+                return;
+            }
+
+            const headerRow = `<tr><th class="p-4 border-b bg-slate-50 w-1/4 text-slate-500 uppercase text-xs tracking-wider">Features</th>` + compareList.map(c => `
+                <th class="p-4 border-b text-center w-1/4 relative bg-white">
+                    <button onclick="removeCompare(${c.id})" class="absolute top-2 right-2 w-8 h-8 bg-slate-100 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition flex items-center justify-center"><i class="fa-solid fa-times"></i></button>
+                    <img src="${c.image}" class="w-full h-24 object-cover rounded-lg mb-3 mix-blend-multiply bg-slate-50">
+                    <p class="font-bold text-slate-900">${c.brand}</p>
+                    <p class="text-sm text-slate-500">${c.model}</p>
+                </th>`).join('') + `</tr>`;
+
+            const rows = [
+                { label: 'Body Type', key: 'type' },
+                { label: 'Horsepower', key: 'hp', suffix: ' HP' },
+                { label: '0-60 mph', key: 'accel' },
+                { label: 'Drivetrain', key: 'drivetrain' },
+                { label: 'Rent Price', key: 'price_rent', prefix: '$', suffix: '/day' },
+                { label: 'Buy Price', key: 'price_sell', prefix: '$' }
+            ];
+
+            const bodyRows = rows.map(r => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="p-4 border-b font-semibold bg-slate-50/50 text-slate-700">${r.label}</td>
+                    ${compareList.map(c => `
+                        <td class="p-4 border-b text-center text-slate-800 font-medium bg-white">
+                            ${r.prefix || ''}${c[r.key].toLocaleString()}${r.suffix || ''}
+                        </td>
+                    `).join('')}
+                </tr>
+            `).join('');
+
+            table.innerHTML = headerRow + bodyRows;
+        }
+
+        function removeCompare(id) {
+            compareList = compareList.filter(c => c.id !== id);
+            renderCompare();
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeFilters();
+            renderViews();
+            updateFilters();
+        });
+    </script>
+</body>
+</html>
