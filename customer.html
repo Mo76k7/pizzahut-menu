@@ -7,6 +7,7 @@
     <title>Pizza Hut — Customer Order</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Ethiopic:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --color-primary: #EE1945;
@@ -328,9 +329,9 @@
                         <button class="copy-account-btn" onclick="copyAccountNumber()"><i class="fa-solid fa-copy"></i> Copy Number</button>
                     </div>
                 </div>
-                <button class="btn-primary" onclick="submitOrder()"><i class="fa-brands fa-telegram"></i> Send Order to Kitchen</button>
+                <button class="btn-primary" onclick="submitOrder()"><i class="fa-solid fa-paper-plane"></i> Send Order to Kitchen</button>
             </div>
-            <div class="kitchen-info-note">Kitchen: @MO76k7 (0923845344)</div>
+            <div class="kitchen-info-note">Orders go directly to the Kitchen Dashboard</div>
         </div>
 
         <div id="view-tracker" class="app-view">
@@ -393,6 +394,12 @@
 </div>
 
 <script>
+// ==================== SUPABASE SETUP ====================
+const SUPABASE_URL = 'https://fxaqyfmlbomidkfxaprf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4YXF5Zm1sYm9taWRrZnhhcHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5ODQ3MTEsImV4cCI6MjEwMDU2MDcxMX0.jXfMdV_aJ4o8eKtgL_P_MeT5i7qweO0qOcLNIk8Xkgo';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // ==================== DATA ====================
 const MENU_DATA = {
     "veg-pizza": { title: "Veg Pizza", title_am: "የአትክልት ፒዛ", items: [
@@ -464,13 +471,13 @@ const MENU_DATA = {
 };
 
 const PAYMENT_ACCOUNTS = { telebirr: { number: "0905909090", name: "Pizza Hut Telebirr" }, cbe: { number: "0987878787", name: "Pizza Hut CBE Birr" }, chapa: { number: "0989", name: "Pizza Hut Chapa" }, cash: { number: "Pay to Waiter", name: "Cash Payment at Table" } };
-const KITCHEN_TELEGRAM = "MO76k7", KITCHEN_PHONE = "0923845344";
 const VAT = 0.15, SERVICE = 0.10;
 
 // ==================== STATE ====================
 let currentLang = 'en', currentCategory = "veg-pizza", currentSort = 'default';
 let activeModalItem = null, selectedSize = 'medium', selectedCrust = 'regular', modalQty = 1;
-let cart = [], selectedPayment = null, orderStatus = 'pending';
+let cart = [], selectedPayment = null, currentOrderId = null;
+let trackerSubscription = null;
 
 // ==================== LANGUAGE ====================
 function switchLanguage(lang) {
@@ -519,17 +526,51 @@ function navigateTo(view) {
 function updateTrackerStatus() {
     const steps = document.querySelectorAll('#tracker-timeline .timeline-step');
     steps.forEach(s => s.classList.remove('active', 'preparing'));
-    if (orderStatus === 'pending') {
+    
+    // Get current order status from Supabase
+    if (currentOrderId) {
+        checkOrderStatus(currentOrderId);
+    } else {
         steps[0].classList.add('active');
         document.getElementById('tracker-title').textContent = 'Waiting for Kitchen...';
-    } else if (orderStatus === 'accepted') {
-        steps[0].classList.add('active'); steps[1].classList.add('active');
+    }
+}
+
+async function checkOrderStatus(orderId) {
+    try {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('status')
+            .eq('id', orderId)
+            .single();
+        
+        if (error) throw error;
+        if (data) {
+            updateStatusUI(data.status);
+        }
+    } catch(e) {
+        console.error('Error checking order status:', e);
+    }
+}
+
+function updateStatusUI(status) {
+    const steps = document.querySelectorAll('#tracker-timeline .timeline-step');
+    steps.forEach(s => s.classList.remove('active', 'preparing'));
+    
+    if (status === 'pending') {
+        steps[0].classList.add('active');
+        document.getElementById('tracker-title').textContent = 'Waiting for Kitchen...';
+    } else if (status === 'accepted') {
+        steps[0].classList.add('active');
+        steps[1].classList.add('active');
         document.getElementById('tracker-title').textContent = 'Kitchen Accepted Your Order!';
-    } else if (orderStatus === 'preparing') {
-        steps[0].classList.add('active'); steps[1].classList.add('active');
-        steps[2].classList.add('active'); steps[2].classList.add('preparing');
+    } else if (status === 'preparing') {
+        steps[0].classList.add('active');
+        steps[1].classList.add('active');
+        steps[2].classList.add('active');
+        steps[2].classList.add('preparing');
         document.getElementById('tracker-title').textContent = '🍳 Preparing Your Order...';
-    } else if (orderStatus === 'ready') {
+    } else if (status === 'ready') {
         steps.forEach(s => s.classList.add('active'));
         document.getElementById('tracker-title').textContent = '✅ Order Ready for Pickup!';
         document.getElementById('tracker-estimate').textContent = '🎉 Your order is ready!';
@@ -815,9 +856,10 @@ function copyAccountNumber() {
     navigator.clipboard.writeText(PAYMENT_ACCOUNTS[selectedPayment].number).then(() => showToast('Copied!'));
 }
 
-// ==================== ORDER SUBMISSION ====================
-function submitOrder() {
+// ==================== ORDER SUBMISSION (SUPABASE) ====================
+async function submitOrder() {
     if (!cart.length) return;
+    
     const tableInput = document.getElementById('table-number-input');
     const tableVal = tableInput.value.trim();
     const tableError = document.getElementById('table-error-msg');
@@ -842,24 +884,105 @@ function submitOrder() {
     const table = tableVal;
     const instr = document.getElementById('extra-instructions-input').value.trim();
     const sc = parseInt(document.getElementById('split-count').value) || 1;
-    let gt = 0, summary = `🍕 *NEW ORDER*\n\n📍 ${branch}\n🪑 Table ${table}\n${sc > 1 ? `👥 Split: ${sc}p\n` : ''}───────────────────\n`;
-    cart.forEach((item, i) => {
-        const it = item.unitPrice * item.quantity; gt += it;
-        const name = item.nameEn || item.name;
-        summary += `${i+1}. *${name}*${item.size ? ` [${item.size.toUpperCase()}]` : ''}${item.crust && item.crust !== 'regular' ? ` (${item.crust})` : ''} x${item.quantity} - Br ${it.toFixed(2)}\n`;
+    
+    let gt = 0;
+    const items = cart.map(item => {
+        const it = item.unitPrice * item.quantity;
+        gt += it;
+        return {
+            name: item.nameEn || item.name,
+            size: item.size || null,
+            crust: item.crust && item.crust !== 'regular' ? item.crust : null,
+            quantity: item.quantity,
+            price: item.unitPrice,
+            total: it
+        };
     });
-    const vat = gt * VAT, svc = gt * SERVICE, total = gt + vat + svc;
-    if (instr) summary += `───────────────────\n📝 ${instr}\n`;
-    summary += `───────────────────\n💰 Subtotal: Br ${gt.toFixed(2)}\n🧾 VAT: Br ${vat.toFixed(2)}\n🍽️ Service: Br ${svc.toFixed(2)}\n💵 *TOTAL: Br ${total.toFixed(2)}*\n${sc > 1 ? `👤 Per person: Br ${(total/sc).toFixed(2)}\n` : ''}\n💳 *${selectedPayment.toUpperCase()}*${selectedPayment !== 'cash' ? ` - ${PAYMENT_ACCOUNTS[selectedPayment].number}` : ''}\n\n🧑‍🍳 @${KITCHEN_TELEGRAM} | 📞 ${KITCHEN_PHONE}`;
     
-    window.open(`https://t.me/${KITCHEN_TELEGRAM}?text=${encodeURIComponent(summary)}`, '_blank');
-    showToast('Order sent!');
+    const vat = gt * VAT;
+    const svc = gt * SERVICE;
+    const total = gt + vat + svc;
     
-    orderStatus = 'pending';
-    cart = [];
-    updateBadge();
-    navigateTo('tracker');
-    updateTrackerStatus();
+    // Generate order number
+    const orderNo = Math.floor(1000 + Math.random() * 9000).toString();
+    
+    // Create order object
+    const orderData = {
+        order_no: orderNo,
+        branch: branch,
+        table: table,
+        items: items,
+        subtotal: gt,
+        vat: vat,
+        service: svc,
+        total: total,
+        split: sc,
+        payment: selectedPayment,
+        instructions: instr || '',
+        status: 'pending',
+        customer: 'Walk-in',
+        created_at: new Date().toISOString()
+    };
+    
+    try {
+        // Save order to Supabase
+        const { data, error } = await supabase
+            .from('orders')
+            .insert([orderData])
+            .select();
+        
+        if (error) throw error;
+        
+        const savedOrder = data[0];
+        currentOrderId = savedOrder.id;
+        
+        showToast('Order sent to kitchen!');
+        
+        // Clear cart
+        cart = [];
+        updateBadge();
+        
+        // Navigate to tracker
+        navigateTo('tracker');
+        
+        // Set up realtime subscription for this order
+        setupRealtimeTracker(currentOrderId);
+        
+        // Update initial status
+        updateStatusUI('pending');
+        
+    } catch(e) {
+        console.error('Error submitting order:', e);
+        showToast('Failed to send order. Please try again.');
+    }
+}
+
+// ==================== REALTIME TRACKER ====================
+function setupRealtimeTracker(orderId) {
+    // Clean up old subscription
+    if (trackerSubscription) {
+        trackerSubscription.unsubscribe();
+        trackerSubscription = null;
+    }
+    
+    // Subscribe to changes for this specific order
+    trackerSubscription = supabase
+        .channel('order-tracker')
+        .on(
+            'postgres_changes',
+            {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'orders',
+                filter: `id=eq.${orderId}`
+            },
+            (payload) => {
+                const newStatus = payload.new.status;
+                updateStatusUI(newStatus);
+                showToast(`Order status: ${newStatus.toUpperCase()}`);
+            }
+        )
+        .subscribe();
 }
 
 // ==================== TOAST & UTILITY ====================
