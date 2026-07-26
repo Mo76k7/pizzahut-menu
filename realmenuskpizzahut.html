@@ -290,6 +290,11 @@
             border-color: var(--primary-plastic);
             background: #fff0f0;
         }
+        .table-input-field::placeholder {
+            color: #aaa;
+            font-weight: 400;
+            opacity: 0.8;
+        }
 
         .cart-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px dashed #d1c8b4; flex-wrap: wrap;}
         .cart-item:last-child { border-bottom: none; }
@@ -540,7 +545,7 @@
                 <div id="cart-form-section" style="display:none;">
                     <div class="receipt-card">
                         <div style="font-size: 13px; font-weight: 800; color: var(--ink-muted); margin-bottom:8px; text-transform: uppercase;"><i class="fa-solid fa-chair"></i> <span id="t-table-num">Table Number</span> <span style="color: var(--primary-plastic);">*</span></div>
-                        <input type="text" id="table-number-input" class="table-input-field" placeholder="e.g. 05" value="01">
+                        <input type="text" id="table-number-input" class="table-input-field" placeholder="e.g. 05" value="">
                         <div id="table-error-msg" style="color: var(--primary-plastic); font-size: 12px; font-weight: 700; margin-top: 6px; display: none;">Please enter a table number</div>
                     </div>
                 </div>
