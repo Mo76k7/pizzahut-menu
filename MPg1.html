@@ -104,6 +104,8 @@
         .cat-pill.active { background: var(--color-primary); color: #FFF; border-color: rgba(255, 255, 255, 0.4); box-shadow: 0 6px 18px rgba(238, 25, 69, 0.35); }
 
         .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(140px, 42vw, 180px), 1fr)); gap: clamp(8px, 2vw, 12px); margin-top: 6px; }
+        @media (min-width: 500px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+
         .product-card { background: var(--glass-bg); backdrop-filter: var(--glass-blur); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); cursor: pointer; display: flex; flex-direction: column; transition: transform 0.2s ease, border-color 0.2s ease; position: relative; }
         .product-card.sold-out { opacity: 0.45; pointer-events: none; filter: grayscale(0.6); }
         .product-card:active:not(.sold-out) { transform: scale(0.97); }
@@ -218,7 +220,7 @@
             </div>
             <div class="header-right">
                 <button class="lang-toggle active-lang">EN</button>
-                <!-- Secret Door Trigger: Tap Logo 5 Times -->
+                <!-- Secret Door Trigger: Tap Logo 1 Time -->
                 <div class="brand-logo" onclick="handleLogoTap()">PIZZA HUT</div>
             </div>
         </header>
@@ -324,13 +326,30 @@
          ========================================================= -->
     <script>
         // -------------------------------------------------------------
-        // 1. SUPABASE CONFIGURATION (Corrected Initialization)
+        // 1. SUPABASE CONFIGURATION
         // -------------------------------------------------------------
         const SUPABASE_URL = "https://fxaqyfmlbomidkfxaprf.supabase.co"; 
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4YXF5Zm1sYm9taWRrZnhhcHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5ODQ3MTEsImV4cCI6MjEwMDU2MDcxMX0.jXfMdV_aJ4o8eKtgL_P_MeT5i7qweO0qOcLNIk8Xkgo";
         
-        // Initialize Supabase correctly with the variables
         let supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Expanded initial items to auto-seed into Supabase
+        const INITIAL_MENU = [
+            { name_en: "Margherita Pizza", category: "veg-pizza", price: 770, image_url: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&q=80", in_stock: true },
+            { name_en: "Cheese Pizza", category: "veg-pizza", price: 740, image_url: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", in_stock: true },
+            { name_en: "Veggie Supreme", category: "veg-pizza", price: 830, image_url: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80", in_stock: true },
+            { name_en: "Pepperoni Lovers", category: "meat-pizza", price: 965, image_url: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", in_stock: true },
+            { name_en: "Meat Lovers", category: "meat-pizza", price: 1150, image_url: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?w=400&q=80", in_stock: true },
+            { name_en: "BBQ Double Meat", category: "meat-pizza", price: 1025, image_url: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&q=80", in_stock: true },
+            { name_en: "Hot & Spicy Chicken", category: "chicken-pizza", price: 940, image_url: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", in_stock: true },
+            { name_en: "Chicken Fajita", category: "chicken-pizza", price: 890, image_url: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=400&q=80", in_stock: true },
+            { name_en: "French Fries", category: "sides", price: 355, image_url: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", in_stock: true },
+            { name_en: "Cheesy Garlic Bread", category: "sides", price: 445, image_url: "https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=400&q=80", in_stock: true },
+            { name_en: "6 Bone-out Wings", category: "sides", price: 1300, image_url: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400&q=80", in_stock: true },
+            { name_en: "Coca-Cola 500ml", category: "drinks", price: 140, image_url: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", in_stock: true },
+            { name_en: "Sprite 500ml", category: "drinks", price: 140, image_url: "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&q=80", in_stock: true },
+            { name_en: "Bottled Water 500ml", category: "drinks", price: 70, image_url: "https://images.unsplash.com/photo-1560023907-5f339617ea30?w=400&q=80", in_stock: true }
+        ];
 
         // State Variables
         let menuItems = [];
@@ -356,7 +375,13 @@
             try {
                 let { data, error } = await supabase.from('menu_items').select('*');
                 if (error) throw error;
-                menuItems = data || [];
+                
+                if (!data || data.length === 0) {
+                    const { data: seededData } = await supabase.from('menu_items').insert(INITIAL_MENU).select();
+                    menuItems = seededData || INITIAL_MENU;
+                } else {
+                    menuItems = data;
+                }
             } catch (err) {
                 console.error("Error loading menu:", err);
                 showToast("Failed to load menu from database.");
@@ -364,7 +389,7 @@
         }
 
         function renderCategoryBar() {
-            const categories = [ { id: 'veg-pizza', title: 'Veg Pizza' }, { id: 'meat-pizza', title: 'Meat Pizza' }, { id: 'sides', title: 'Sides' }, { id: 'drinks', title: 'Drinks' } ];
+            const categories = [ { id: 'veg-pizza', title: 'Veg Pizza' }, { id: 'meat-pizza', title: 'Meat Pizza' }, { id: 'chicken-pizza', title: 'Chicken Pizza' }, { id: 'sides', title: 'Sides' }, { id: 'drinks', title: 'Drinks' } ];
             document.getElementById('categories-bar').innerHTML = categories.map(c => `
                 <div class="cat-pill ${c.id === currentCategory ? 'active' : ''}" onclick="selectCategory('${c.id}')">${c.title}</div>
             `).join('');
@@ -499,7 +524,6 @@
         // -------------------------------------------------------------
         
         async function fetchKitchenOrders() {
-            // Fetch all orders that are not 'completed' (or fetch all if you want history)
             const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
             if (data) {
                 kitchenOrders = data;
@@ -519,7 +543,6 @@
             }
 
             container.innerHTML = filtered.map(order => {
-                // Determine buttons based on status
                 let buttonsHtml = '';
                 if(order.status === 'new') {
                     buttonsHtml = `
@@ -536,7 +559,6 @@
                     `;
                 }
 
-                // Format items list
                 let itemsList = order.items.map(item => `${item.name_en} x${item.quantity || 1}`).join('<br>');
 
                 return `
@@ -564,7 +586,6 @@
             try {
                 const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
                 if (error) throw error;
-                // Instantly update local UI
                 const order = kitchenOrders.find(o => o.id === orderId);
                 if(order) order.status = newStatus;
                 renderKitchenUI();
@@ -574,11 +595,10 @@
             }
         }
 
-        // Subscribe kitchen to all live incoming orders
         function subscribeKitchenToOrders() {
             supabase.channel('kitchen_global_orders')
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
-                    kitchenOrders.unshift(payload.new); // add new order to top of list
+                    kitchenOrders.unshift(payload.new);
                     showToast("🚨 NEW ORDER ARRIVED!");
                     renderKitchenUI();
                 })
@@ -593,26 +613,15 @@
         // NAVIGATION & SECRET DOOR
         // -------------------------------------------------------------
         
-        let logoTapCount = 0;
-        let logoTapTimer;
-
         function handleLogoTap() {
-            logoTapCount++;
-            clearTimeout(logoTapTimer);
-            
-            if (logoTapCount >= 5) {
-                logoTapCount = 0;
-                let pwd = prompt("Enter Admin/Kitchen Password:");
-                if (pwd === "1234") {
-                    document.getElementById('nav-kitchen').classList.remove('hidden');
-                    showToast("Kitchen Dashboard Unlocked!");
-                    navigateTo('kitchen');
-                } else {
-                    showToast("Incorrect Password.");
-                }
+            let pwd = prompt("Enter Admin/Kitchen Password:");
+            if (pwd === "1234") {
+                document.getElementById('nav-kitchen').classList.remove('hidden');
+                showToast("Kitchen Dashboard Unlocked!");
+                navigateTo('kitchen');
+            } else {
+                showToast("Incorrect Password.");
             }
-            
-            logoTapTimer = setTimeout(() => { logoTapCount = 0; }, 2000);
         }
 
         function navigateTo(view) {
