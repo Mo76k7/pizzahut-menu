@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0A0A0C">
+    <title>Pizza Hut Kitchen — Live Display System</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Supabase Client Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --color-primary: #EE1945;
+            --color-primary-dark: #B80F32;
+            --color-accent: #FFAA00;
+            --color-bg: #0A0A0C;
+            --color-text-main: #FFFFFF;
+            --color-text-muted: #CBD5E1;
+            --color-success: #10B981;
+            --color-error: #EF4444;
+            --color-preparing: #38BDF8;
+            --font-display: 'Barlow Condensed', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --glass-bg: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-blur: blur(20px) saturate(180%);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body { background-color: #040405; font-family: var(--font-sans); color: var(--color-text-main); display: flex; justify-content: center; align-items: center; }
+
+        .app-container { width: 100%; height: 100vh; height: 100dvh; max-width: 100%; background-color: var(--color-bg); position: relative; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* Background Glow */
+        .bg-mesh { position: absolute; inset: 0; z-index: 1; filter: blur(60px); pointer-events: none; overflow: hidden; }
+        .blob { position: absolute; border-radius: 50%; opacity: 0.4; }
+        .blob-1 { width: 45vmax; height: 45vmax; top: -15%; left: -15%; background: #EE1945; }
+        .blob-2 { width: 35vmax; height: 35vmax; bottom: -10%; right: -10%; background: #38BDF8; }
+
+        /* HEADER */
+        .app-header { padding: calc(14px + var(--safe-top)) 4vw 12px; display: flex; justify-content: space-between; align-items: center; background: rgba(18, 18, 24, 0.6); backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--glass-border); z-index: 20; position: relative; }
+        .brand-title { font-family: var(--font-display); font-weight: 900; font-size: clamp(20px, 5vw, 26px); color: var(--color-primary); letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+        .live-pill { font-family: var(--font-sans); font-size: 10px; font-weight: 800; background: rgba(16, 185, 129, 0.2); color: var(--color-success); border: 1px solid var(--color-success); padding: 3px 8px; border-radius: 12px; display: flex; align-items: center; gap: 4px; text-transform: uppercase; }
+        .live-dot { width: 6px; height: 6px; background: var(--color-success); border-radius: 50%; animation: pulse-dot 1.5s infinite; }
+        @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* FILTER TABS */
+        .kitchen-tabs { display: flex; gap: 8px; padding: 12px 4vw 8px; overflow-x: auto; scrollbar-width: none; z-index: 20; position: relative; border-bottom: 1px solid var(--glass-border); background: rgba(10, 10, 12, 0.4); }
+        .kitchen-tabs::-webkit-scrollbar { display: none; }
+        .k-tab { padding: 8px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--color-text-muted); white-space: nowrap; transition: all 0.2s ease; }
+        .k-tab.active { color: #FFF; border-color: rgba(255,255,255,0.4); }
+        .k-tab.active.all { background: rgba(255, 255, 255, 0.2); }
+        .k-tab.active.new { background: var(--color-accent); color: #000; border-color: var(--color-accent); }
+        .k-tab.active.preparing { background: var(--color-preparing); color: #000; border-color: var(--color-preparing); }
+        .k-tab.active.ready { background: var(--color-success); color: #000; border-color: var(--color-success); }
+        .k-tab.active.completed { background: #64748B; color: #FFF; border-color: #64748B; }
+
+        /* ORDERS VIEWPORT */
+        .view-container { flex: 1; overflow-y: auto; padding: 14px 4vw calc(20px + var(--safe-bottom)); scrollbar-width: none; z-index: 10; position: relative; }
+        .view-container::-webkit-scrollbar { display: none; }
+
+        .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(280px, 45vw, 360px), 1fr)); gap: 14px; }
+
+        /* KITCHEN ORDER CARD */
+        .kitchen-card { background: rgba(22, 22, 30, 0.85); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 16px; position: relative; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); transition: all 0.25s ease; }
+        .kitchen-card.new-card { border-color: var(--color-accent); box-shadow: 0 0 20px rgba(255, 170, 0, 0.25); }
+        .kitchen-card.preparing-card { border-color: var(--color-preparing); }
+        .kitchen-card.ready-card { border-color: var(--color-success); }
+
+        .k-card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 12px; }
+        .k-order-num { font-family: var(--font-display); font-size: clamp(20px, 4vw, 24px); font-weight: 900; color: #FFF; letter-spacing: 0.5px; }
+        .k-table-num { color: var(--color-accent); font-weight: 800; font-size: 14px; margin-left: 6px; }
+        .k-time { font-size: 11px; color: var(--color-text-muted); font-weight: 600; margin-top: 2px; }
+
+        .k-badge { font-size: 10px; padding: 4px 10px; border-radius: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .k-badge.new { background: rgba(255, 170, 0, 0.2); color: var(--color-accent); border: 1px solid var(--color-accent); }
+        .k-badge.preparing { background: rgba(56, 189, 248, 0.2); color: var(--color-preparing); border: 1px solid var(--color-preparing); }
+        .k-badge.ready { background: rgba(16, 185, 129, 0.2); color: var(--color-success); border: 1px solid var(--color-success); }
+        .k-badge.completed { background: rgba(100, 116, 139, 0.2); color: #94A3B8; border: 1px solid #64748B; }
+
+        /* ITEMS LIST */
+        .k-items-container { flex: 1; margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px; }
+        .k-item-row { display: flex; justify-content: space-between; align-items: flex-start; font-size: 14px; font-weight: 700; color: #FFF; background: rgba(255, 255, 255, 0.04); padding: 8px 10px; border-radius: var(--radius-sm); border-left: 3px solid var(--color-primary); }
+        .k-item-name { flex: 1; line-height: 1.3; }
+        .k-item-meta { font-size: 11px; color: var(--color-text-muted); font-weight: 600; margin-top: 2px; }
+        .k-item-qty { background: var(--color-primary); color: #FFF; font-family: var(--font-display); font-size: 14px; font-weight: 900; padding: 2px 8px; border-radius: 6px; margin-left: 8px; }
+
+        .k-instructions { font-size: 12px; background: rgba(239, 68, 68, 0.15); color: #FCA5A5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px; border-radius: var(--radius-sm); margin-top: 4px; font-weight: 600; }
+
+        .k-card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--glass-border); padding-top: 10px; margin-top: auto; gap: 10px; }
+        .k-price { font-size: 15px; font-weight: 900; color: var(--color-accent); }
+
+        /* ACTION BUTTONS */
+        .k-actions { display: flex; gap: 8px; flex: 1; justify-content: flex-end; }
+        .k-btn { padding: 10px 16px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none; color: #FFF; transition: transform 0.15s ease, opacity 0.15s ease; }
+        .k-btn:active { transform: scale(0.95); }
+        .k-btn.accept { background: var(--color-success); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        .k-btn.cancel { background: transparent; border: 1px solid rgba(239, 68, 68, 0.5); color: var(--color-error); }
+        .k-btn.ready { background: var(--color-preparing); color: #000; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); }
+        .k-btn.complete { background: #64748B; color: #FFF; }
+
+        .toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--color-primary); color: #FFF; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 800; z-index: 999; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.3); }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <div class="bg-mesh">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+        </div>
+
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand-title">
+                <i class="fa-solid fa-fire-burner"></i> PIZZA HUT KITCHEN
+            </div>
+            <div class="live-pill">
+                <div class="live-dot"></div> Live Connection
+            </div>
+        </header>
+
+        <!-- STATUS TABS -->
+        <div class="kitchen-tabs">
+            <div class="k-tab active all" onclick="filterOrders('all')">All (<span id="count-all">0</span>)</div>
+            <div class="k-tab new" onclick="filterOrders('new')">New (<span id="count-new">0</span>)</div>
+            <div class="k-tab preparing" onclick="filterOrders('preparing')">Preparing (<span id="count-preparing">0</span>)</div>
+            <div class="k-tab ready" onclick="filterOrders('ready')">Ready (<span id="count-ready">0</span>)</div>
+            <div class="k-tab completed" onclick="filterOrders('completed')">Completed (<span id="count-completed">0</span>)</div>
+        </div>
+
+        <!-- MAIN ORDERS CONTAINER -->
+        <main class="view-container">
+            <div class="orders-grid" id="kitchen-orders-container">
+                <!-- Orders injected dynamically -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // SUPABASE CONFIGURATION
+        const SUPABASE_URL = "https://fxaqyfmlbomidkfxaprf.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4YXF5Zm1sYm9taWRrZnhhcHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5ODQ3MTEsImV4cCI6MjEwMDU2MDcxMX0.jXfMdV_aJ4o8eKtgL_P_MeT5i7qweO0qOcLNIk8Xkgo";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let kitchenOrders = [];
+        let currentFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchKitchenOrders();
+            subscribeToLiveOrders();
+        });
+
+        // 1. FETCH INITIAL ORDERS FROM SUPABASE
+        async function fetchKitchenOrders() {
+            try {
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                kitchenOrders = data || [];
+                updateCounts();
+                renderKitchenUI();
+            } catch (err) {
+                console.error("Error fetching orders:", err);
+                showToast("Failed to fetch orders from database.");
+            }
+        }
+
+        // 2. SUBSCRIBE TO LIVE REAL-TIME INCOMING ORDERS
+        function subscribeToLiveOrders() {
+            supabase
+                .channel('kitchen_realtime_orders')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
+                    kitchenOrders.unshift(payload.new);
+                    playAlertSound();
+                    showToast(`🚨 NEW ORDER ALERT: Table ${payload.new.table_number}!`);
+                    updateCounts();
+                    renderKitchenUI();
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, payload => {
+                    const idx = kitchenOrders.findIndex(o => o.id === payload.new.id);
+                    if (idx > -1) {
+                        kitchenOrders[idx] = payload.new;
+                        updateCounts();
+                        renderKitchenUI();
+                    }
+                })
+                .subscribe();
+        }
+
+        // 3. RENDER KITCHEN DASHBOARD UI
+        function renderKitchenUI() {
+            const container = document.getElementById('kitchen-orders-container');
+            const filtered = currentFilter === 'all' 
+                ? kitchenOrders 
+                : kitchenOrders.filter(o => o.status === currentFilter);
+
+            if (!filtered.length) {
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align:center; padding: 60px 20px; color: var(--color-text-muted);">
+                        <i class="fa-solid fa-utensils" style="font-size: 40px; margin-bottom: 12px; opacity: 0.3;"></i>
+                        <p style="font-size: 15px; font-weight: 700;">No ${currentFilter.toUpperCase()} orders right now.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(order => {
+                const timeStr = new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                // Construct items HTML
+                const itemsHtml = Array.isArray(order.items) ? order.items.map(item => `
+                    <div class="k-item-row">
+                        <div class="k-item-name">
+                            ${item.name_en || item.name}
+                            ${item.size ? `<div class="k-item-meta">Size: ${item.size.toUpperCase()}</div>` : ''}
+                        </div>
+                        <span class="k-item-qty">x${item.quantity || 1}</span>
+                    </div>
+                `).join('') : '<div class="k-item-row">Standard Items</div>';
+
+                // Action Buttons Logic
+                let actionsHtml = '';
+                if (order.status === 'new') {
+                    actionsHtml = `
+                        <button class="k-btn cancel" onclick="updateOrderStatus(${order.id}, 'cancelled')">Reject</button>
+                        <button class="k-btn accept" onclick="updateOrderStatus(${order.id}, 'preparing')">Accept Order</button>
+                    `;
+                } else if (order.status === 'preparing') {
+                    actionsHtml = `
+                        <button class="k-btn ready" onclick="updateOrderStatus(${order.id}, 'ready')">Mark Ready</button>
+                    `;
+                } else if (order.status === 'ready') {
+                    actionsHtml = `
+                        <button class="k-btn complete" onclick="updateOrderStatus(${order.id}, 'completed')">Complete & Deliver</button>
+                    `;
+                } else if (order.status === 'completed') {
+                    actionsHtml = `<span style="font-size: 11px; color: var(--color-text-muted); font-weight: 700;">Delivered</span>`;
+                }
+
+                return `
+                    <div class="kitchen-card ${order.status}-card">
+                        <div class="k-card-header">
+                            <div>
+                                <span class="k-order-num">#${order.id}</span>
+                                <span class="k-table-num"><i class="fa-solid fa-chair"></i> Table ${order.table_number || 'N/A'}</span>
+                                <div class="k-time"><i class="fa-regular fa-clock"></i> ${timeStr}</div>
+                            </div>
+                            <span class="k-badge ${order.status}">${order.status}</span>
+                        </div>
+
+                        <div class="k-items-container">
+                            ${itemsHtml}
+                        </div>
+
+                        <div class="k-card-footer">
+                            <div class="k-price">Br ${order.total_price}.00</div>
+                            <div class="k-actions">
+                                ${actionsHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 4. UPDATE ORDER STATUS IN SUPABASE
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                const { error } = await supabase
+                    .from('orders')
+                    .update({ status: newStatus })
+                    .eq('id', orderId);
+
+                if (error) throw error;
+
+                // Update local array instantly
+                const order = kitchenOrders.find(o => o.id === orderId);
+                if (order) order.status = newStatus;
+                
+                updateCounts();
+                renderKitchenUI();
+                showToast(`Order #${orderId} updated to ${newStatus.toUpperCase()}`);
+            } catch (err) {
+                console.error("Error updating status:", err);
+                showToast("Failed to update order status.");
+            }
+        }
+
+        // FILTER CONTROL
+        function filterOrders(status) {
+            currentFilter = status;
+            document.querySelectorAll('.k-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.k-tab.${status}`).classList.add('active');
+            renderKitchenUI();
+        }
+
+        // UPDATE TAB COUNTS
+        function updateCounts() {
+            document.getElementById('count-all').textContent = kitchenOrders.length;
+            document.getElementById('count-new').textContent = kitchenOrders.filter(o => o.status === 'new').length;
+            document.getElementById('count-preparing').textContent = kitchenOrders.filter(o => o.status === 'preparing').length;
+            document.getElementById('count-ready').textContent = kitchenOrders.filter(o => o.status === 'ready').length;
+            document.getElementById('count-completed').textContent = kitchenOrders.filter(o => o.status === 'completed').length;
+        }
+
+        // ALERT SOUND FOR NEW ORDERS
+        function playAlertSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.4);
+            } catch(e) {}
+        }
+
+        function showToast(msg) {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+            const t = document.createElement('div');
+            t.className = 'toast-notification'; t.textContent = msg;
+            document.querySelector('.app-container').appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
