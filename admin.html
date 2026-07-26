@@ -2,150 +2,195 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pizza Hut — Admin Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Inter',sans-serif; background:#0A0A0C; color:#FFFFFF; min-height:100vh; padding:20px; }
-        .container { max-width:1200px; margin:0 auto; }
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:16px; flex-wrap:wrap; gap:12px; }
-        .logo { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:24px; color:#EE1945; }
-        .tabs { display:flex; gap:4px; margin-bottom:20px; flex-wrap:wrap; background:rgba(255,255,255,0.05); padding:4px; border-radius:12px; }
-        .tab { padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:13px; background:transparent; color:#CBD5E1; transition:all .2s; text-transform:uppercase; }
-        .tab.active { background:#EE1945; color:#FFF; }
+        body { font-family:'Inter',sans-serif; background:#0A0A0C; color:#FFFFFF; min-height:100vh; padding:16px; }
+        .container { max-width:1400px; margin:0 auto; }
+        
+        /* Header */
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:14px; flex-wrap:wrap; gap:12px; }
+        .logo { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:28px; color:#EE1945; display:flex; align-items:center; gap:10px; }
+        .logo i { font-size:24px; }
+        .header-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+        .header-actions .status { font-size:12px; color:#10B981; font-weight:600; display:flex; align-items:center; gap:4px; }
+        .header-actions .status i { font-size:8px; }
+        .refresh-btn { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); color:#FFF; padding:8px 16px; border-radius:10px; cursor:pointer; font-weight:600; font-size:12px; transition:all .2s; }
+        .refresh-btn:hover { background:rgba(255,255,255,0.1); }
+        
+        /* Tabs */
+        .tabs { display:flex; gap:4px; margin-bottom:20px; background:rgba(255,255,255,0.05); padding:4px; border-radius:14px; flex-wrap:wrap; }
+        .tab { padding:10px 24px; border:none; border-radius:10px; cursor:pointer; font-weight:700; font-size:13px; background:transparent; color:#CBD5E1; transition:all .2s; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+        .tab.active { background:#EE1945; color:#FFF; box-shadow:0 4px 16px rgba(238,25,69,0.3); }
         .tab:hover:not(.active) { background:rgba(255,255,255,0.05); }
         .panel { display:none; }
         .panel.active { display:block; }
-        .menu-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
-        .menu-item-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:14px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all .2s; }
-        .menu-item-card:hover { border-color:rgba(255,255,255,0.25); background:rgba(255,255,255,0.08); }
-        .menu-item-card img { width:60px; height:60px; object-fit:cover; border-radius:8px; }
-        .menu-item-card .info { flex:1; }
-        .menu-item-card .info h4 { font-size:14px; font-weight:700; }
-        .menu-item-card .info p { font-size:12px; color:#CBD5E1; }
-        .menu-item-card .status { padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700; }
-        .status.available { background:rgba(16,185,129,0.2); color:#10B981; }
-        .status.limited { background:rgba(245,158,11,0.2); color:#F59E0B; }
-        .status.sold-out { background:rgba(239,68,68,0.2); color:#EF4444; }
-        .add-btn { background:rgba(255,255,255,0.1); border:1px dashed rgba(255,255,255,0.3); border-radius:12px; padding:30px; text-align:center; cursor:pointer; transition:all .2s; color:#CBD5E1; }
-        .add-btn:hover { background:rgba(255,255,255,0.15); border-color:#EE1945; color:#FFF; }
-        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); z-index:1000; display:none; align-items:center; justify-content:center; }
-        .modal { background:#1A1A24; border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:24px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; }
-        .modal h2 { margin-bottom:16px; }
-        .modal label { display:block; font-size:12px; font-weight:700; color:#CBD5E1; text-transform:uppercase; margin-top:12px; margin-bottom:4px; }
-        .modal input, .modal textarea, .modal select { width:100%; padding:10px 12px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#FFF; font-size:14px; outline:none; }
+        
+        /* Stats Cards */
+        .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:20px; }
+        .stat-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:16px; text-align:center; }
+        .stat-card .number { font-size:32px; font-weight:900; color:#FFAA00; }
+        .stat-card .label { font-size:11px; color:#CBD5E1; text-transform:uppercase; font-weight:600; margin-top:4px; }
+        
+        /* Menu Grid */
+        .menu-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+        .menu-item-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all .2s; }
+        .menu-item-card:hover { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.2); }
+        .menu-item-card img { width:56px; height:56px; object-fit:cover; border-radius:10px; border:1px solid rgba(255,255,255,0.1); }
+        .menu-item-card .info { flex:1; min-width:0; }
+        .menu-item-card .info h4 { font-size:13px; font-weight:700; color:#FFF; }
+        .menu-item-card .info .meta { font-size:11px; color:#CBD5E1; margin-top:2px; display:flex; gap:10px; flex-wrap:wrap; }
+        .menu-item-card .info .meta .price { color:#FFAA00; font-weight:700; }
+        .status-badge { padding:3px 10px; border-radius:12px; font-size:10px; font-weight:700; text-transform:uppercase; }
+        .status-badge.available { background:rgba(16,185,129,0.2); color:#10B981; }
+        .status-badge.limited { background:rgba(245,158,11,0.2); color:#F59E0B; }
+        .status-badge.sold-out { background:rgba(239,68,68,0.2); color:#EF4444; }
+        
+        /* Add Button */
+        .add-btn { background:rgba(255,255,255,0.05); border:2px dashed rgba(255,255,255,0.2); border-radius:12px; padding:24px; text-align:center; cursor:pointer; transition:all .2s; color:#CBD5E1; font-weight:600; }
+        .add-btn:hover { border-color:#EE1945; color:#FFF; background:rgba(238,25,69,0.05); }
+        .add-btn i { font-size:20px; display:block; margin-bottom:6px; }
+        
+        /* Category Header */
+        .category-header { font-size:14px; font-weight:700; color:#FFAA00; text-transform:uppercase; margin:16px 0 10px; letter-spacing:0.5px; display:flex; align-items:center; gap:8px; }
+        .category-header::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.1); }
+        
+        /* Modal */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(12px); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; }
+        .modal { background:rgba(22,22,30,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:28px; max-width:560px; width:100%; max-height:90vh; overflow-y:auto; }
+        .modal h2 { font-family:'Barlow Condensed',sans-serif; font-size:22px; margin-bottom:16px; }
+        .modal label { display:block; font-size:11px; font-weight:700; color:#CBD5E1; text-transform:uppercase; margin-top:14px; margin-bottom:4px; }
+        .modal input, .modal textarea, .modal select { width:100%; padding:10px 14px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:#FFF; font-size:14px; outline:none; transition:border .2s; font-family:inherit; }
         .modal input:focus, .modal textarea:focus, .modal select:focus { border-color:#EE1945; }
         .modal textarea { resize:vertical; min-height:60px; }
         .modal-actions { display:flex; gap:10px; margin-top:20px; }
-        .modal-actions button { padding:10px 20px; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px; flex:1; }
+        .modal-actions button { padding:12px 20px; border:none; border-radius:10px; font-weight:700; cursor:pointer; font-size:14px; transition:all .2s; flex:1; }
+        .modal-actions button:active { transform:scale(.97); }
         .btn-save { background:#EE1945; color:#FFF; }
-        .btn-delete { background:rgba(239,68,68,0.2); color:#EF4444; border:1px solid rgba(239,68,68,0.3); }
+        .btn-save:hover { background:#c41438; }
+        .btn-delete { background:rgba(239,68,68,0.15); color:#EF4444; border:1px solid rgba(239,68,68,0.3); }
+        .btn-delete:hover { background:rgba(239,68,68,0.25); }
         .btn-cancel { background:rgba(255,255,255,0.05); color:#CBD5E1; }
-        .report-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
-        .report-stat { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px; text-align:center; }
+        .btn-cancel:hover { background:rgba(255,255,255,0.1); }
+        
+        /* Reports */
+        .report-period-tabs { display:flex; gap:4px; background:rgba(255,255,255,0.05); padding:4px; border-radius:10px; margin-bottom:16px; flex-wrap:wrap; }
+        .report-period-tab { padding:8px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:12px; background:transparent; color:#CBD5E1; text-transform:uppercase; transition:all .2s; }
+        .report-period-tab.active { background:#EE1945; color:#FFF; }
+        .report-period-tab:hover:not(.active) { background:rgba(255,255,255,0.05); }
+        
+        .report-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+        .report-stat { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; text-align:center; }
         .report-stat .num { font-size:28px; font-weight:900; color:#FFAA00; }
-        .report-stat .label { font-size:11px; color:#CBD5E1; text-transform:uppercase; margin-top:4px; }
-        .ranking-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        .report-stat .label { font-size:11px; color:#CBD5E1; text-transform:uppercase; font-weight:600; margin-top:4px; }
+        
+        .ranking-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
         @media(max-width:600px){ .ranking-grid { grid-template-columns:1fr; } }
-        .ranking-box { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px; }
-        .ranking-box h4 { color:#FFAA00; margin-bottom:10px; text-transform:uppercase; font-size:13px; }
+        .ranking-box { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; }
+        .ranking-box h4 { color:#FFAA00; font-size:13px; text-transform:uppercase; margin-bottom:10px; letter-spacing:0.5px; }
         .ranking-list { list-style:none; }
         .ranking-list li { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; }
         .ranking-list li .rank { font-weight:800; color:#FFAA00; width:30px; }
         .ranking-list li .name { flex:1; color:#FFF; }
         .ranking-list li .count { color:#CBD5E1; }
-        .recent-orders { margin-top:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px; max-height:300px; overflow-y:auto; }
+        
+        .recent-orders { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; max-height:300px; overflow-y:auto; }
         .recent-orders h4 { color:#CBD5E1; font-size:12px; text-transform:uppercase; margin-bottom:10px; }
         .recent-order { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; color:#CBD5E1; }
-        .period-tabs { display:flex; gap:4px; margin-bottom:16px; background:rgba(255,255,255,0.05); padding:4px; border-radius:8px; }
-        .period-tab { padding:6px 16px; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-size:12px; background:transparent; color:#CBD5E1; text-transform:uppercase; transition:all .2s; }
-        .period-tab.active { background:#EE1945; color:#FFF; }
-        .period-tab:hover:not(.active) { background:rgba(255,255,255,0.05); }
-        .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#EE1945; color:#FFF; padding:12px 24px; border-radius:12px; font-weight:700; z-index:2000; animation:toastIn .3s ease-out, toastOut .3s ease-in 2.5s forwards; }
+        .recent-order .order-id { color:#FFAA00; font-weight:700; }
+        
+        /* Toast */
+        .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#EE1945; color:#FFF; padding:12px 28px; border-radius:12px; font-weight:700; z-index:2000; animation:toastIn .3s ease-out, toastOut .3s ease-in 2.8s forwards; box-shadow:0 8px 30px rgba(238,25,69,0.4); }
         @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(20px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
         @keyframes toastOut { from{opacity:1;} to{opacity:0;} }
-        .connection-status { font-size:12px; padding:4px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:6px; }
-        .connection-status.online { background:rgba(16,185,129,0.2); color:#10B981; }
-        .connection-status.offline { background:rgba(239,68,68,0.2); color:#EF4444; }
-        .category-group { margin-bottom:16px; }
-        .category-group h3 { color:#FFAA00; font-size:14px; text-transform:uppercase; margin-bottom:8px; padding-bottom:4px; border-bottom:1px solid rgba(255,255,255,0.05); }
+        
+        /* Loading */
+        .loading { text-align:center; padding:40px; color:#CBD5E1; }
+        .loading i { font-size:28px; animation:spin 1s linear infinite; display:block; margin-bottom:12px; }
+        @keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.2); border-radius:4px; }
     </style>
 </head>
 <body>
+
 <div class="container">
+    <!-- HEADER -->
     <div class="header">
         <div class="logo"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <span class="connection-status online" id="connection-status"><i class="fa-solid fa-circle"></i> Live</span>
-            <button class="refresh-btn" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#FFF;padding:6px 14px;border-radius:8px;cursor:pointer;font-weight:600;" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        <div class="header-actions">
+            <span class="status"><i class="fa-solid fa-circle"></i> Live</span>
+            <span style="font-size:12px;color:#CBD5E1;" id="last-updated">Updated: now</span>
+            <button class="refresh-btn" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> Refresh</button>
         </div>
     </div>
 
+    <!-- TABS -->
     <div class="tabs">
         <button class="tab active" data-tab="menu" onclick="switchTab('menu')"><i class="fa-solid fa-list"></i> Menu</button>
+        <button class="tab" data-tab="orders" onclick="switchTab('orders')"><i class="fa-solid fa-receipt"></i> Orders</button>
         <button class="tab" data-tab="reports" onclick="switchTab('reports')"><i class="fa-solid fa-chart-simple"></i> Reports</button>
     </div>
 
+    <!-- PANEL: MENU -->
     <div class="panel active" id="panel-menu">
-        <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-            <span style="font-weight:700;color:#CBD5E1;">Manage Menu Items</span>
-            <button class="add-btn" style="padding:8px 16px;border-radius:8px;border:1px dashed rgba(255,255,255,0.3);background:transparent;color:#FFF;cursor:pointer;font-weight:700;" onclick="openAddModal()"><i class="fa-solid fa-plus"></i> Add Item</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+            <h2 style="font-size:18px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;color:#FFF;">Menu Management</h2>
+            <button class="add-btn" style="padding:8px 20px;border:2px dashed rgba(255,255,255,0.2);background:transparent;color:#FFF;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:8px;" onclick="openAddModal()">
+                <i class="fa-solid fa-plus"></i> Add Item
+            </button>
         </div>
-        <div id="menu-grid"></div>
+        <div id="menu-container"><div class="loading"><i class="fa-solid fa-spinner"></i> Loading menu...</div></div>
     </div>
 
+    <!-- PANEL: ORDERS -->
+    <div class="panel" id="panel-orders">
+        <h2 style="font-size:18px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;color:#FFF;margin-bottom:16px;">Live Orders</h2>
+        <div id="orders-container"><div class="loading"><i class="fa-solid fa-spinner"></i> Loading orders...</div></div>
+    </div>
+
+    <!-- PANEL: REPORTS -->
     <div class="panel" id="panel-reports">
-        <div class="period-tabs">
-            <button class="period-tab active" data-period="daily" onclick="switchPeriod('daily')">Daily</button>
-            <button class="period-tab" data-period="weekly" onclick="switchPeriod('weekly')">Weekly</button>
-            <button class="period-tab" data-period="monthly" onclick="switchPeriod('monthly')">Monthly</button>
+        <div class="report-period-tabs">
+            <button class="report-period-tab active" data-period="daily" onclick="switchReportPeriod('daily')">Daily</button>
+            <button class="report-period-tab" data-period="weekly" onclick="switchReportPeriod('weekly')">Weekly</button>
+            <button class="report-period-tab" data-period="monthly" onclick="switchReportPeriod('monthly')">Monthly</button>
         </div>
-        <div class="report-stats" id="report-stats"></div>
-        <div class="ranking-grid" id="ranking-grid"></div>
-        <div class="recent-orders" id="recent-orders"><h4>Recent Orders</h4></div>
+        <div id="report-content"><div class="loading"><i class="fa-solid fa-spinner"></i> Loading reports...</div></div>
     </div>
 </div>
 
+<!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay">
     <div class="modal">
         <h2 id="modal-title">Edit Item</h2>
         <label>Item Name *</label>
         <input type="text" id="edit-name" placeholder="e.g. Margherita Pizza">
-        <label>Amharic Name</label>
-        <input type="text" id="edit-name-am" placeholder="ማርጋሪታ ፒዛ">
         <label>Description</label>
         <textarea id="edit-desc" placeholder="e.g. Tomato sauce, mozzarella cheese..."></textarea>
-        <label>Amharic Description</label>
-        <textarea id="edit-desc-am" placeholder="የቲማቲም ሶስ፣ ሞዛሬላ አይብ..."></textarea>
-        <label>Price (Br) *</label>
-        <input type="number" id="edit-price" placeholder="e.g. 770">
-        <label>Small Price (for pizzas)</label>
-        <input type="number" id="edit-price-small" placeholder="e.g. 495">
-        <label>Large Price (for pizzas)</label>
-        <input type="number" id="edit-price-large" placeholder="e.g. 1120">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+                <label>Price (Br) *</label>
+                <input type="number" id="edit-price" placeholder="e.g. 770">
+            </div>
+            <div>
+                <label>Inventory</label>
+                <select id="edit-inventory">
+                    <option value="available">✅ Available</option>
+                    <option value="limited">⚠️ Limited</option>
+                    <option value="sold-out">❌ Sold Out</option>
+                </select>
+            </div>
+        </div>
         <label>Image URL</label>
         <input type="text" id="edit-img" placeholder="https://images.unsplash.com/...">
-        <label>Type</label>
-        <select id="edit-type">
-            <option value="flat">Flat (Non-Pizza)</option>
-            <option value="pizza">Pizza</option>
-        </select>
-        <label>Inventory Status</label>
-        <select id="edit-inventory">
-            <option value="available">Available</option>
-            <option value="limited">Limited</option>
-            <option value="sold-out">Sold Out</option>
-        </select>
-        <label>Popular</label>
-        <select id="edit-popular">
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-        </select>
-        <label>Dietary Tags (comma separated)</label>
-        <input type="text" id="edit-dietary" placeholder="vegetarian, spicy, fasting">
         <label>Category</label>
         <select id="edit-category">
             <option value="veg-pizza">Veg Pizza</option>
@@ -171,11 +216,41 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ==================== STATE ====================
+let editingItem = null;
+let editingCategory = null;
+let currentReportPeriod = 'daily';
 let menuItems = [];
 let orders = [];
-let editingItem = null;
-let currentPeriod = 'daily';
-let subscription = null;
+
+// ==================== CATEGORY MAPPING ====================
+const CATEGORY_TITLES = {
+    'veg-pizza': 'Veg Pizza',
+    'meat-pizza': 'Meat Pizza',
+    'chicken-pizza': 'Chicken Pizza',
+    'fasting-pizza': 'Fasting Pizza',
+    'sides': 'Sides & Pasta',
+    'specials': 'Specials & Melts',
+    'drinks': 'Drinks'
+};
+
+// ==================== TAB SWITCHING ====================
+function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`panel-${tab}`).classList.add('active');
+    if (tab === 'menu') renderMenu();
+    if (tab === 'orders') renderOrders();
+    if (tab === 'reports') renderReports(currentReportPeriod);
+}
+
+function switchReportPeriod(period) {
+    currentReportPeriod = period;
+    document.querySelectorAll('.report-period-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.report-period-tab[data-period="${period}"]`).classList.add('active');
+    renderReports(period);
+}
 
 // ==================== LOAD DATA ====================
 async function loadMenuItems() {
@@ -186,13 +261,11 @@ async function loadMenuItems() {
             .order('category');
         if (error) throw error;
         menuItems = data || [];
-        renderMenu();
-        document.getElementById('connection-status').className = 'connection-status online';
-        document.getElementById('connection-status').innerHTML = '<i class="fa-solid fa-circle"></i> Live';
+        return menuItems;
     } catch(e) {
         console.error('Error loading menu:', e);
-        document.getElementById('connection-status').className = 'connection-status offline';
-        document.getElementById('connection-status').innerHTML = '<i class="fa-solid fa-circle"></i> Offline';
+        showToast('Failed to load menu items');
+        return [];
     }
 }
 
@@ -201,184 +274,122 @@ async function loadOrders() {
         const { data, error } = await supabase
             .from('orders')
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(100);
         if (error) throw error;
         orders = data || [];
-        if (document.getElementById('panel-reports').classList.contains('active')) {
-            renderReports(currentPeriod);
-        }
+        return orders;
     } catch(e) {
         console.error('Error loading orders:', e);
+        return [];
     }
 }
 
-// ==================== TAB SWITCHING ====================
-function switchTab(tab) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.getElementById(`panel-${tab}`).classList.add('active');
-    if (tab === 'menu') renderMenu();
-    if (tab === 'reports') renderReports(currentPeriod);
+async function loadAll() {
+    document.getElementById('last-updated').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+    await loadMenuItems();
+    await loadOrders();
+    const activeTab = document.querySelector('.tab.active');
+    if (activeTab) switchTab(activeTab.dataset.tab);
+    showToast('Data refreshed!');
 }
 
-function switchPeriod(period) {
-    currentPeriod = period;
-    document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
-    document.querySelector(`.period-tab[data-period="${period}"]`).classList.add('active');
-    renderReports(period);
-}
-
-// ==================== MENU MANAGEMENT ====================
+// ==================== RENDER MENU ====================
 function renderMenu() {
-    const grid = document.getElementById('menu-grid');
-    const categories = ['veg-pizza', 'meat-pizza', 'chicken-pizza', 'fasting-pizza', 'sides', 'specials', 'drinks'];
-    const categoryTitles = {
-        'veg-pizza': 'Veg Pizza',
-        'meat-pizza': 'Meat Pizza',
-        'chicken-pizza': 'Chicken Pizza',
-        'fasting-pizza': 'Fasting Pizza',
-        'sides': 'Sides & Pasta',
-        'specials': 'Specials & Melts',
-        'drinks': 'Drinks'
-    };
-    let html = '';
-    categories.forEach(cat => {
-        const items = menuItems.filter(item => item.category === cat);
-        if (!items.length) return;
-        html += `<div class="category-group"><h3>${categoryTitles[cat]}</h3>`;
-        items.forEach(item => {
-            const status = item.inventory || 'available';
-            const statusClass = status === 'available' ? 'available' : status === 'limited' ? 'limited' : 'sold-out';
-            const statusLabel = status === 'available' ? '✅ Available' : status === 'limited' ? '⚠️ Limited' : '❌ Sold Out';
-            html += `<div class="menu-item-card" onclick="openEditModal('${item.id}')">
-                <img src="${item.image_url || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80'}" alt="${item.name}">
-                <div class="info"><h4>${item.name}</h4><p>Br ${item.price}</p></div>
-                <span class="status ${statusClass}">${statusLabel}</span>
-            </div>`;
-        });
-        html += `</div>`;
-    });
-    grid.innerHTML = html || '<div style="text-align:center;padding:40px;color:#CBD5E1;">No menu items found. Add some!</div>';
-}
-
-function openEditModal(itemId) {
-    editingItem = menuItems.find(i => i.id === itemId);
-    if (!editingItem) return;
-    document.getElementById('modal-title').textContent = 'Edit Item';
-    document.getElementById('edit-name').value = editingItem.name || '';
-    document.getElementById('edit-name-am').value = editingItem.name_am || '';
-    document.getElementById('edit-desc').value = editingItem.description || '';
-    document.getElementById('edit-desc-am').value = editingItem.description_am || '';
-    document.getElementById('edit-price').value = editingItem.price || '';
-    document.getElementById('edit-price-small').value = editingItem.prices?.small || '';
-    document.getElementById('edit-price-large').value = editingItem.prices?.large || '';
-    document.getElementById('edit-img').value = editingItem.image_url || '';
-    document.getElementById('edit-type').value = editingItem.type || 'flat';
-    document.getElementById('edit-inventory').value = editingItem.inventory || 'available';
-    document.getElementById('edit-popular').value = editingItem.popular ? 'true' : 'false';
-    document.getElementById('edit-dietary').value = (editingItem.dietary || []).join(', ');
-    document.getElementById('edit-category').value = editingItem.category || 'veg-pizza';
-    document.getElementById('btn-delete').style.display = 'inline-block';
-    document.getElementById('modal-overlay').style.display = 'flex';
-}
-
-function openAddModal() {
-    editingItem = null;
-    document.getElementById('modal-title').textContent = 'Add New Item';
-    document.getElementById('edit-name').value = '';
-    document.getElementById('edit-name-am').value = '';
-    document.getElementById('edit-desc').value = '';
-    document.getElementById('edit-desc-am').value = '';
-    document.getElementById('edit-price').value = '';
-    document.getElementById('edit-price-small').value = '';
-    document.getElementById('edit-price-large').value = '';
-    document.getElementById('edit-img').value = '';
-    document.getElementById('edit-type').value = 'flat';
-    document.getElementById('edit-inventory').value = 'available';
-    document.getElementById('edit-popular').value = 'false';
-    document.getElementById('edit-dietary').value = '';
-    document.getElementById('edit-category').value = 'veg-pizza';
-    document.getElementById('btn-delete').style.display = 'none';
-    document.getElementById('modal-overlay').style.display = 'flex';
-}
-
-function closeModal() {
-    document.getElementById('modal-overlay').style.display = 'none';
-}
-
-async function saveItem() {
-    const name = document.getElementById('edit-name').value.trim();
-    const price = parseFloat(document.getElementById('edit-price').value);
-    if (!name || isNaN(price) || price <= 0) {
-        showToast('Please fill in name and price');
+    const container = document.getElementById('menu-container');
+    if (!menuItems.length) {
+        container.innerHTML = `<div class="loading"><i class="fa-solid fa-spinner"></i> No items found. Add your first item!</div>`;
         return;
     }
     
-    const data = {
-        name: name,
-        name_am: document.getElementById('edit-name-am').value.trim() || name,
-        description: document.getElementById('edit-desc').value.trim(),
-        description_am: document.getElementById('edit-desc-am').value.trim(),
-        price: price,
-        image_url: document.getElementById('edit-img').value.trim() || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80',
-        type: document.getElementById('edit-type').value,
-        inventory: document.getElementById('edit-inventory').value,
-        popular: document.getElementById('edit-popular').value === 'true',
-        dietary: document.getElementById('edit-dietary').value.split(',').map(s => s.trim()).filter(Boolean),
-        category: document.getElementById('edit-category').value
-    };
+    let html = '';
+    const categories = {};
+    menuItems.forEach(item => {
+        if (!categories[item.category]) categories[item.category] = [];
+        categories[item.category].push(item);
+    });
     
-    const smallPrice = parseFloat(document.getElementById('edit-price-small').value);
-    const largePrice = parseFloat(document.getElementById('edit-price-large').value);
-    if (data.type === 'pizza' && !isNaN(smallPrice) && !isNaN(largePrice)) {
-        data.prices = { small: smallPrice, medium: price, large: largePrice };
-    }
-    
-    try {
-        if (editingItem) {
-            const { error } = await supabase
-                .from('menu_items')
-                .update(data)
-                .eq('id', editingItem.id);
-            if (error) throw error;
-            showToast('Item updated!');
-        } else {
-            data.id = 'n' + Date.now().toString(36);
-            const { error } = await supabase
-                .from('menu_items')
-                .insert([data]);
-            if (error) throw error;
-            showToast('Item added!');
-        }
-        closeModal();
-        await loadMenuItems();
-    } catch(e) {
-        console.error('Error saving item:', e);
-        showToast('Error saving item');
-    }
+    Object.keys(CATEGORY_TITLES).forEach(cat => {
+        if (!categories[cat] || !categories[cat].length) return;
+        html += `<div class="category-header">${CATEGORY_TITLES[cat]}</div>`;
+        html += `<div class="menu-grid">`;
+        categories[cat].forEach(item => {
+            const status = item.inventory || 'available';
+            const statusClass = status === 'available' ? 'available' : status === 'limited' ? 'limited' : 'sold-out';
+            const price = item.type === 'pizza' ? (item.prices?.medium || item.price) : item.price;
+            html += `
+                <div class="menu-item-card" onclick="openEditModal('${item.id}')">
+                    <img src="${item.image_url || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80'}" alt="${item.name}">
+                    <div class="info">
+                        <h4>${item.name}</h4>
+                        <div class="meta">
+                            <span class="price">Br ${price}</span>
+                            <span>${item.type === 'pizza' ? '🍕 Pizza' : '🍽️ Side'}</span>
+                        </div>
+                    </div>
+                    <span class="status-badge ${statusClass}">${status === 'available' ? '✅ Available' : status === 'limited' ? '⚠️ Limited' : '❌ Sold Out'}</span>
+                </div>
+            `;
+        });
+        html += `</div>`;
+    });
+    container.innerHTML = html;
 }
 
-async function deleteItem() {
-    if (!editingItem) return;
-    if (!confirm('Delete this item permanently?')) return;
-    try {
-        const { error } = await supabase
-            .from('menu_items')
-            .delete()
-            .eq('id', editingItem.id);
-        if (error) throw error;
-        showToast('Item deleted!');
-        closeModal();
-        await loadMenuItems();
-    } catch(e) {
-        console.error('Error deleting item:', e);
-        showToast('Error deleting item');
+// ==================== RENDER ORDERS ====================
+function renderOrders() {
+    const container = document.getElementById('orders-container');
+    if (!orders.length) {
+        container.innerHTML = `<div class="loading"><i class="fa-solid fa-inbox"></i> No orders yet</div>`;
+        return;
     }
+    
+    // Stats
+    const pending = orders.filter(o => (o.status||'pending') === 'pending').length;
+    const preparing = orders.filter(o => o.status === 'preparing').length;
+    const ready = orders.filter(o => o.status === 'ready').length;
+    const total = orders.length;
+    
+    let html = `
+        <div class="stats-grid">
+            <div class="stat-card"><div class="number">${pending}</div><div class="label">⏳ Pending</div></div>
+            <div class="stat-card"><div class="number">${preparing}</div><div class="label">🔨 Preparing</div></div>
+            <div class="stat-card"><div class="number">${ready}</div><div class="label">✅ Ready</div></div>
+            <div class="stat-card"><div class="number">${total}</div><div class="label">📋 Total Orders</div></div>
+        </div>
+        <div style="max-height:500px;overflow-y:auto;">
+    `;
+    
+    orders.slice(0, 50).forEach(order => {
+        const status = order.status || 'pending';
+        const statusLabel = status === 'pending' ? '⏳ Pending' : status === 'accepted' ? '✅ Accepted' : status === 'preparing' ? '🔨 Preparing' : '✅ Ready';
+        const statusClass = status === 'pending' ? 'available' : status === 'accepted' ? 'limited' : status === 'preparing' ? 'limited' : 'available';
+        const itemsList = (order.items || []).map(it => `${it.name}${it.size ? ` (${it.size})` : ''} x${it.quantity}`).join(', ');
+        html += `
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px;margin-bottom:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                    <div>
+                        <span style="font-weight:800;color:#FFAA00;">#${order.order_no || 'N/A'}</span>
+                        <span style="color:#CBD5E1;font-size:13px;margin-left:10px;">Table ${order.table_number || 'N/A'}</span>
+                        <span style="color:#CBD5E1;font-size:12px;margin-left:10px;">${order.branch || 'N/A'}</span>
+                    </div>
+                    <span class="status-badge ${statusClass}">${statusLabel}</span>
+                </div>
+                <div style="font-size:13px;color:#CBD5E1;margin:6px 0;">${itemsList || 'No items'}</div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;">
+                    <span style="font-weight:700;color:#FFAA00;">Total: Br ${(order.total || 0).toFixed(2)}</span>
+                    <span style="color:#CBD5E1;font-size:11px;">${order.created_at ? new Date(order.created_at).toLocaleString() : ''}</span>
+                </div>
+            </div>
+        `;
+    });
+    html += `</div>`;
+    container.innerHTML = html;
 }
 
-// ==================== REPORTS ====================
+// ==================== RENDER REPORTS ====================
 function renderReports(period) {
+    const container = document.getElementById('report-content');
     const now = new Date();
     let filtered = [...orders];
     
@@ -399,6 +410,7 @@ function renderReports(period) {
     const totalRevenue = filtered.reduce((sum, o) => sum + (o.total || 0), 0);
     const avgOrder = orderCount > 0 ? totalRevenue / orderCount : 0;
     
+    // Item ranking
     const itemSales = {};
     filtered.forEach(o => {
         (o.items || []).forEach(it => {
@@ -412,30 +424,159 @@ function renderReports(period) {
     const topItems = sortedItems.slice(0, 5);
     const bottomItems = sortedItems.slice(-5).reverse();
     
-    document.getElementById('report-stats').innerHTML = `
-        <div class="report-stat"><div class="num">${orderCount}</div><div class="label">Orders</div></div>
-        <div class="report-stat"><div class="num">Br ${totalRevenue.toFixed(0)}</div><div class="label">Revenue</div></div>
-        <div class="report-stat"><div class="num">Br ${avgOrder.toFixed(0)}</div><div class="label">Avg Order</div></div>
-    `;
+    const periodLabel = period.charAt(0).toUpperCase() + period.slice(1);
     
-    document.getElementById('ranking-grid').innerHTML = `
-        <div class="ranking-box"><h4>🔥 Most Sold</h4>
-            <ul class="ranking-list">${topItems.map((it,i) => `<li><span class="rank">#${i+1}</span><span class="name">${it.name}</span><span class="count">${it.count}x</span></li>`).join('') || '<li style="color:#CBD5E1;">No data</li>'}</ul>
+    container.innerHTML = `
+        <div class="report-stats">
+            <div class="report-stat"><div class="num">${orderCount}</div><div class="label">📋 Orders</div></div>
+            <div class="report-stat"><div class="num">Br ${totalRevenue.toFixed(0)}</div><div class="label">💰 Revenue</div></div>
+            <div class="report-stat"><div class="num">Br ${avgOrder.toFixed(0)}</div><div class="label">📊 Avg Order</div></div>
         </div>
-        <div class="ranking-box"><h4>📉 Least Sold</h4>
-            <ul class="ranking-list">${bottomItems.map((it,i) => `<li><span class="rank">#${i+1}</span><span class="name">${it.name}</span><span class="count">${it.count}x</span></li>`).join('') || '<li style="color:#CBD5E1;">No data</li>'}</ul>
+        <div class="ranking-grid">
+            <div class="ranking-box">
+                <h4>🔥 Most Sold</h4>
+                <ul class="ranking-list">${topItems.map((it,i) => `<li><span class="rank">#${i+1}</span><span class="name">${it.name}</span><span class="count">${it.count}x</span></li>`).join('') || '<li style="color:#CBD5E1;">No data</li>'}</ul>
+            </div>
+            <div class="ranking-box">
+                <h4>📉 Least Sold</h4>
+                <ul class="ranking-list">${bottomItems.map((it,i) => `<li><span class="rank">#${i+1}</span><span class="name">${it.name}</span><span class="count">${it.count}x</span></li>`).join('') || '<li style="color:#CBD5E1;">No data</li>'}</ul>
+            </div>
+        </div>
+        <div class="recent-orders">
+            <h4>Recent Orders (${periodLabel})</h4>
+            ${filtered.slice(0, 10).map(o => `
+                <div class="recent-order">
+                    <span class="order-id">#${o.order_no || 'N/A'}</span>
+                    <span>Table ${o.table_number || 'N/A'}</span>
+                    <span>Br ${(o.total || 0).toFixed(2)}</span>
+                    <span style="font-size:11px;">${o.created_at ? new Date(o.created_at).toLocaleTimeString() : ''}</span>
+                </div>
+            `).join('') || '<div style="color:#CBD5E1;padding:10px 0;">No orders in this period</div>'}
         </div>
     `;
+}
+
+// ==================== MODAL OPERATIONS ====================
+function openEditModal(itemId) {
+    const item = menuItems.find(i => i.id === itemId);
+    if (!item) return;
+    editingItem = itemId;
+    editingCategory = item.category;
+    document.getElementById('modal-title').textContent = 'Edit Item';
+    document.getElementById('edit-name').value = item.name || '';
+    document.getElementById('edit-desc').value = item.description || '';
+    document.getElementById('edit-price').value = item.type === 'pizza' ? (item.prices?.medium || item.price) : item.price;
+    document.getElementById('edit-img').value = item.image_url || '';
+    document.getElementById('edit-inventory').value = item.inventory || 'available';
+    document.getElementById('edit-category').value = item.category || 'veg-pizza';
+    document.getElementById('btn-delete').style.display = 'inline-block';
+    document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function openAddModal() {
+    editingItem = null;
+    editingCategory = null;
+    document.getElementById('modal-title').textContent = 'Add New Item';
+    document.getElementById('edit-name').value = '';
+    document.getElementById('edit-desc').value = '';
+    document.getElementById('edit-price').value = '';
+    document.getElementById('edit-img').value = '';
+    document.getElementById('edit-inventory').value = 'available';
+    document.getElementById('edit-category').value = 'veg-pizza';
+    document.getElementById('btn-delete').style.display = 'none';
+    document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('modal-overlay').style.display = 'none';
+}
+
+async function saveItem() {
+    const name = document.getElementById('edit-name').value.trim();
+    const desc = document.getElementById('edit-desc').value.trim();
+    const price = parseFloat(document.getElementById('edit-price').value);
+    const img = document.getElementById('edit-img').value.trim() || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80';
+    const inventory = document.getElementById('edit-inventory').value;
+    const category = document.getElementById('edit-category').value;
     
-    const recent = filtered.slice(0, 10);
-    document.getElementById('recent-orders').innerHTML = `
-        <h4>Recent Orders (${period})</h4>
-        ${recent.map(o => `<div class="recent-order">
-            <span>#${o.order_no || 'N/A'} - Table ${o.table_number || 'N/A'}</span>
-            <span>Br ${(o.total || 0).toFixed(2)}</span>
-            <span style="font-size:11px;color:#CBD5E1;">${o.created_at ? new Date(o.created_at).toLocaleTimeString() : ''}</span>
-        </div>`).join('') || '<div style="color:#CBD5E1;padding:10px 0;">No orders in this period</div>'}
-    `;
+    if (!name || isNaN(price) || price <= 0) {
+        showToast('Please fill in name and price');
+        return;
+    }
+    
+    const itemData = {
+        name: name,
+        description: desc,
+        price: price,
+        image_url: img,
+        inventory: inventory,
+        category: category,
+        type: 'flat',
+        popular: false,
+        dietary: []
+    };
+    
+    if (editingItem) {
+        // Update existing
+        const { error } = await supabase
+            .from('menu_items')
+            .update(itemData)
+            .eq('id', editingItem);
+        if (error) { showToast('Error updating item'); console.error(error); return; }
+        showToast('Item updated!');
+    } else {
+        // Add new
+        const newId = 'n' + Date.now().toString(36);
+        itemData.id = newId;
+        const { error } = await supabase
+            .from('menu_items')
+            .insert([itemData]);
+        if (error) { showToast('Error adding item'); console.error(error); return; }
+        showToast('Item added!');
+    }
+    
+    closeModal();
+    await loadMenuItems();
+    renderMenu();
+}
+
+async function deleteItem() {
+    if (!editingItem) return;
+    if (!confirm('Delete this item permanently?')) return;
+    const { error } = await supabase
+        .from('menu_items')
+        .delete()
+        .eq('id', editingItem);
+    if (error) { showToast('Error deleting item'); console.error(error); return; }
+    showToast('Item deleted!');
+    closeModal();
+    await loadMenuItems();
+    renderMenu();
+}
+
+// ==================== SUPABASE REALTIME SUBSCRIPTIONS ====================
+function setupRealtime() {
+    // Subscribe to menu_items changes
+    supabase
+        .channel('menu-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'menu_items' }, () => {
+            loadMenuItems().then(() => {
+                if (document.querySelector('.tab.active')?.dataset.tab === 'menu') renderMenu();
+            });
+        })
+        .subscribe();
+    
+    // Subscribe to orders changes
+    supabase
+        .channel('orders-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+            loadOrders().then(() => {
+                const activeTab = document.querySelector('.tab.active')?.dataset.tab;
+                if (activeTab === 'orders') renderOrders();
+                if (activeTab === 'reports') renderReports(currentReportPeriod);
+            });
+        })
+        .subscribe();
 }
 
 // ==================== TOAST ====================
@@ -449,50 +590,21 @@ function showToast(msg) {
     setTimeout(() => t.remove(), 3000);
 }
 
-// ==================== LOAD ALL ====================
-async function loadAll() {
+// ==================== INIT ====================
+async function init() {
     await loadMenuItems();
     await loadOrders();
-}
-
-// ==================== REALTIME ====================
-function setupRealtime() {
-    if (subscription) {
-        subscription.unsubscribe();
-        subscription = null;
-    }
-    subscription = supabase
-        .channel('admin-changes')
-        .on('postgres_changes', {
-            event: '*',
-            schema: 'public',
-            table: 'menu_items'
-        }, () => {
-            loadMenuItems();
-        })
-        .on('postgres_changes', {
-            event: '*',
-            schema: 'public',
-            table: 'orders'
-        }, () => {
-            loadOrders();
-        })
-        .subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-                document.getElementById('connection-status').className = 'connection-status online';
-                document.getElementById('connection-status').innerHTML = '<i class="fa-solid fa-circle"></i> Live';
-            }
-        });
-}
-
-// ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', () => {
-    loadAll();
+    renderMenu();
     setupRealtime();
+    document.getElementById('last-updated').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+    
+    // Close modal on overlay click
     document.getElementById('modal-overlay').addEventListener('click', (e) => {
         if (e.target === e.currentTarget) closeModal();
     });
-});
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
