@@ -122,21 +122,10 @@
         }
 
         @keyframes float {
-            0% {
-                transform: translate(0, 0) scale(1) rotate(0deg);
-            }
-
-            33% {
-                transform: translate(4%, 8%) scale(1.06) rotate(4deg);
-            }
-
-            66% {
-                transform: translate(-4%, 4%) scale(0.94) rotate(-4deg);
-            }
-
-            100% {
-                transform: translate(0, 0) scale(1) rotate(0deg);
-            }
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(4%, 8%) scale(1.06) rotate(4deg); }
+            66% { transform: translate(-4%, 4%) scale(0.94) rotate(-4deg); }
+            100% { transform: translate(0, 0) scale(1) rotate(0deg); }
         }
 
         /* ===== HEADER ===== */
@@ -184,6 +173,26 @@
 
         .location-value i {
             font-size: clamp(10px, 2.2vw, 13px);
+        }
+
+        /* NEW: Glass Branch Select */
+        .glass-select {
+            background: transparent;
+            border: none;
+            color: var(--color-primary);
+            font-family: inherit;
+            font-size: inherit;
+            font-weight: inherit;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            padding-right: 12px;
+        }
+        
+        .glass-select option {
+            background: var(--color-bg);
+            color: #fff;
         }
 
         .header-right {
@@ -302,11 +311,7 @@
             height: 20px;
         }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .switch input { opacity: 0; width: 0; height: 0; }
 
         .slider {
             position: absolute;
@@ -366,15 +371,8 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(4px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .display-title {
@@ -428,11 +426,6 @@
             color: #FFF;
         }
 
-        .sort-btn i:last-child {
-            font-size: 8px;
-            transition: transform 0.3s ease;
-        }
-
         .sort-btn.open i:last-child {
             transform: rotate(180deg);
         }
@@ -443,7 +436,6 @@
             right: 0;
             background: rgba(20, 20, 30, 0.97);
             backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border-light);
             border-radius: 12px;
             padding: 4px;
@@ -454,20 +446,11 @@
             animation: dropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .sort-dropdown.show {
-            display: block;
-        }
+        .sort-dropdown.show { display: block; }
 
         @keyframes dropdownIn {
-            from {
-                opacity: 0;
-                transform: translateY(-6px) scale(0.96);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .sort-option {
@@ -484,20 +467,8 @@
             white-space: nowrap;
         }
 
-        .sort-option:active {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .sort-option.selected {
-            background: rgba(238, 25, 69, 0.2);
-            color: var(--color-primary);
-        }
-
-        .sort-option i {
-            width: 14px;
-            text-align: center;
-            font-size: 10px;
-        }
+        .sort-option:active { background: rgba(255, 255, 255, 0.1); }
+        .sort-option.selected { background: rgba(238, 25, 69, 0.2); color: var(--color-primary); }
 
         .category-scroll-wrapper {
             position: relative;
@@ -513,10 +484,6 @@
             scroll-behavior: smooth;
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
-        }
-
-        .category-scroll-container::-webkit-scrollbar {
-            display: none;
         }
 
         .category-scroll {
@@ -575,9 +542,7 @@
         }
 
         @media (min-width: 500px) {
-            .product-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
         }
 
         .product-card {
@@ -637,27 +602,12 @@
             z-index: 5;
         }
 
-        .badge-sold-out {
-            background: rgba(239, 68, 68, 0.9);
-            color: #FFF;
-        }
-
-        .badge-limited {
-            background: rgba(245, 158, 11, 0.9);
-            color: #000;
-            animation: pulse-badge 2s infinite;
-        }
+        .badge-sold-out { background: rgba(239, 68, 68, 0.9); color: #FFF; }
+        .badge-limited { background: rgba(245, 158, 11, 0.9); color: #000; animation: pulse-badge 2s infinite; }
 
         @keyframes pulse-badge {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.6;
-            }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
 
         .dietary-badges {
@@ -983,7 +933,8 @@
         .table-selector-card,
         .instructions-card,
         .summary-block,
-        .payment-card {
+        .payment-card,
+        .tracker-card {
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
@@ -1199,6 +1150,86 @@
             gap: 6px;
             margin-top: 8px;
             box-shadow: 0 6px 20px rgba(238, 25, 69, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        /* ===== TRACKER VIEW STYLES ===== */
+        .tracker-card {
+            padding: clamp(20px, 5vw, 30px);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .pulse-ring {
+            width: 70px;
+            height: 70px;
+            background: rgba(238, 25, 69, 0.15);
+            border: 2px solid var(--color-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 20px rgba(238, 25, 69, 0.4);
+            animation: pulse-ring 2s infinite;
+        }
+
+        .pulse-ring i {
+            font-size: 28px;
+            color: var(--color-primary);
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(238, 25, 69, 0.5); }
+            70% { box-shadow: 0 0 0 15px rgba(238, 25, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(238, 25, 69, 0); }
+        }
+
+        .timeline {
+            text-align: left;
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+        }
+
+        .timeline-step {
+            margin-bottom: 20px;
+            position: relative;
+            color: var(--color-text-muted);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .timeline-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-step::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--color-bg);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .timeline-step.active {
+            color: #FFF;
+            font-weight: 700;
+        }
+
+        .timeline-step.active::before {
+            background: var(--color-success);
+            border-color: var(--color-success);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
 
         /* Modal */
@@ -1237,13 +1268,8 @@
         }
 
         @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-            }
-
-            to {
-                transform: translateY(0);
-            }
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
         }
 
         .modal-close-header {
@@ -1286,17 +1312,9 @@
             transition: all 0.35s ease;
         }
 
-        .modal-img.size-small {
-            transform: scale(0.85);
-        }
-
-        .modal-img.size-medium {
-            transform: scale(1);
-        }
-
-        .modal-img.size-large {
-            transform: scale(1.1);
-        }
+        .modal-img.size-small { transform: scale(0.85); }
+        .modal-img.size-medium { transform: scale(1); }
+        .modal-img.size-large { transform: scale(1.1); }
 
         .modal-desc {
             font-size: clamp(10px, 2.2vw, 12px);
@@ -1527,25 +1545,13 @@
         }
 
         @keyframes toastIn {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
         @keyframes toastOut {
-            from {
-                opacity: 1;
-            }
-
-            to {
-                opacity: 0;
-            }
+            from { opacity: 1; }
+            to { opacity: 0; }
         }
 
         /* Required field indicator */
@@ -1581,10 +1587,17 @@
         <header class="app-header">
             <div class="header-left">
                 <div class="location-display">
-                    <p class="location-label" data-i18n="branch">Addis Ababa · Bethel Square</p>
+                    <p class="location-label" data-i18n="city_label">Addis Ababa City</p>
                     <div class="location-value">
                         <i class="fa-solid fa-location-dot"></i>
-                        <span data-i18n="bethel">Bethel Square</span>
+                        <select id="branch-select" class="glass-select">
+                            <option value="4 Kilo">4 Kilo</option>
+                            <option value="Lebu">Lebu</option>
+                            <option value="Morning Star Mall">Morning Star Mall</option>
+                            <option value="Bole Bulbula">Bole Bulbula</option>
+                            <option value="Century Mall">Century Mall</option>
+                            <option value="Sarbet Boran Complex">Sarbet Boran Complex</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -1735,6 +1748,25 @@
                 </div>
                 <div class="kitchen-info-note">Kitchen: @MO76k7 (0923845344)</div>
             </div>
+
+            <!-- VIEW 3: LIVE TRACKER -->
+            <div id="view-tracker" class="app-view">
+                <h1 class="display-title" style="text-align: center; margin-bottom: 20px; font-size: clamp(24px, 5vw, 32px);" data-i18n="order_status">Order Ticket</h1>
+                <div class="tracker-card">
+                    <div class="pulse-ring"><i class="fa-solid fa-fire-burner"></i></div>
+                    <h3 style="font-size: clamp(18px, 4vw, 22px); margin-bottom: 5px; color: #FFF;">Ticket Sent to Telegram!</h3>
+                    <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 24px; font-weight: 600;">Est. Time: 25 mins</p>
+                    
+                    <div class="timeline">
+                        <div class="timeline-step active" id="step-1">Ticket Generated</div>
+                        <div class="timeline-step" id="step-2">Sent to Kitchen Staff</div>
+                        <div class="timeline-step" id="step-3">Check Telegram for Status</div>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="navigateTo('home')" style="background: var(--glass-bg); color: #fff; border: 1px solid var(--glass-border); box-shadow: none;">
+                    <span data-i18n="new_order">Start New Ticket</span>
+                </button>
+            </div>
         </main>
 
         <!-- MODAL -->
@@ -1789,7 +1821,6 @@
     </div>
 
     <script>
-        // ==================== DATA (UPDATED FROM REAL MENU PHOTOS) ====================
         const MENU_DATA = {
             "veg-pizza": {
                 title: "Veg Pizza", title_am: "የአትክልት ፒዛ", items: [
@@ -1825,7 +1856,7 @@
                 title: "Fasting Pizza", title_am: "የጾም ፒዛ", items: [
                     { id: "f1", name: "TUNA PIZZA", name_am: "ቱና ፒዛ", desc: "Fasting Sauce, Tuna, Onion, Capsicum, Olives & Green Chilli", desc_am: "የጾም ሶስ፣ ቱና፣ ሽንኩርት፣ ቃሪያ፣ ወይራ እና አረንጓዴ ቃሪያ", prices: { small: 540, medium: 740, large: 1165 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?w=400&q=80", type: "pizza", tags: ["fasting"], dietary: ["fasting", "spicy"], popular: true, inventory: "available" },
                     { id: "f2", name: "VEGGIE BLAST", name_am: "አትክልት ፍንዳታ", desc: "Fasting Sauce, Pineapple, Onion, Olives, Capsicum, Tomato, Mushroom & Green Chilli", desc_am: "የጾም ሶስ፣ አናናስ፣ ሽንኩርት፣ ወይራ፣ ቃሪያ፣ ቲማቲም፣ እንጉዳይ እና አረንጓዴ ቃሪያ", prices: { small: 480, medium: 795, large: 1100 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "pizza", dietary: ["fasting", "spicy", "vegetarian"], inventory: "available" },
-                    { id: "f3", name: "PINEAPPLE LOVERS", name_am: "አናናስ ወዳጆች", desc: "Fasting Sauce, Pineapple, Mushroom, Tomato & Green Chilli", desc_am: "የጾም ሶስ፣ አናናስ፣ እንጉዳይ፣ ቲማቲም እና አረንጓዴ ቃሪያ", prices: { small: 520, medium: 740, large: 1100 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "pizza", dietary: ["fasting", "vegetarian"], inventory: "available" }
+                    { id: "f3", name: "PINEAPPLE LOVERS", name_am: "አናናስ ወዳጆች", desc: "Fasting Sauce, Pineapple, Mushroom, Tomato & Green Chilli", descam: "የጾም ሶስ፣ አናናስ፣ እንጉዳይ፣ ቲማቲም እና አረንጓዴ ቃሪያ", prices: { small: 520, medium: 740, large: 1100 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "pizza", dietary: ["fasting", "vegetarian"], inventory: "available" }
                 ]
             },
             "sides": {
@@ -1882,7 +1913,7 @@
 
         const TRANSLATIONS = {
             en: {
-                branch: "Addis Ababa · Bethel Square", bethel: "Bethel Square",
+                city_label: "Addis Ababa City",
                 search_placeholder: "Search menu...", fasting: "Fasting",
                 explore: "Explore Our", delicious_menu: "Delicious Menu",
                 sort_popular: "Popular", sort_price_low: "Price: Low to High",
@@ -1895,10 +1926,11 @@
                 payment_method: "Payment Method", cash: "Cash", waiter: "Waiter",
                 pay_to: "Pay to this account", copy_number: "Copy Number",
                 send_order: "Send Order to Kitchen", menu_nav: "Menu",
-                tray_nav: "Tray", crust_type: "Crust Type"
+                tray_nav: "Tray", crust_type: "Crust Type",
+                order_status: "Order Ticket", new_order: "Start New Ticket"
             },
             am: {
-                branch: "አዲስ አበባ · ቤተል አደባባይ", bethel: "ቤተል አደባባይ",
+                city_label: "አዲስ አበባ ከተማ",
                 search_placeholder: "ምናሌ ይፈልጉ...", fasting: "ጾም",
                 explore: "የኛን ምርጥ", delicious_menu: "ምናሌ ይመልከቱ",
                 sort_popular: "ታዋቂ", sort_price_low: "ዋጋ፦ ከዝቅተኛ ወደ ከፍተኛ",
@@ -1911,7 +1943,8 @@
                 payment_method: "የክፍያ ዘዴ", cash: "ጥሬ ገንዘብ", waiter: "አስተናጋጅ",
                 pay_to: "ወደዚህ ሂሳብ ይክፈሉ", copy_number: "ቁጥር ቅዳ",
                 send_order: "ትዕዛዝ ለኩሽና ላክ", menu_nav: "ምናሌ",
-                tray_nav: "ትሪ", crust_type: "የዳቦ አይነት"
+                tray_nav: "ትሪ", crust_type: "የዳቦ አይነት",
+                order_status: "የትዕዛዝ ሁኔታ", new_order: "አዲስ ትዕዛዝ ጀምር"
             }
         };
 
@@ -1943,7 +1976,6 @@
             });
             setupDragToDismiss();
 
-            // Clear error states on input
             document.getElementById('table-number-input').addEventListener('input', function() {
                 this.classList.remove('error');
                 document.getElementById('table-error-msg').classList.remove('show');
@@ -2157,7 +2189,6 @@
             const existing = cart.findIndex(c => c.id === cartItem.id);
             existing > -1 ? cart[existing].quantity += modalQty : cart.push(cartItem);
 
-            // Fly to cart effect
             const card = document.getElementById(`card-${activeModalItem.id}`);
             if (card) flyToCart(activeModalItem.img, card);
 
@@ -2229,10 +2260,12 @@
             if (view === 'home') {
                 document.getElementById('view-home').classList.add('active');
                 document.getElementById('nav-home').classList.add('active');
-            } else {
+            } else if (view === 'cart') {
                 document.getElementById('view-cart').classList.add('active');
                 document.getElementById('nav-cart').classList.add('active');
                 renderCart();
+            } else if (view === 'tracker') {
+                document.getElementById('view-tracker').classList.add('active');
             }
             updateNavPill();
         }
@@ -2332,7 +2365,6 @@
         function submitOrderToTelegram() {
             if (!cart.length) return;
 
-            // Validate Table Number (REQUIRED)
             const tableInput = document.getElementById('table-number-input');
             const tableVal = tableInput.value.trim();
             const tableError = document.getElementById('table-error-msg');
@@ -2346,7 +2378,6 @@
                 tableError.classList.remove('show');
             }
 
-            // Validate Payment Method (REQUIRED)
             if (!selectedPayment) {
                 document.getElementById('payment-error-msg').classList.add('show');
                 showToast('Please select a payment method');
@@ -2355,6 +2386,7 @@
                 document.getElementById('payment-error-msg').classList.remove('show');
             }
 
+            const branch = document.getElementById('branch-select').value;
             const table = tableVal;
             const instr = document.getElementById('extra-instructions-input').value.trim();
             const sc = parseInt(document.getElementById('split-count').value) || 1;
@@ -2367,7 +2399,7 @@
                 localStorage.setItem('ph_seq', s.toString());
                 return s.toString().padStart(2, '0');
             })();
-            let gt = 0, summary = `🍕 *NEW ORDER*\n\n📋 #${orderNo}\n📍 Bethel Square\n🪑 Table ${table}\n${sc > 1 ? `👥 Split: ${sc}p\n` : ''}───────────────────\n`;
+            let gt = 0, summary = `🍕 *NEW ORDER*\n\n📋 #${orderNo}\n📍 ${branch}\n🪑 Table ${table}\n${sc > 1 ? `👥 Split: ${sc}p\n` : ''}───────────────────\n`;
             cart.forEach((item, i) => {
                 const it = item.unitPrice * item.quantity; gt += it;
                 summary += `${i + 1}. *${item.nameEn}*${item.size ? ` [${item.size.toUpperCase()}]` : ''}${item.crust && item.crust !== 'regular' ? ` (${item.crust})` : ''} x${item.quantity} - Br ${it.toFixed(2)}\n`;
@@ -2377,6 +2409,11 @@
             summary += `───────────────────\n💰 Subtotal: Br ${gt.toFixed(2)}\n🧾 VAT: Br ${vat.toFixed(2)}\n🍽️ Service: Br ${svc.toFixed(2)}\n💵 *TOTAL: Br ${total.toFixed(2)}*\n${sc > 1 ? `👤 Per person: Br ${(total / sc).toFixed(2)}\n` : ''}\n💳 *${selectedPayment.toUpperCase()}*${selectedPayment !== 'cash' ? ` - ${PAYMENT_ACCOUNTS[selectedPayment].number}` : ''}\n\n🧑‍🍳 @${KITCHEN_TELEGRAM} | 📞 ${KITCHEN_PHONE}`;
             window.open(`https://t.me/${KITCHEN_TELEGRAM}?text=${encodeURIComponent(summary)}`, '_blank');
             showToast('Order sent!');
+
+            // Clear the cart, update the floating badge, and navigate to the tracker view
+            cart = [];
+            updateBadge();
+            navigateTo('tracker');
         }
 
         // ==================== UTILS ====================
