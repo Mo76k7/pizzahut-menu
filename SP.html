@@ -7,6 +7,11 @@
   Client Target: Pizza Hut Addis Ababa
   Design System: Skeuomorphic / Physical Realism
   Tech Stack: Vanilla JS, CSS3, HTML5
+  Features: Bilingual (EN/AM), Physical Gestures,
+  Cart Flying Animations, Dynamic Fasting System, Split Bill,
+  Sorting, Telegram Checkout, Floating Tray, Toast Notifications.
+  Updates: 100% Responsive, Fluid Grid, Safe-Area adaptations, 
+  Compact Bottom Nav, Fixed Modal Images, Removed Sticky Categories.
   ========================================================
 -->
 <head>
@@ -31,10 +36,10 @@
             --metal-mid: #b3b3b3;
             --metal-dark: #737373;
 
-            /* Brand Colors Mapped to Physical Ink/Plastic (Pizza Hut Red) */
-            --primary-plastic: #E31837; 
-            --primary-plastic-dark: #b3122b;
-            --primary-ink: #c8102e;
+            /* Brand Colors Mapped to Physical Ink/Plastic */
+            --primary-plastic: #d92534;
+            --primary-plastic-dark: #a11420;
+            --primary-ink: #9c1521;
             
             --accent-gold: #c29b4e;
             --accent-gold-dark: #8c6a2c;
@@ -43,7 +48,7 @@
             --ink-muted: #666666;
 
             /* Typography */
-            --font-serif: 'Playfair Display', serif;
+            --font-serif: 'Playfair Display', serif; /* Classic printed menu font */
             --font-sans: 'Source Sans Pro', sans-serif;
             
             /* Shadows for 3D depth */
@@ -69,9 +74,12 @@
             background-color: var(--leather-dark);
             font-family: var(--font-sans);
             color: var(--ink-main);
-            overflow: hidden; 
+            overflow: hidden; /* Managed by app container */
         }
 
+        /* =========================================================
+           2. RESPONSIVE APP WRAPPER 
+           ========================================================= */
         .phone-wrapper {
             width: 100%;
             height: 100dvh;
@@ -84,7 +92,11 @@
             margin: 0 auto;
         }
 
+        /* =========================================================
+           3. LEATHER HEADER & UTILITIES
+           ========================================================= */
         .app-header {
+            /* Account for physical notches/safe areas */
             padding: calc(24px + env(safe-area-inset-top)) 20px 16px;
             display: flex;
             justify-content: space-between;
@@ -93,6 +105,7 @@
             position: relative;
             z-index: 20;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            /* Leather Stitching */
             border-bottom: 3px solid #111;
         }
         
@@ -115,6 +128,7 @@
         }
         .location-value i { color: var(--primary-plastic); }
 
+        /* Metallic Toggle Button */
         .lang-switch-btn {
             background: linear-gradient(to bottom, var(--metal-light), var(--metal-mid));
             border: 1px solid var(--metal-dark);
@@ -143,6 +157,7 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
         
+        /* Physical Engraved Input */
         .search-container { flex: 1; position: relative; max-width: 400px;}
         .search-container i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); font-size: 12px; }
         .search-input {
@@ -154,6 +169,7 @@
         }
         .search-input:focus { background: #fff; }
 
+        /* Physical Plastic Toggle Switch */
         .fasting-toggle-container { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--ink-main); text-transform: uppercase; text-shadow: var(--shadow-engraved); }
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -162,6 +178,9 @@
         input:checked + .slider { background-color: var(--primary-plastic-dark); border-color: #7a0c16; box-shadow: inset 0 2px 5px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.6); }
         input:checked + .slider:before { transform: translateX(20px); }
 
+        /* =========================================================
+           4. PAPER VIEWPORT, CATEGORY TABS & SORTING
+           ========================================================= */
         .view-container {
             flex: 1; overflow-y: auto; padding: 16px 5% 85px; scrollbar-width: none; position: relative; z-index: 10;
         }
@@ -173,6 +192,7 @@
 
         .display-title { font-family: var(--font-serif); font-weight: 700; font-style: italic; color: var(--ink-main); line-height: 1.1; }
         
+        /* Physical Manilla Folder Tabs - Removed Sticky Positioning */
         .category-scroll-container {
             width: 100%; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; position: relative; background: inherit; z-index: 15; padding: 16px 0 8px; touch-action: pan-x; border-bottom: 2px solid #dcd4c3; margin-bottom: 16px;
         }
@@ -197,8 +217,12 @@
         .sort-option:hover { background: #e8e3d8; }
         .sort-option.selected { color: var(--primary-ink); font-weight: 900; background: #fdfbf7; }
 
+        /* =========================================================
+           5. PRODUCT GRID & POLAROID CARDS (Fluid Layout)
+           ========================================================= */
         .product-grid { 
             display: grid; 
+            /* Auto-fill ensures cards dynamically fit any tablet/mobile/desktop width */
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
             gap: clamp(12px, 2vw, 20px); 
         }
@@ -208,6 +232,7 @@
             display: flex; flex-direction: column; box-shadow: var(--shadow-drop-light);
             transition: transform 0.1s ease, box-shadow 0.1s ease; position: relative;
         }
+        /* Masking tape effect */
         .product-card::before {
             content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%) rotate(-2deg);
             width: 40px; height: 16px; background: rgba(230, 225, 210, 0.8);
@@ -241,6 +266,9 @@
         .product-price { font-size: clamp(14px, 3vw, 16px); font-weight: 800; color: var(--primary-ink); }
         .add-icon-btn { color: #5cb85c; font-size: 24px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); background: #fff; border-radius: 50%; border: 1px solid #4cae4c; }
 
+        /* =========================================================
+           6. PHYSICAL RECEIPT & CART VIEW
+           ========================================================= */
         .receipt-card {
             background: #fff; border: 1px solid #e0d9cc;
             padding: 16px; margin-bottom: 16px; position: relative;
@@ -275,6 +303,7 @@
         .cart-item-title { font-family: var(--font-serif); font-size: 15px; font-weight: 700; color: var(--ink-main); }
         .cart-item-meta { font-size: 13px; color: var(--ink-muted); font-family: 'Courier New', monospace; }
         
+        /* Mechanical Quantity Spinner */
         .qty-selector { display: flex; align-items: center; gap: 10px; background: linear-gradient(#e6e6e6, #cccccc); border: 1px solid #999; padding: 6px 10px; border-radius: 4px; box-shadow: var(--shadow-inset-button), 0 2px 4px rgba(0,0,0,0.15); }
         .qty-btn { background: linear-gradient(#fff, #e6e6e6); border: 1px solid #b3b3b3; color: #333; width: 28px; height: 28px; border-radius: 2px; font-size: 18px; cursor: pointer; font-weight: 900; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
         .qty-btn:active { background: #d9d9d9; box-shadow: var(--shadow-pressed); }
@@ -282,9 +311,11 @@
         .summary-row { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 14px; margin-bottom: 8px; color: var(--ink-muted); font-weight: 600;}
         .summary-row.total { border-top: 2px solid var(--ink-main); padding-top: 10px; font-weight: 900; color: var(--ink-main); font-size: 18px; margin-top: 6px; font-family: var(--font-sans);}
         
+        /* Split Bill Feature */
         .split-bill-container { margin-top: 12px; display: none; background: #f4efdf; padding: 12px; border: 1px solid #d1c8b4; }
         .split-bill-container.active { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
 
+        /* Payment Buttons - Physical Plastic Look */
         .payment-gateways {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -304,8 +335,9 @@
         .pay-chapa { background: linear-gradient(to bottom, #1db954, #128c3e); }
         .pay-cash { background: linear-gradient(to bottom, #8c6a2c, #5c451b); }
 
+        /* General Primary Button (Big Red Physical Button) */
         .btn-primary {
-            background: linear-gradient(to bottom, var(--primary-plastic), var(--primary-plastic-dark));
+            background: linear-gradient(to bottom, #f24e5d, var(--primary-plastic-dark));
             color: #FFF; border: 1px solid #730000; border-radius: 8px;
             padding: 18px; width: 100%; font-family: var(--font-sans); font-size: 16px; font-weight: 800; text-transform: uppercase;
             letter-spacing: 1px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px;
@@ -314,6 +346,9 @@
         }
         .btn-primary:active { transform: translateY(4px); box-shadow: inset 0 4px 8px rgba(0,0,0,0.6), 0 1px 2px rgba(0,0,0,0.4); background: linear-gradient(to bottom, var(--primary-plastic-dark), #730000); }
 
+        /* =========================================================
+           7. MODAL (CLIPBOARD SHEET)
+           ========================================================= */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7);
             z-index: 200; display: none; align-items: flex-end; touch-action: none;
@@ -340,6 +375,7 @@
         .options-group-title { font-family: var(--font-serif); font-size: 16px; font-style: italic; color: var(--primary-ink); font-weight: 700; margin-bottom: 12px; margin-top: 16px; border-bottom: 1px solid #d1c8b4; padding-bottom: 4px; }
         .selector-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; }
         
+        /* Segmented Metallic/Plastic Controls */
         .selector-btn {
             background: linear-gradient(to bottom, #f9f9f9, #e0e0e0); border: 1px solid #b3b3b3; color: var(--ink-main);
             padding: 14px 6px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 800; text-align: center;
@@ -351,6 +387,9 @@
             box-shadow: inset 0 3px 6px rgba(0,0,0,0.3); color: var(--primary-ink); text-shadow: none;
         }
 
+        /* =========================================================
+           8. FLYING ANIMATION, TOASTS, FLOATING TRAY & LIVE TRACKER
+           ========================================================= */
         .flying-item {
             position: fixed; width: 60px; height: 60px; border-radius: 50%; border: 3px solid #fff; object-fit: cover;
             z-index: 9999; pointer-events: none; opacity: 1; transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
@@ -371,7 +410,7 @@
         .floating-tray-btn {
             position: fixed; bottom: calc(75px + env(safe-area-inset-bottom)); right: clamp(20px, 5vw, 40px);
             width: 64px; height: 64px; border-radius: 50%;
-            background: linear-gradient(to bottom, var(--primary-plastic), var(--primary-plastic-dark));
+            background: linear-gradient(to bottom, #f24e5d, var(--primary-plastic-dark));
             border: 2px solid #730000; color: #FFF; font-size: 24px; display: flex; align-items: center; justify-content: center;
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 6px 10px rgba(0,0,0,0.4);
             cursor: pointer; z-index: 90; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -395,6 +434,9 @@
         .timeline-step.active { color: var(--ink-main); font-weight: 800; }
         .timeline-step.active::before { background: #5cb85c; }
 
+        /* =========================================================
+           9. COMPACT LEATHER BOTTOM NAVIGATION
+           ========================================================= */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; 
             background: linear-gradient(to bottom, var(--leather-light), var(--leather-dark));
@@ -402,6 +444,7 @@
             padding: 8px 10px calc(12px + env(safe-area-inset-bottom)); z-index: 100;
             box-shadow: 0 -4px 10px rgba(0,0,0,0.4);
         }
+        /* Stitching */
         .bottom-nav::before {
             content: ''; position: absolute; top: 4px; left: 10px; right: 10px;
             border-top: 1px dashed rgba(255, 255, 255, 0.15); pointer-events: none;
@@ -418,32 +461,35 @@
         .nav-item i { font-size: 18px; margin-bottom: 2px; }
         .nav-item.active { color: var(--accent-gold); }
         
+        /* Notification Badge - Red Plastic Bead */
         .badge { position: absolute; top: 4px; right: 20px; background: radial-gradient(circle at 30% 30%, #ff6b6b, var(--primary-plastic-dark)); color: #FFF; font-size: 11px; padding: 2px 6px; border-radius: 12px; font-weight: 900; box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.6); border: 1px solid #730000; text-shadow: 0 -1px 1px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
+    <!-- Hidden audio element for Haptic/Sound feedback -->
     <audio id="audio-pop" src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAAE=" preload="auto"></audio>
 
     <div class="phone-wrapper" id="phone-wrapper">
+
+        <!-- Leather Header -->
         <header class="app-header">
             <div class="header-left">
-                <p class="location-label" id="t-location-label">Addis Ababa · 4 Kilo</p>
+                <p class="location-label" id="t-location-label">Addis Ababa · Bethel Square</p>
                 <div class="location-value">
                     <i class="fa-solid fa-location-dot"></i> 
                     <select id="branch-select" style="background:transparent; border:none; color:inherit; font-weight:inherit; font-size:inherit; outline:none; cursor:pointer; text-shadow: inherit;">
-                        <option value="4 Kilo" style="background:#2c1e14; color:#c29b4e;">4 Kilo</option>
-                        <option value="Lebu" style="background:#2c1e14; color:#c29b4e;">Lebu</option>
-                        <option value="Morning Star Mall" style="background:#2c1e14; color:#c29b4e;">Morning Star Mall</option>
-                        <option value="Bole Bulbula" style="background:#2c1e14; color:#c29b4e;">Bole Bulbula</option>
-                        <option value="Century Mall" style="background:#2c1e14; color:#c29b4e;">Century Mall</option>
-                        <option value="Sarbet Boran Complex" style="background:#2c1e14; color:#c29b4e;">Sarbet Boran Complex</option>
+                        <option value="Bethel Square" style="background:#2c1e14; color:#c29b4e;">Bethel Square</option>
+                        <option value="Bole Road" style="background:#2c1e14; color:#c29b4e;">Bole Road</option>
+                        <option value="CMC" style="background:#2c1e14; color:#c29b4e;">CMC Branch</option>
                     </select>
                 </div>
             </div>
+            <!-- Metallic Bilingual Toggle -->
             <button class="lang-switch-btn" onclick="toggleLanguage()" id="lang-btn">EN / AM</button>
         </header>
         
+        <!-- Physical Utility Bar -->
         <div class="utility-bar">
             <div class="search-container">
                 <i class="fa-solid fa-search"></i>
@@ -458,9 +504,12 @@
             </div>
         </div>
 
+        <!-- Paper Viewport container -->
         <main class="view-container">
+            
+            <!-- VIEW 1: HOME/MENU -->
             <div id="view-home" class="app-view active">
-                <h1 class="display-title" style="font-size: clamp(28px, 6vw, 36px); margin-top: 4px;" id="t-explore-menu">Always Delivering <br><span style="color:var(--primary-ink)">Our Love of Pizza</span></h1>
+                <h1 class="display-title" style="font-size: clamp(28px, 6vw, 36px); margin-top: 4px;" id="t-explore-menu">Explore Our <br><span style="color:var(--primary-ink)">Delicious Menu</span></h1>
                 
                 <div class="category-scroll-container">
                     <div class="category-scroll" id="categories-bar"></div>
@@ -486,6 +535,7 @@
                 <div class="product-grid" id="products-target-grid"></div>
             </div>
 
+            <!-- VIEW 2: CART -->
             <div id="view-cart" class="app-view">
                 <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid var(--ink-main); padding-bottom: 8px; margin-bottom:16px;">
                     <h1 class="display-title" style="font-size: clamp(24px, 5vw, 32px); margin:0;" id="t-your-tray">Customer Check</h1>
@@ -513,6 +563,7 @@
                         <div class="summary-row"><span>VAT (15%)</span><span id="summary-vat">Br 0.00</span></div>
                         <div class="summary-row"><span id="t-service">Service (10%)</span><span id="summary-service">Br 0.00</span></div>
                         
+                        <!-- Split Bill Feature -->
                         <div style="margin-top: 12px; border-top: 1px dashed #d1c8b4; padding-top: 12px;">
                             <label style="font-size: 13px; display:flex; align-items:center; gap:8px; font-weight: 700; cursor:pointer;">
                                 <input type="checkbox" id="split-toggle" onchange="toggleSplitBill()" style="width:18px; height:18px; accent-color: var(--primary-plastic);"> 
@@ -553,6 +604,7 @@
                 </div>
             </div>
 
+            <!-- VIEW 3: LIVE TRACKER -->
             <div id="view-tracker" class="app-view">
                 <h1 class="display-title" style="font-size: clamp(24px, 5vw, 32px); text-align: center;" id="t-order-status">Order Ticket</h1>
                 <div class="tracker-container">
@@ -570,6 +622,7 @@
             </div>
         </main>
 
+        <!-- Product Customizer Clipboard Modal -->
         <div class="modal-overlay" id="product-modal">
             <div class="modal-sheet" id="modal-sheet">
                 <div class="drag-handle"></div>
@@ -580,12 +633,14 @@
                 <h3 class="display-title" id="modal-item-name" style="font-size: clamp(22px, 5vw, 28px);">Item</h3>
                 <p id="modal-item-desc" style="font-size:14px; color:var(--ink-muted); margin-bottom:16px; font-weight: 600;">Desc</p>
                 
+                <!-- Expanded Crust Customizer -->
                 <div id="crust-options-container" style="display:none; margin-top:16px;">
                     <div class="options-group-title" id="t-crust-type">Crust Type</div>
                     <div class="selector-row">
-                        <div class="selector-btn active crust-btn" id="crust-pan" onclick="setCrust('pan', this)">Original Pan Pizza</div>
-                        <div class="selector-btn crust-btn" id="crust-traditional" onclick="setCrust('traditional', this)">Traditional</div>
-                        <div class="selector-btn crust-btn" id="crust-stuffed" onclick="setCrust('stuffed', this)">Cheese Stuffed Crust (+Br 750)</div>
+                        <div class="selector-btn active crust-btn" id="crust-regular" onclick="setCrust('regular', this)">Regular</div>
+                        <div class="selector-btn crust-btn" id="crust-thin" onclick="setCrust('thin', this)">Thin</div>
+                        <div class="selector-btn crust-btn" id="crust-thick" onclick="setCrust('thick', this)">Thick</div>
+                        <div class="selector-btn crust-btn" id="crust-stuffed" onclick="setCrust('stuffed', this)">Stuffed (+Br 795)</div>
                     </div>
                 </div>
 
@@ -604,10 +659,12 @@
             </div>
         </div>
 
+        <!-- Floating Tray Button -->
         <button class="floating-tray-btn" id="floating-tray-btn" onclick="navigateTo('cart')">
             <i class="fa-solid fa-basket-shopping"></i><span class="floating-badge" id="floating-badge-count">0</span>
         </button>
 
+        <!-- Compact Bottom Leather Navigation -->
         <nav class="bottom-nav">
             <div class="liquid-nav-pill" id="liquid-pill"></div>
             <div class="nav-item active" id="nav-home" onclick="navigateTo('home')">
@@ -622,11 +679,15 @@
         </nav>
     </div>
 
+    <!-- =========================================================
+         JAVASCRIPT LOGIC & DATABASE
+         ========================================================= -->
     <script>
+        // --- TRANSLATION DICTIONARY (Merged System) ---
         const TRANSLATIONS = {
             en: {
-                locationLabel: "Addis Ababa · 4 Kilo",
-                exploreMenu: "Always Delivering <br><span style='color:var(--primary-ink)'>Our Love of Pizza</span>",
+                locationLabel: "Addis Ababa · Bethel Square",
+                exploreMenu: "Explore Our <br><span style='color:var(--primary-ink)'>Delicious Menu</span>",
                 fastingToggle: "Fasting",
                 searchPlaceholder: "Search menu...",
                 yourTray: "Customer Check",
@@ -645,8 +706,8 @@
                 paymentMethod: "Payment Method", payTo: "Pay to this account", crustType: "Crust Type", people: "People:"
             },
             am: {
-                locationLabel: "አዲስ አበባ · 4 ኪሎ",
-                exploreMenu: "ሁልጊዜም የፒዛ ፍቅራችንን <br><span style='color:var(--primary-ink)'>እናቀርባለን</span>",
+                locationLabel: "አዲስ አበባ · ቤተል አደባባይ",
+                exploreMenu: "ጣፋጭ ምግባችንን <br><span style='color:var(--primary-ink)'>ይመርምሩ</span>",
                 fastingToggle: "የጾም",
                 searchPlaceholder: "ምናሌ ይፈልጉ...",
                 yourTray: "ትሪዎ",
@@ -666,52 +727,52 @@
             }
         };
 
+        // --- EXPANDED MENU DATABASE ---
         const MENU_DATA = {
             "veg-pizza": {
-                title: { en: "Veg", am: "የአትክልት ፒዛ" }, items: [
-                    { id: "v1", name: { en: "MARGHERITA PIZZA", am: "ማርጋሪታ ፒዛ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Tomato", am: "የቲማቲም ሶስ፣ ሞዛሬላ አይብ፣ ቲማቲም" }, prices: { small: 440, medium: 685, large: 995 }, img: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&q=80", type: "pizza", popular: true, dietary: ["vegetarian"], inventory: "available" },
-                    { id: "v2", name: { en: "CHEESE PIZZA", am: "የአይብ ፒዛ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese", am: "ቲማቲም ሶስ፣ ሞዛሬላ" }, prices: { small: 425, medium: 660, large: 980 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "pizza", popular: true, dietary: ["vegetarian"], inventory: "available" },
-                    { id: "v3", name: { en: "HOT & SPICY VEG", am: "ቅመም አትክልት" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Green Chilli", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ አረንጓዴ ቃሪያ" }, prices: { small: 490, medium: 780, large: 1170 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "pizza", dietary: ["vegetarian", "spicy"], inventory: "available" },
-                    { id: "v5", name: { en: "TROPICAL VEGGIE", am: "ትሮፒካል አትክልት" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Pineapple", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ አናናስ" }, prices: { small: 520, medium: 805, large: 1235 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "pizza", dietary: ["vegetarian"], inventory: "limited" }
+                title: { en: "Veg Pizza", am: "የአትክልት ፒዛ" }, items: [
+                    { id: "v1", name: { en: "MARGHERITA PIZZA", am: "ማርጋሪታ ፒዛ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Tomato", am: "የቲማቲም ሶስ፣ ሞዛሬላ አይብ፣ ቲማቲም" }, prices: { small: 495, medium: 770, large: 1120 }, img: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&q=80", type: "pizza", popular: true, dietary: ["vegetarian"], inventory: "available" },
+                    { id: "v2", name: { en: "CHEESE PIZZA", am: "የአይብ ፒዛ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Cheddar Cheese", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ቼዳር አይብ" }, prices: { small: 475, medium: 740, large: 1100 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "pizza", popular: true, dietary: ["vegetarian"], inventory: "available" },
+                    { id: "v3", name: { en: "HOT & SPICY VEG", am: "ቅመም አትክልት" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Green Chilli", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ አረንጓዴ ቃሪያ" }, prices: { small: 550, medium: 875, large: 1315 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "pizza", dietary: ["vegetarian", "spicy"], inventory: "available" },
+                    { id: "v4", name: { en: "MUSHROOM LOVERS", am: "እንጉዳይ ወዳጆች" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Mushroom, Olives", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ እንጉዳይ፣ ወይራ" }, prices: { small: 585, medium: 940, large: 1245 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?w=400&q=80", type: "pizza", dietary: ["vegetarian"], inventory: "available" },
+                    { id: "v5", name: { en: "TROPICAL VEGGIE", am: "ትሮፒካል አትክልት" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Pineapple", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ አናናስ" }, prices: { small: 585, medium: 905, large: 1390 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "pizza", dietary: ["vegetarian"], inventory: "limited" },
+                    { id: "v6", name: { en: "VEGGIE SUPREME", am: "ልዩ አትክልት" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Tomato & Olives", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ ቲማቲም እና ወይራ" }, prices: { small: 540, medium: 830, large: 1245 }, img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80", type: "pizza", dietary: ["vegetarian"], inventory: "sold-out" }
                 ]
             },
             "meat-pizza": {
-                title: { en: "Meat", am: "የስጋ ፒዛ" }, items: [
-                    { id: "m1", name: { en: "HAWAIIAN PIZZA", am: "ሃዋያን ፒዛ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Turkey Ham, Pineapple", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ የቱርክ ስጋ፣ አናናስ" }, prices: { small: 620, medium: 860, large: 1170 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
-                    { id: "m2", name: { en: "ITALIAN MEAT", am: "ጣሊያናዊ ስጋ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Italian Meat Roll, Onion, Tomato, Green Chilli", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ጣሊያናዊ ስጋ፣ ሽንኩርት፣ ቲማቲም፣ አረንጓዴ ቃሪያ" }, prices: { small: 690, medium: 950, large: 1370 }, img: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=400&q=80", type: "pizza", dietary: ["spicy"], inventory: "available" },
-                    { id: "m4", name: { en: "PEPPERONI LOVERS", am: "ፔፐሮኒ ወዳጆች" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Pepperoni", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ፔፐሮኒ" }, prices: { small: 590, medium: 860, large: 1255 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
-                    { id: "m5", name: { en: "BBQ DOUBLE MEAT", am: "ቢቢኪው ደብል ስጋ" }, desc: { en: "BBQ Sauce, Mozzarella Cheese, Beef, Turkey Ham", am: "ቢቢኪው ሶስ፣ ሞዛሬላ፣ የበሬ ስጋ፣ የቱርክ ስጋ" }, prices: { small: 680, medium: 1025, large: 1370 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "pizza", popular: true, inventory: "available" }
+                title: { en: "Meat Pizza", am: "የስጋ ፒዛ" }, items: [
+                    { id: "m1", name: { en: "HAWAIIAN PIZZA", am: "ሃዋያን ፒዛ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Turkey Ham, Pineapple", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ የቱርክ ስጋ፣ አናናስ" }, prices: { small: 700, medium: 965, large: 1315 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
+                    { id: "m2", name: { en: "ITALIAN MEAT", am: "ጣሊያናዊ ስጋ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Italian Meat Roll, Onion, Tomato, Green Chilli", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ጣሊያናዊ ስጋ፣ ሽንኩርት፣ ቲማቲም፣ አረንጓዴ ቃሪያ" }, prices: { small: 775, medium: 1070, large: 1535 }, img: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=400&q=80", type: "pizza", dietary: ["spicy"], inventory: "available" },
+                    { id: "m3", name: { en: "MEAT LOVERS", am: "የስጋ ወዳጆች" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Pepperoni, Turkey Ham, Beef", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ፔፐሮኒ፣ የቱርክ ስጋ፣ የበሬ ስጋ" }, prices: { small: 765, medium: 1150, large: 1535 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
+                    { id: "m4", name: { en: "PEPPERONI LOVERS", am: "ፔፐሮኒ ወዳጆች" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Pepperoni", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ፔፐሮኒ" }, prices: { small: 685, medium: 965, large: 1410 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
+                    { id: "m5", name: { en: "SUPER SUPREME", am: "ሱፐር ሱፕሪም" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Beef, Pepperoni, Turkey Ham, Onion, Capsicum, Olives", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ የበሬ ስጋ፣ ፔፐሮኒ፣ የቱርክ ስጋ፣ ሽንኩርት፣ ቃሪያ፣ ወይራ" }, prices: { small: 795, medium: 1200, large: 1535 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "pizza", popular: true, inventory: "available" }
                 ]
             },
             "chicken-pizza": {
-                title: { en: "Chicken", am: "የዶሮ ፒዛ" }, items: [
-                    { id: "c1", name: { en: "HOT & SPICY CHICKEN", am: "ቅመም ዶሮ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Chicken, Onion, Tomato, Green Chilli", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ፣ ሽንኩርት፣ ቲማቲም፣ አረንጓዴ ቃሪያ" }, prices: { small: 590, medium: 940, large: 1360 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "pizza", dietary: ["spicy"], popular: true, inventory: "available" },
-                    { id: "c3", name: { en: "CHICKEN & MUSHROOM", am: "ዶሮ እና እንጉዳይ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Chicken, Mushroom", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ፣ እንጉዳይ" }, prices: { small: 590, medium: 940, large: 1340 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?w=400&q=80", type: "pizza", inventory: "available" },
-                    { id: "c4", name: { en: "SWEET CHILLI CHICKEN", am: "ስዊት ቺሊ ዶሮ" }, desc: { en: "Sweet Chilli Sauce, Mozzarella Cheese, Chicken", am: "ስዊት ቺሊ ሶስ፣ ሞዛሬላ፣ ዶሮ" }, prices: { small: 620, medium: 950, large: 1340 }, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
-                    { id: "c5", name: { en: "CHICKEN FAJITA", am: "ዶሮ ፋጂታ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Fajita Chicken", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ፋጂታ ዶሮ" }, prices: { small: 590, medium: 890, large: 1370 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "pizza", popular: true, inventory: "available" }
+                title: { en: "Chicken Pizza", am: "የዶሮ ፒዛ" }, items: [
+                    { id: "c1", name: { en: "HOT & SPICY CHICKEN", am: "ቅመም ዶሮ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Chicken, Onion, Tomato, Green Chilli", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ፣ ሽንኩርት፣ ቲማቲም፣ አረንጓዴ ቃሪያ" }, prices: { small: 665, medium: 1055, large: 1550 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "pizza", dietary: ["spicy"], popular: true, inventory: "available" },
+                    { id: "c2", name: { en: "BBQ CHICKEN", am: "ቢቢኪው ዶሮ" }, desc: { en: "BBQ Sauce, Mozzarella Cheese, Turkey Ham, Chicken", am: "ቢቢኪው ሶስ፣ ሞዛሬላ፣ የቱርክ ስጋ፣ ዶሮ" }, prices: { small: 740, medium: 1165, large: 1535 }, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
+                    { id: "c3", name: { en: "CHICKEN & MUSHROOM", am: "ዶሮ እና እንጉዳይ" }, desc: { en: "Tomato Sauce, Mozzarella Cheese, Chicken, Mushroom", am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ፣ እንጉዳይ" }, prices: { small: 665, medium: 1055, large: 1505 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?w=400&q=80", type: "pizza", inventory: "available" }
                 ]
             },
             "fasting-pizza": {
-                title: { en: "Fasting", am: "የጾም ፒዛ" }, items: [
-                    { id: "f1", name: { en: "TUNA PIZZA", am: "ቱና ፒዛ" }, desc: { en: "Fasting Sauce, Tuna, Onion, Capsicum, Olives & Green Chilli", am: "የጾም ሶስ፣ ቱና፣ ሽንኩርት፣ ቃሪያ፣ ወይራ እና አረንጓዴ ቃሪያ" }, prices: { small: 480, medium: 660, large: 1035 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?w=400&q=80", type: "pizza", tags: ["fasting"], dietary: ["fasting", "spicy"], popular: true, inventory: "available" },
-                    { id: "f2", name: { en: "VEGGIE BLAST", am: "አትክልት ፍንዳታ" }, desc: { en: "Fasting Sauce, Pineapple, Onion, Olives, Capsicum, Tomato, Mushroom & Green Chilli", am: "የጾም ሶስ፣ አናናስ፣ ሽንኩርት፣ ወይራ፣ ቃሪያ፣ ቲማቲም፣ እንጉዳይ እና አረንጓዴ ቃሪያ" }, prices: { small: 430, medium: 710, large: 980 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "pizza", dietary: ["fasting", "spicy", "vegetarian"], inventory: "available" },
-                    { id: "f3", name: { en: "PINEAPPLE LOVERS", am: "አናናስ ወዳጆች" }, desc: { en: "Fasting Sauce, Pineapple, Mushroom, Tomato, Green Chilli", am: "የጾም ሶስ፣ አናናስ፣ እንጉዳይ፣ ቲማቲም፣ አረንጓዴ ቃሪያ" }, prices: { small: 460, medium: 660, large: 980 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "pizza", dietary: ["fasting", "vegetarian"], inventory: "available" }
+                title: { en: "Fasting Pizza", am: "የጾም ፒዛ" }, items: [
+                    { id: "f1", name: { en: "TUNA PIZZA", am: "ቱና ፒዛ" }, desc: { en: "Fasting Sauce, Tuna, Onion, Capsicum, Olives & Green Chilli", am: "የጾም ሶስ፣ ቱና፣ ሽንኩርት፣ ቃሪያ፣ ወይራ እና አረንጓዴ ቃሪያ" }, prices: { small: 540, medium: 740, large: 1165 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?w=400&q=80", type: "pizza", tags: ["fasting"], dietary: ["fasting", "spicy"], popular: true, inventory: "available" },
+                    { id: "f2", name: { en: "VEGGIE BLAST", am: "አትክልት ፍንዳታ" }, desc: { en: "Fasting Sauce, Pineapple, Onion, Olives, Capsicum, Tomato, Mushroom & Green Chilli", am: "የጾም ሶስ፣ አናናስ፣ ሽንኩርት፣ ወይራ፣ ቃሪያ፣ ቲማቲም፣ እንጉዳይ እና አረንጓዴ ቃሪያ" }, prices: { small: 480, medium: 795, large: 1100 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "pizza", dietary: ["fasting", "spicy", "vegetarian"], inventory: "available" }
                 ]
             },
             "sides": {
-                title: { en: "Sides & Desserts", am: "ተጨማሪዎች እና ማጣፈጫ" }, items: [
-                    { id: "s1", name: { en: "FRENCH FRIES", am: "የተጠበሰ ድንች" }, desc: { en: "Crispy golden fries", am: "ወርቃማ ጥብስ ድንች" }, price: 315, img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", type: "flat", dietary: ["vegetarian", "fasting"], popular: true, inventory: "available" },
-                    { id: "s2", name: { en: "POTATO WEDGES", am: "የድንች ቆራረጥ" }, desc: { en: "Crispy seasoned wedges", am: "በቅመም የተጠበሰ ድንች" }, price: 340, img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", type: "flat", dietary: ["vegetarian"], popular: true, inventory: "available" },
-                    { id: "s6", name: { en: "6 BONE-OUT WINGS", am: "6 ቦን-አውት ዊንግስ" }, desc: { en: "6 Tender boneless chicken wings", am: "6 ጣፋጭ የአጥንት የሌለው ዶሮ ዊንግስ" }, price: 940, img: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400&q=80", type: "flat", popular: true, inventory: "available" },
-                    { id: "s7", name: { en: "3 BONE-OUT WINGS", am: "3 ቦን-አውት ዊንግስ" }, desc: { en: "3 Tender boneless chicken wings", am: "3 ጣፋጭ የአጥንት የሌለው ዶሮ ዊንግስ" }, price: 510, img: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400&q=80", type: "flat", popular: false, inventory: "available" },
-                    { id: "s8", name: { en: "HERSHEY'S CHOCOLATE CHIP COOKIES", am: "የቸኮሌት ኩኪስ" }, desc: { en: "Warm and gooey fresh baked cookies", am: "ትኩስ እና ጣፋጭ ኩኪስ" }, price: 1630, img: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&q=80", type: "flat", popular: true, inventory: "available" }
+                title: { en: "Sides & Pasta", am: "ተጨማሪዎች እና ፓስታ" }, items: [
+                    { id: "s1", name: { en: "FRENCH FRIES", am: "የተጠበሰ ድንች" }, desc: { en: "Crispy golden fries", am: "ወርቃማ ጥብስ ድንች" }, price: 355, img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", type: "flat", dietary: ["vegetarian", "fasting"], popular: true, inventory: "available" },
+                    { id: "s6", name: { en: "6 BONE-OUT WINGS", am: "6 ቦን-አውት ዊንግስ" }, desc: { en: "6 Tender boneless chicken wings", am: "6 ጣፋጭ የአጥንት የሌለው ዶሮ ዊንግስ" }, price: 1300, img: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400&q=80", type: "flat", popular: true, inventory: "available" },
+                    { id: "s11", name: { en: "ALFREDO PASTA", am: "አልፍሬዶ ፓስታ" }, desc: { en: "Creamy Alfredo sauce pasta", am: "በክሬሚ አልፍሬዶ ሶስ የተሰራ ፓስታ" }, price: 885, img: "https://images.unsplash.com/photo-1621996346565-e3d5d6281292?w=400&q=80", type: "flat", popular: true, inventory: "available" }
                 ]
             },
             "drinks": {
-                title: { en: "Beverages", am: "መጠጦች" }, items: [
-                    { id: "d2", name: { en: "COCA-COLA 500ML", am: "ኮካ ኮላ 500ml" }, desc: { en: "500ml Ice cold Coca-Cola bottle", am: "500ml ቀዝቃዛ ኮካ ኮላ" }, price: 125, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", type: "flat", popular: true, inventory: "available" },
-                    { id: "d4", name: { en: "SPRITE 500ML", am: "ስፕራይት 500ml" }, desc: { en: "500ml Crisp Sprite bottle", am: "500ml ቀዝቃዛ ስፕራይት" }, price: 125, img: "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&q=80", type: "flat", inventory: "available" },
-                    { id: "d12", name: { en: "WATER 500 ML", am: "ታሸገ ውሀ 500ml" }, desc: { en: "500ml Purified drinking water", am: "500ml የታሸገ የጠረጴዛ ውሀ" }, price: 60, img: "https://images.unsplash.com/photo-1560023907-5f339617ea30?w=400&q=80", type: "flat", inventory: "available" }
+                title: { en: "Drinks", am: "መጠጦች" }, items: [
+                    { id: "d2", name: { en: "COCA-COLA 500ML", am: "ኮካ ኮላ 500ml" }, desc: { en: "500ml Ice cold Coca-Cola bottle", am: "500ml ቀዝቃዛ ኮካ ኮላ" }, price: 140, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", type: "flat", popular: true, inventory: "available" },
+                    { id: "d4", name: { en: "SPRITE 500ML", am: "ስፕራይት 500ml" }, desc: { en: "500ml Crisp Sprite bottle", am: "500ml ቀዝቃዛ ስፕራይት" }, price: 140, img: "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&q=80", type: "flat", inventory: "available" },
+                    { id: "d12", name: { en: "BOTTLED WATER 500ML", am: "ታሸገ ውሀ 500ml" }, desc: { en: "500ml Purified drinking water", am: "500ml የታሸገ የጠረጴዛ ውሀ" }, price: 70, img: "https://images.unsplash.com/photo-1560023907-5f339617ea30?w=400&q=80", type: "flat", inventory: "available" }
                 ]
             }
         };
@@ -728,16 +789,18 @@
         const VAT = 0.15;
         const SERVICE = 0.10;
 
+        // --- STATE VARIABLES ---
         let currentLang = 'en';
         let currentCategoryKey = "veg-pizza";
         let currentSort = 'default';
         let activeModalItem = null;
         let selectedSize = 'medium';
-        let selectedCrust = 'pan';
+        let selectedCrust = 'regular';
         let modalQuantity = 1;
         let cart = [];
         let selectedPayment = null;
         
+        // --- INITIALIZATION ---
         window.addEventListener('DOMContentLoaded', () => {
             checkDynamicFastingSchedule();
             applyLanguage();
@@ -762,11 +825,14 @@
                 }
             });
 
+            // Handle responsive resizing for the bottom liquid navigation
             window.addEventListener('resize', debounce(() => {
                 const activeNav = document.querySelector('.nav-item.active');
                 if(activeNav) updateLiquidNavPill(activeNav, false);
             }, 100));
         });
+
+        // --- UTILS & CORE ---
 
         function checkDynamicFastingSchedule() {
             const day = new Date().getDay();
@@ -787,6 +853,8 @@
             setTimeout(() => t.remove(), 2800);
             playHaptic();
         }
+
+        // --- LANGUAGE ---
 
         function toggleLanguage() {
             currentLang = currentLang === 'en' ? 'am' : 'en';
@@ -855,6 +923,8 @@
             try { const audio = document.getElementById('audio-pop'); audio.currentTime = 0; audio.play().catch(()=>{}); } catch(e) {}
         }
 
+        // --- SORTING ---
+
         function toggleSortDropdown() {
             const dd = document.getElementById('sort-dropdown');
             dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
@@ -887,6 +957,8 @@
             }
             return sorted;
         }
+
+        // --- RENDERERS ---
 
         function renderCategoryBar() {
             const container = document.getElementById('categories-bar');
@@ -978,13 +1050,15 @@
             }).join('');
         }
 
+        // --- MODAL & CUSTOMIZER ---
+
         function openProductModal(catKey, itemId) {
             playHaptic();
             const item = MENU_DATA[catKey].items.find(i => i.id === itemId);
             if(!item) return;
 
             activeModalItem = item;
-            modalQuantity = 1; selectedSize = 'medium'; selectedCrust = 'pan';
+            modalQuantity = 1; selectedSize = 'medium'; selectedCrust = 'regular';
 
             document.getElementById('modal-item-name').innerText = getItemName(item);
             document.getElementById('modal-item-img').src = item.img;
@@ -992,7 +1066,7 @@
             document.getElementById('modal-qty-display').innerText = modalQuantity;
             
             document.querySelectorAll('.crust-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('crust-pan').classList.add('active');
+            document.getElementById('crust-regular').classList.add('active');
 
             const optionsContainer = document.getElementById('pizza-options-container');
             const crustContainer = document.getElementById('crust-options-container');
@@ -1049,7 +1123,7 @@
 
         function calcPrice(item, size) {
             let p = item.type === 'pizza' ? item.prices[size] : item.price;
-            if (item.type === 'pizza' && selectedCrust === 'stuffed') p = size === 'medium' ? 750 : 980;
+            if (item.type === 'pizza' && selectedCrust === 'stuffed') p = size === 'medium' ? 795 : 1040;
             return p;
         }
 
@@ -1061,7 +1135,7 @@
         function addModalItemToCart(event) {
             playHaptic();
             const unitPrice = calcPrice(activeModalItem, selectedSize);
-            const crustLabel = (activeModalItem.type === 'pizza' && selectedCrust !== 'pan') ? selectedCrust : null;
+            const crustLabel = (activeModalItem.type === 'pizza' && selectedCrust !== 'regular') ? selectedCrust : null;
             const cartItem = {
                 id: activeModalItem.id + (activeModalItem.type === 'pizza' ? `-${selectedSize}-${selectedCrust}` : `-flat-${Date.now()}`),
                 nameEn: activeModalItem.name.en, nameAm: activeModalItem.name.am,
@@ -1119,6 +1193,8 @@
                 badge.style.display = 'none'; floatBtn.classList.remove('visible'); 
             }
         }
+
+        // --- CART, VAT, SPLIT BILL & PAYMENT ---
 
         function toggleSplitBill() {
             const ui = document.getElementById('split-ui');
@@ -1232,6 +1308,8 @@
             if (!selectedPayment || selectedPayment === 'cash') return;
             navigator.clipboard.writeText(PAYMENT_ACCOUNTS[selectedPayment].number).then(() => showToast('Number Copied!'));
         }
+
+        // --- NAVIGATION & TRACKING ---
         
         function updateLiquidNavPill(activeNavItem, smooth = true) {
             const pill = document.getElementById('liquid-pill');
@@ -1264,6 +1342,7 @@
             if(cart.length === 0) return;
             if(!selectedPayment) { showToast('Please select a payment method!'); return; }
             
+            // --- TABLE NUMBER VALIDATION ---
             const tableInput = document.getElementById('table-number-input');
             const tableVal = tableInput.value.trim();
             const errorMsg = document.getElementById('table-error-msg');
@@ -1285,11 +1364,11 @@
             const sc = document.getElementById('split-toggle').checked ? (parseInt(document.getElementById('split-ways').value) || 1) : 1;
             
             let gt = 0;
-            let summary = `🍕 *NEW ORDER*\n\n📍 4 Kilo\n🪑 Table ${table}\n${sc > 1 ? `👥 Split: ${sc}p\n` : ''}───────────────────\n`;
+            let summary = `🍕 *NEW ORDER*\n\n📍 Bethel Square\n🪑 Table ${table}\n${sc > 1 ? `👥 Split: ${sc}p\n` : ''}───────────────────\n`;
             
             cart.forEach((item, i) => {
                 const it = item.unitPrice * item.quantity; gt += it;
-                summary += `${i + 1}. *${item.nameEn}*${item.size ? ` [${item.size.toUpperCase()}]` : ''}${item.crust && item.crust !== 'pan' ? ` (${item.crust})` : ''} x${item.quantity} - Br ${it.toFixed(2)}\n`;
+                summary += `${i + 1}. *${item.nameEn}*${item.size ? ` [${item.size.toUpperCase()}]` : ''}${item.crust && item.crust !== 'regular' ? ` (${item.crust})` : ''} x${item.quantity} - Br ${it.toFixed(2)}\n`;
             });
             
             const vat = gt * VAT;
