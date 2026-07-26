@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pizza Hut — Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#0A0A0C; color:#FFFFFF; min-height:100vh; padding:20px; }
+        .container { max-width:1200px; margin:0 auto; }
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:16px; flex-wrap:wrap; gap:12px; }
+        .logo { font-family:'Barlow Condensed',sans-serif; font-weight:900; font-size:24px; color:#EE1945; }
+        .tabs { display:flex; gap:4px; margin-bottom:20px; flex-wrap:wrap; background:rgba(255,255,255,0.05); padding:4px; border-radius:12px; }
+        .tab { padding:10px 20px; border:none; border-radius:8px; cursor:pointer; font-weight:700; font-size:13px; background:transparent; color:#CBD5E1; transition:all .2s; text-transform:uppercase; }
+        .tab.active { background:#EE1945; color:#FFF; }
+        .tab:hover:not(.active) { background:rgba(255,255,255,0.05); }
+        .panel { display:none; }
+        .panel.active { display:block; }
+        
+        /* Menu Management */
+        .menu-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; }
+        .menu-item-card { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:14px; display:flex; align-items:center; gap:14px; cursor:pointer; transition:all .2s; }
+        .menu-item-card:hover { border-color:rgba(255,255,255,0.25); background:rgba(255,255,255,0.08); }
+        .menu-item-card img { width:60px; height:60px; object-fit:cover; border-radius:8px; }
+        .menu-item-card .info { flex:1; }
+        .menu-item-card .info h4 { font-size:14px; font-weight:700; }
+        .menu-item-card .info p { font-size:12px; color:#CBD5E1; }
+        .menu-item-card .status { padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700; }
+        .status.available { background:rgba(16,185,129,0.2); color:#10B981; }
+        .status.limited { background:rgba(245,158,11,0.2); color:#F59E0B; }
+        .status.sold-out { background:rgba(239,68,68,0.2); color:#EF4444; }
+        .add-btn { background:rgba(255,255,255,0.1); border:1px dashed rgba(255,255,255,0.3); border-radius:12px; padding:30px; text-align:center; cursor:pointer; transition:all .2s; color:#CBD5E1; }
+        .add-btn:hover { background:rgba(255,255,255,0.15); border-color:#EE1945; color:#FFF; }
+
+        /* Modal */
+        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); z-index:1000; display:none; align-items:center; justify-content:center; }
+        .modal { background:#1A1A24; border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:24px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; }
+        .modal h2 { margin-bottom:16px; }
+        .modal label { display:block; font-size:12px; font-weight:700; color:#CBD5E1; text-transform:uppercase; margin-top:12px; margin-bottom:4px; }
+        .modal input, .modal textarea, .modal select { width:100%; padding:10px 12px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#FFF; font-size:14px; outline:none; }
+        .modal input:focus, .modal textarea:focus, .modal select:focus { border-color:#EE1945; }
+        .modal textarea { resize:vertical; min-height:60px; }
+        .modal-actions { display:flex; gap:10px; margin-top:20px; }
+        .modal-actions button { padding:10px 20px; border:none; border-radius:8px; font-weight:700; cursor:pointer; font-size:14px; flex:1; }
+        .btn-save { background:#EE1945; color:#FFF; }
+        .btn-delete { background:rgba(239,68,68,0.2); color:#EF4444; border:1px solid rgba(239,68,68,0.3); }
+        .btn-cancel { background:rgba(255,255,255,0.05); color:#CBD5E1; }
+
+        /* Reports */
+        .report-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px; }
+        .report-stat { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px; text-align:center; }
+        .report-stat .num { font-size:28px; font-weight:900; color:#FFAA00; }
+        .report-stat .label { font-size:11px; color:#CBD5E1; text-transform:uppercase; margin-top:4px; }
+        .ranking-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+        @media(max-width:600px){ .ranking-grid { grid-template-columns:1fr; } }
+        .ranking-box { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px; }
+        .ranking-box h4 { color:#FFAA00; margin-bottom:10px; text-transform:uppercase; font-size:13px; }
+        .ranking-list { list-style:none; }
+        .ranking-list li { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; }
+        .ranking-list li .rank { font-weight:800; color:#FFAA00; width:30px; }
+        .ranking-list li .name { flex:1; color:#FFF; }
+        .ranking-list li .count { color:#CBD5E1; }
+        .recent-orders { margin-top:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px; max-height:300px; overflow-y:auto; }
+        .recent-orders h4 { color:#CBD5E1; font-size:12px; text-transform:uppercase; margin-bottom:10px; }
+        .recent-order { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; color:#CBD5E1; }
+        .period-tabs { display:flex; gap:4px; margin-bottom:16px; background:rgba(255,255,255,0.05); padding:4px; border-radius:8px; }
+        .period-tab { padding:6px 16px; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-size:12px; background:transparent; color:#CBD5E1; text-transform:uppercase; transition:all .2s; }
+        .period-tab.active { background:#EE1945; color:#FFF; }
+        .period-tab:hover:not(.active) { background:rgba(255,255,255,0.05); }
+
+        .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#EE1945; color:#FFF; padding:12px 24px; border-radius:12px; font-weight:700; z-index:2000; animation:toastIn .3s ease-out, toastOut .3s ease-in 2.5s forwards; }
+        @keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(20px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
+        @keyframes toastOut { from{opacity:1;} to{opacity:0;} }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo"><i class="fa-solid fa-gauge-high"></i> Admin Dashboard</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <span style="font-size:12px;color:#CBD5E1;" id="last-updated">Updated: now</span>
+            <button class="refresh-btn" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#FFF;padding:6px 14px;border-radius:8px;cursor:pointer;font-weight:600;" onclick="loadAll()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="menu" onclick="switchTab('menu')"><i class="fa-solid fa-list"></i> Menu</button>
+        <button class="tab" data-tab="reports" onclick="switchTab('reports')"><i class="fa-solid fa-chart-simple"></i> Reports</button>
+    </div>
+
+    <!-- Menu Panel -->
+    <div class="panel active" id="panel-menu">
+        <div style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <span style="font-weight:700;color:#CBD5E1;">Manage Menu Items</span>
+            <button class="add-btn" style="padding:8px 16px;border-radius:8px;border:1px dashed rgba(255,255,255,0.3);background:transparent;color:#FFF;cursor:pointer;font-weight:700;" onclick="openAddModal()"><i class="fa-solid fa-plus"></i> Add Item</button>
+        </div>
+        <div class="menu-grid" id="menu-grid"></div>
+    </div>
+
+    <!-- Reports Panel -->
+    <div class="panel" id="panel-reports">
+        <div class="period-tabs">
+            <button class="period-tab active" data-period="daily" onclick="switchPeriod('daily')">Daily</button>
+            <button class="period-tab" data-period="weekly" onclick="switchPeriod('weekly')">Weekly</button>
+            <button class="period-tab" data-period="monthly" onclick="switchPeriod('monthly')">Monthly</button>
+        </div>
+        <div class="report-stats" id="report-stats"></div>
+        <div class="ranking-grid" id="ranking-grid"></div>
+        <div class="recent-orders" id="recent-orders"><h4>Recent Orders</h4></div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+        <h2 id="modal-title">Edit Item</h2>
+        <label>Item Name *</label>
+        <input type="text" id="edit-name" placeholder="e.g. Margherita Pizza">
+        <label>Description</label>
+        <textarea id="edit-desc" placeholder="e.g. Tomato sauce, mozzarella cheese..."></textarea>
+        <label>Price (Br) *</label>
+        <input type="number" id="edit-price" placeholder="e.g. 770">
+        <label>Image URL</label>
+        <input type="text" id="edit-img" placeholder="https://images.unsplash.com/...">
+        <label>Inventory Status</label>
+        <select id="edit-inventory">
+            <option value="available">Available</option>
+            <option value="limited">Limited</option>
+            <option value="sold-out">Sold Out</option>
+        </select>
+        <label>Category</label>
+        <select id="edit-category">
+            <option value="veg-pizza">Veg Pizza</option>
+            <option value="meat-pizza">Meat Pizza</option>
+            <option value="chicken-pizza">Chicken Pizza</option>
+            <option value="fasting-pizza">Fasting Pizza</option>
+            <option value="sides">Sides & Pasta</option>
+            <option value="specials">Specials & Melts</option>
+            <option value="drinks">Drinks</option>
+        </select>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-delete" id="btn-delete" onclick="deleteItem()" style="display:none;">Delete</button>
+            <button class="btn-save" onclick="saveItem()">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== DATA ====================
+const MENU_DATA = {
+    "veg-pizza": { title: "Veg Pizza", title_am: "የአትክልት ፒዛ", items: [
+        { id: "v1", name: "MARGHERITA PIZZA", name_am: "ማርጋሪታ ፒዛ", desc: "Tomato Sauce, Mozzarella Cheese, Tomato", desc_am: "የቲማቲም ሶስ፣ ሞዛሬላ አይብ፣ ቲማቲም", prices: { small: 495, medium: 770, large: 1120 }, img: "https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?w=400&q=80", type: "pizza", popular: true, dietary: ["vegetarian"], inventory: "available" },
+        { id: "v2", name: "CHEESE PIZZA", name_am: "የአይብ ፒዛ", desc: "Tomato Sauce, Mozzarella Cheese, Cheddar Cheese", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ቼዳር አይብ", prices: { small: 475, medium: 740, large: 1100 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "pizza", popular: true, dietary: ["vegetarian"], inventory: "available" },
+        { id: "v3", name: "HOT & SPICY VEG", name_am: "ቅመም አትክልት", desc: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Green Chilli", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ አረንጓዴ ቃሪያ", prices: { small: 550, medium: 875, large: 1315 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "pizza", dietary: ["vegetarian", "spicy"], inventory: "available" },
+        { id: "v4", name: "MUSHROOM LOVERS", name_am: "እንጉዳይ ወዳጆች", desc: "Tomato Sauce, Mozzarella Cheese, Mushroom, Olives", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ እንጉዳይ፣ ወይራ", prices: { small: 585, medium: 940, large: 1245 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?w=400&q=80", type: "pizza", dietary: ["vegetarian"], inventory: "available" },
+        { id: "v5", name: "TROPICAL VEGGIE", name_am: "ትሮፒካል አትክልት", desc: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Pineapple", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ አናናስ", prices: { small: 585, medium: 905, large: 1390 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "pizza", dietary: ["vegetarian"], inventory: "limited" },
+        { id: "v6", name: "VEGGIE SUPREME", name_am: "ልዩ አትክልት", desc: "Tomato Sauce, Mozzarella Cheese, Onion, Capsicum, Tomato & Olives", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ ቃሪያ፣ ቲማቲም እና ወይራ", prices: { small: 540, medium: 830, large: 1245 }, img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80", type: "pizza", dietary: ["vegetarian"], inventory: "available" }
+    ]},
+    "meat-pizza": { title: "Meat Pizza", title_am: "የስጋ ፒዛ", items: [
+        { id: "m1", name: "HAWAIIAN PIZZA", name_am: "ሃዋያን ፒዛ", desc: "Tomato Sauce, Mozzarella Cheese, Turkey Ham, Pineapple", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ የቱርክ ስጋ፣ አናናስ", prices: { small: 700, medium: 965, large: 1315 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
+        { id: "m2", name: "ITALIAN MEAT", name_am: "ጣሊያናዊ ስጋ", desc: "Tomato Sauce, Mozzarella Cheese, Italian Meat Roll, Onion, Tomato, Green Chilli", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ጣሊያናዊ ስጋ፣ ሽንኩርት፣ ቲማቲም፣ አረንጓዴ ቃሪያ", prices: { small: 775, medium: 1070, large: 1535 }, img: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=400&q=80", type: "pizza", dietary: ["spicy"], inventory: "available" },
+        { id: "m3", name: "MEAT LOVERS", name_am: "የስጋ ወዳጆች", desc: "Tomato Sauce, Mozzarella Cheese, Pepperoni, Turkey Ham, Beef", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ፔፐሮኒ፣ የቱርክ ስጋ፣ የበሬ ስጋ", prices: { small: 765, medium: 1150, large: 1535 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
+        { id: "m4", name: "PEPPERONI LOVERS", name_am: "ፔፐሮኒ ወዳጆች", desc: "Tomato Sauce, Mozzarella Cheese, Pepperoni", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ፔፐሮኒ", prices: { small: 685, medium: 965, large: 1410 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
+        { id: "m5", name: "BBQ DOUBLE MEAT", name_am: "ቢቢኪው ድርብ ስጋ", desc: "BBQ Sauce, Mozzarella Cheese, Turkey Ham, Beef", desc_am: "ቢቢኪው ሶስ፣ ሞዛሬላ፣ የቱርክ ስጋ፣ የበሬ ስጋ", prices: { small: 765, medium: 1150, large: 1535 }, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&q=80", type: "pizza", inventory: "available" },
+        { id: "m6", name: "SUPER SUPREME", name_am: "ሱፐር ሱፕሪም", desc: "Tomato Sauce, Mozzarella Cheese, Beef, Pepperoni, Turkey Ham, Onion, Capsicum, Olives", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ የበሬ ስጋ፣ ፔፐሮኒ፣ የቱርክ ስጋ፣ ሽንኩርት፣ ቃሪያ፣ ወይራ", prices: { small: 795, medium: 1200, large: 1535 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "pizza", popular: true, inventory: "available" }
+    ]},
+    "chicken-pizza": { title: "Chicken Pizza", title_am: "የዶሮ ፒዛ", items: [
+        { id: "c1", name: "HOT & SPICY CHICKEN", name_am: "ቅመም ዶሮ", desc: "Tomato Sauce, Mozzarella Cheese, Chicken, Onion, Tomato, Green Chilli", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ፣ ሽንኩርት፣ ቲማቲም፣ አረንጓዴ ቃሪያ", prices: { small: 665, medium: 1055, large: 1550 }, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "pizza", dietary: ["spicy"], popular: true, inventory: "available" },
+        { id: "c2", name: "SWEET CHILLI CHICKEN", name_am: "ጣፋጭ ቃሪያ ዶሮ", desc: "Tomato Sauce, Mozzarella Cheese, Chicken", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ", prices: { small: 700, medium: 1070, large: 1505 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?w=400&q=80", type: "pizza", dietary: ["spicy"], inventory: "available" },
+        { id: "c3", name: "BBQ CHICKEN", name_am: "ቢቢኪው ዶሮ", desc: "BBQ Sauce, Mozzarella Cheese, Turkey Ham, Chicken", desc_am: "ቢቢኪው ሶስ፣ ሞዛሬላ፣ የቱርክ ስጋ፣ ዶሮ", prices: { small: 740, medium: 1165, large: 1535 }, img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=400&q=80", type: "pizza", popular: true, inventory: "available" },
+        { id: "c4", name: "CHICKEN & MUSHROOM", name_am: "ዶሮ እና እንጉዳይ", desc: "Tomato Sauce, Mozzarella Cheese, Chicken, Mushroom", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ፣ እንጉዳይ", prices: { small: 665, medium: 1055, large: 1505 }, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?w=400&q=80", type: "pizza", inventory: "available" },
+        { id: "c5", name: "CHICKEN FAJITA", name_am: "ዶሮ ፋጂታ", desc: "Tomato Sauce, Mozzarella Cheese, Chicken Fajita, Onion, Tomato", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ዶሮ ፋጂታ፣ ሽንኩርት፣ ቲማቲም", prices: { small: 665, medium: 1000, large: 1535 }, img: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=400&q=80", type: "pizza", inventory: "available" },
+        { id: "c6", name: "CHICKEN SUPREME", name_am: "ልዩ ዶሮ", desc: "Tomato Sauce, Mozzarella Cheese, Onion, Turkey Ham, Chicken, Capsicum", desc_am: "ቲማቲም ሶስ፣ ሞዛሬላ፣ ሽንኩርት፣ የቱርክ ስጋ፣ ዶሮ፣ ቃሪያ", prices: { small: 730, medium: 1130, large: 1535 }, img: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400&q=80", type: "pizza", inventory: "limited" }
+    ]},
+    "fasting-pizza": { title: "Fasting Pizza", title_am: "የጾም ፒዛ", items: [
+        { id: "f1", name: "TUNA PIZZA", name_am: "ቱና ፒዛ", desc: "Fasting Sauce, Tuna, Onion, Capsicum, Olives & Green Chilli", desc_am: "የጾም ሶስ፣ ቱና፣ ሽንኩርት፣ ቃሪያ፣ ወይራ እና አረንጓዴ ቃሪያ", prices: { small: 540, medium: 740, large: 1165 }, img: "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?w=400&q=80", type: "pizza", tags: ["fasting"], dietary: ["fasting", "spicy"], popular: true, inventory: "available" },
+        { id: "f2", name: "VEGGIE BLAST", name_am: "አትክልት ፍንዳታ", desc: "Fasting Sauce, Pineapple, Onion, Olives, Capsicum, Tomato, Mushroom & Green Chilli", desc_am: "የጾም ሶስ፣ አናናስ፣ ሽንኩርት፣ ወይራ፣ ቃሪያ፣ ቲማቲም፣ እንጉዳይ እና አረንጓዴ ቃሪያ", prices: { small: 480, medium: 795, large: 1100 }, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "pizza", dietary: ["fasting", "spicy", "vegetarian"], inventory: "available" },
+        { id: "f3", name: "PINEAPPLE LOVERS", name_am: "አናናስ ወዳጆች", desc: "Fasting Sauce, Pineapple, Mushroom, Tomato & Green Chilli", desc_am: "የጾም ሶስ፣ አናናስ፣ እንጉዳይ፣ ቲማቲም እና አረንጓዴ ቃሪያ", prices: { small: 520, medium: 740, large: 1100 }, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "pizza", dietary: ["fasting", "vegetarian"], inventory: "available" }
+    ]},
+    "sides": { title: "Sides & Pasta", title_am: "ተጨማሪዎች እና ፓስታ", items: [
+        { id: "s1", name: "FRENCH FRIES", name_am: "የተጠበሰ ድንች", desc: "Crispy golden fries", desc_am: "ወርቃማ ጥብስ ድንች", price: 355, img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", type: "flat", dietary: ["vegetarian", "fasting"], popular: true, inventory: "available" },
+        { id: "s2", name: "CHILLI FRIES", name_am: "ቅመም ድንች", desc: "Fries tossed in spicy chilli seasoning", desc_am: "የተጠበሰ ድንች በቃሪያ ቅመም", price: 450, img: "https://images.unsplash.com/photo-1585109649139-366815a0d713?w=400&q=80", type: "flat", dietary: ["spicy", "vegetarian", "fasting"], inventory: "available" },
+        { id: "s3", name: "CHEESY FRIES", name_am: "አይብ ድንች", desc: "Golden fries topped with melted cheese", desc_am: "በመሪቅ አይብ የተሸፈነ ድንች", price: 425, img: "https://images.unsplash.com/photo-1585109649139-366815a0d713?w=400&q=80", type: "flat", dietary: ["vegetarian"], inventory: "available" },
+        { id: "s4", name: "POTATO WEDGE", name_am: "ፖቴቶ ዌጅ", desc: "Crispy seasoned potato wedges", desc_am: "የተጠበሰ ቅመም ድንች ዌጅ", price: 360, img: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400&q=80", type: "flat", dietary: ["vegetarian"], inventory: "available" },
+        { id: "s5", name: "3 BONE-OUT WINGS", name_am: "3 ቦን-አውት ዊንግስ", desc: "3 Tender boneless chicken wings", desc_am: "3 ጣፋጭ የአጥንት የሌለው ዶሮ ዊንግስ", price: 700, img: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "s6", name: "6 BONE-OUT WINGS", name_am: "6 ቦን-አውት ዊንግስ", desc: "6 Tender boneless chicken wings", desc_am: "6 ጣፋጭ የአጥንት የሌለው ዶሮ ዊንግስ", price: 1300, img: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400&q=80", type: "flat", popular: true, inventory: "available" },
+        { id: "s7", name: "BUFFALO CHICKEN WINGS", name_am: "ቡፋሎ ዶሮ ዊንግስ", desc: "Spicy buffalo chicken wings", desc_am: "በቡፋሎ ሶስ የተሰራ ቅመም ዶሮ ዊንግስ", price: 1430, img: "https://images.unsplash.com/photo-1527477396000-e27163b481c2?w=400&q=80", type: "flat", dietary: ["spicy"], inventory: "available" },
+        { id: "s8", name: "PLAIN GARLIC BREAD", name_am: "ጋርሊክ ብሬድ", desc: "Toasted bread with garlic butter", desc_am: "የነጭ ሽንኩርት ቅቤ ዳቦ", price: 295, img: "https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=400&q=80", type: "flat", dietary: ["vegetarian"], inventory: "available" },
+        { id: "s9", name: "SPICY GARLIC BREAD", name_am: "ቅመም ጋርሊክ ብሬድ", desc: "Garlic bread topped with spicy chillies", desc_am: "የነጭ ሽንኩርት ዳቦ በቃሪያ ቅመም", price: 445, img: "https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=400&q=80", type: "flat", dietary: ["spicy", "vegetarian"], inventory: "available" },
+        { id: "s10", name: "CHEESY GARLIC BREAD", name_am: "አይብ ጋርሊክ ብሬድ", desc: "Garlic bread loaded with melted cheese", desc_am: "የነጭ ሽንኩርት ዳቦ በሞዛሬላ አይብ", price: 445, img: "https://images.unsplash.com/photo-1573140247632-f8fd74997d5c?w=400&q=80", type: "flat", dietary: ["vegetarian"], popular: true, inventory: "available" },
+        { id: "s11", name: "ALFREDO PASTA", name_am: "አልፍሬዶ ፓስታ", desc: "Creamy Alfredo sauce pasta", desc_am: "በክሬሚ አልፍሬዶ ሶስ የተሰራ ፓስታ", price: 885, img: "https://images.unsplash.com/photo-1621996346565-e3d5d6281292?w=400&q=80", type: "flat", popular: true, inventory: "available" },
+        { id: "s12", name: "HERSHEY'S CHOCO-CHIP COOKIES", name_am: "ኸርሺስ ቾኮ-ቺፕ ኩኪስ", desc: "Warm freshly baked chocolate chip cookies", desc_am: "ትኩስ የኸርሺስ ቸኮሌት ኩኪስ", price: 1930, img: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400&q=80", type: "flat", inventory: "available" }
+    ]},
+    "specials": { title: "Specials & Melts", title_am: "ልዩ ቅናሾች እና መልትስ", items: [
+        { id: "sp1", name: "BIG BOSS PIZZA", name_am: "ቢግ ቦስ ፒዛ", desc: "Gigantic rectangular party pizza loaded with multiple toppings", desc_am: "ግዙፍ አራት ማዕዘን ፒዛ በብዙ አይነት ተወዳጅ ይዘቶች", price: 5990, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "flat", popular: true, inventory: "available" },
+        { id: "sp2", name: "MELTS SPICY CHICKEN", name_am: "መልትስ ቅመም ዶሮ", desc: "Crispy folded crust loaded with spicy chicken & cheese", desc_am: "የተጠበሰ ዳቦ በቅመም ዶሮ እና አይብ", price: 1220, img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=80", type: "flat", dietary: ["spicy"], inventory: "available" },
+        { id: "sp3", name: "MELTS MEAT LOVERS", name_am: "መልትስ ስጋ ወዳጆች", desc: "Crispy folded crust loaded with meats & melted cheese", desc_am: "የተጠበሰ ዳቦ በስጋ እና በሞዛሬላ አይብ", price: 1270, img: "https://images.unsplash.com/photo-1604917869287-3ae73c77e227?w=400&q=80", type: "flat", popular: true, inventory: "available" },
+        { id: "sp4", name: "MELTS PEPPERONI LOVERS", name_am: "መልትስ ፔፐሮኒ", desc: "Crispy folded crust loaded with pepperoni & cheese", desc_am: "የተጠበሰ ዳቦ በፔፐሮኒ እና አይብ", price: 1270, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "sp5", name: "VEGGIE CALZONE", name_am: "የአትክልት ካልዞን", desc: "Folded pizza stuffed with fresh vegetables & cheese", desc_am: "በአትክልት እና አይብ የተሞላ የታጠፈ ፒዛ", price: 520, img: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=400&q=80", type: "flat", dietary: ["vegetarian"], inventory: "available" },
+        { id: "sp6", name: "BEEF CALZONE", name_am: "የበሬ ስጋ ካልዞን", desc: "Folded pizza stuffed with beef & cheese", desc_am: "በበሬ ስጋ እና አይብ የተሞላ የታጠፈ ፒዛ", price: 635, img: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "sp7", name: "CHICKEN CALZONE", name_am: "የዶሮ ካልዞን", desc: "Folded pizza stuffed with chicken & cheese", desc_am: "በዶሮ ስጋ እና አይብ የተሞላ የታጠፈ ፒዛ", price: 635, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80", type: "flat", inventory: "available" }
+    ]},
+    "drinks": { title: "Drinks", title_am: "መጠጦች", items: [
+        { id: "d1", name: "COCA-COLA 300ML", name_am: "ኮካ ኮላ 300ml", desc: "300ml Ice cold Coca-Cola bottle", desc_am: "300ml ቀዝቃዛ ኮካ ኮላ", price: 100, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "d2", name: "COCA-COLA 500ML", name_am: "ኮካ ኮላ 500ml", desc: "500ml Ice cold Coca-Cola bottle", desc_am: "500ml ቀዝቃዛ ኮካ ኮላ", price: 140, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", type: "flat", popular: true, inventory: "available" },
+        { id: "d3", name: "SPRITE 300ML", name_am: "ስፕራይት 300ml", desc: "300ml Crisp Sprite bottle", desc_am: "300ml ቀዝቃዛ ስፕራይት", price: 100, img: "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "d4", name: "SPRITE 500ML", name_am: "ስፕራይት 500ml", desc: "500ml Crisp Sprite bottle", desc_am: "500ml ቀዝቃዛ ስፕራይት", price: 140, img: "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "d5", name: "FANTA ORANGE 300ML", name_am: "ፋንታ ብርቱካን 300ml", desc: "300ml Fanta Orange bottle", desc_am: "300ml የብርቱካን ፋንታ", price: 100, img: "https://images.unsplash.com/photo-1624517452488-04869289c4ca?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "d6", name: "FANTA ORANGE 500ML", name_am: "ፋንታ ብርቱካን 500ml", desc: "500ml Fanta Orange bottle", desc_am: "500ml የብርቱካን ፋንታ", price: 140, img: "https://images.unsplash.com/photo-1624517452488-04869289c4ca?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "d7", name: "FANTA PINEAPPLE 300ML", name_am: "ፋንታ አናናስ 300ml", desc: "300ml Fanta Pineapple bottle", desc_am: "300ml የአናናስ ፋንታ", price: 100, img: "https://images.unsplash.com/photo-1624517452488-04869289c4ca?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "d8", name: "FANTA PINEAPPLE 500ML", name_am: "ፋንታ አናናስ 500ml", desc: "500ml Fanta Pineapple bottle", desc_am: "500ml የአናናስ ፋንታ", price: 140, img: "https://images.unsplash.com/photo-1624517452488-04869289c4ca?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "d9", name: "NOVIDA 300ML", name_am: "ኖቪዳ 300ml", desc: "300ml Novida apple malt drink", desc_am: "300ml ኖቪዳ", price: 100, img: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "d10", name: "AMBO SPARKLING 500ML", name_am: "አምቦ ውሀ 500ml", desc: "500ml Ambo mineral sparkling water", desc_am: "500ml አምቦ ፍል ውሀ", price: 110, img: "https://images.unsplash.com/photo-1560023907-5f339617ea30?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "d11", name: "AMBO FLAVOR 500ML", name_am: "አምቦ ፍላቨር 500ml", desc: "500ml Flavored Ambo mineral water", desc_am: "500ml ጣዕም ያለው አምቦ ውሀ", price: 140, img: "https://images.unsplash.com/photo-1560023907-5f339617ea30?w=400&q=80", type: "flat", inventory: "available" },
+        { id: "d12", name: "BOTTLED WATER 500ML", name_am: "ታሸገ ውሀ 500ml", desc: "500ml Purified drinking water", desc_am: "500ml የታሸገ የጠረጴዛ ውሀ", price: 70, img: "https://images.unsplash.com/photo-1560023907-5f339617ea30?w=400&q=80", type: "flat", inventory: "available" }
+    ]}
+};
+
+const STORAGE_KEY = 'ph_orders';
+let editingItem = null;
+let editingCategory = null;
+let currentPeriod = 'daily';
+
+// ==================== LOAD / SAVE ====================
+function loadOrders() {
+    try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : [];
+    } catch(e) { return []; }
+}
+
+function saveOrders(orders) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(orders)); } catch(e) {}
+}
+
+// ==================== TAB SWITCHING ====================
+function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`panel-${tab}`).classList.add('active');
+    if (tab === 'menu') renderMenu();
+    if (tab === 'reports') renderReports(currentPeriod);
+}
+
+function switchPeriod(period) {
+    currentPeriod = period;
+    document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.period-tab[data-period="${period}"]`).classList.add('active');
+    renderReports(period);
+}
+
+// ==================== MENU MANAGEMENT ====================
+function renderMenu() {
+    const grid = document.getElementById('menu-grid');
+    let html = '';
+    Object.entries(MENU_DATA).forEach(([catKey, cat]) => {
+        html += `<div style="margin-bottom:12px;"><h3 style="color:#FFAA00;font-size:13px;text-transform:uppercase;margin-bottom:6px;">${cat.title}</h3>`;
+        cat.items.forEach(item => {
+            const status = item.inventory || 'available';
+            const statusClass = status === 'available' ? 'available' : status === 'limited' ? 'limited' : 'sold-out';
+            const statusLabel = status === 'available' ? '✅ Available' : status === 'limited' ? '⚠️ Limited' : '❌ Sold Out';
+            const price = item.type === 'pizza' ? `Br ${item.prices.medium}` : `Br ${item.price}`;
+            html += `<div class="menu-item-card" onclick="openEditModal('${catKey}','${item.id}')">
+                <img src="${item.img}" alt="${item.name}">
+                <div class="info"><h4>${item.name}</h4><p>${price} • ${item.desc ? item.desc.substring(0,30)+'...' : ''}</p></div>
+                <span class="status ${statusClass}">${statusLabel}</span>
+            </div>`;
+        });
+        html += `</div>`;
+    });
+    grid.innerHTML = html;
+}
+
+function openEditModal(catKey, itemId) {
+    editingCategory = catKey;
+    editingItem = itemId;
+    const item = MENU_DATA[catKey].items.find(i => i.id === itemId);
+    if (!item) return;
+    document.getElementById('modal-title').textContent = 'Edit Item';
+    document.getElementById('edit-name').value = item.name;
+    document.getElementById('edit-desc').value = item.desc || '';
+    document.getElementById('edit-price').value = item.type === 'pizza' ? item.prices.medium : item.price;
+    document.getElementById('edit-img').value = item.img || '';
+    document.getElementById('edit-inventory').value = item.inventory || 'available';
+    document.getElementById('edit-category').value = catKey;
+    document.getElementById('btn-delete').style.display = 'inline-block';
+    document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function openAddModal() {
+    editingCategory = null;
+    editingItem = null;
+    document.getElementById('modal-title').textContent = 'Add New Item';
+    document.getElementById('edit-name').value = '';
+    document.getElementById('edit-desc').value = '';
+    document.getElementById('edit-price').value = '';
+    document.getElementById('edit-img').value = '';
+    document.getElementById('edit-inventory').value = 'available';
+    document.getElementById('edit-category').value = 'veg-pizza';
+    document.getElementById('btn-delete').style.display = 'none';
+    document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('modal-overlay').style.display = 'none';
+}
+
+function saveItem() {
+    const name = document.getElementById('edit-name').value.trim();
+    const desc = document.getElementById('edit-desc').value.trim();
+    const price = parseFloat(document.getElementById('edit-price').value);
+    const img = document.getElementById('edit-img').value.trim() || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80';
+    const inventory = document.getElementById('edit-inventory').value;
+    const catKey = document.getElementById('edit-category').value;
+    
+    if (!name || isNaN(price) || price <= 0) {
+        showToast('Please fill in name and price');
+        return;
+    }
+    
+    if (editingItem && editingCategory) {
+        // Edit existing
+        const item = MENU_DATA[editingCategory].items.find(i => i.id === editingItem);
+        if (item) {
+            item.name = name;
+            item.desc = desc;
+            item.img = img;
+            item.inventory = inventory;
+            if (item.type === 'pizza') {
+                item.prices.small = Math.round(price * 0.6);
+                item.prices.medium = price;
+                item.prices.large = Math.round(price * 1.45);
+            } else {
+                item.price = price;
+            }
+        }
+    } else {
+        // Add new
+        const newId = 'n' + Date.now().toString(36);
+        const newItem = {
+            id: newId,
+            name: name,
+            name_am: name,
+            desc: desc,
+            desc_am: desc,
+            img: img,
+            type: 'flat',
+            price: price,
+            inventory: inventory,
+            popular: false,
+            dietary: []
+        };
+        MENU_DATA[catKey].items.push(newItem);
+    }
+    
+    closeModal();
+    renderMenu();
+    // Also update the customer page by triggering a storage event
+    localStorage.setItem('ph_menu_update', Date.now().toString());
+    showToast('Item saved successfully!');
+}
+
+function deleteItem() {
+    if (!editingItem || !editingCategory) return;
+    if (!confirm('Delete this item permanently?')) return;
+    const cat = MENU_DATA[editingCategory];
+    if (cat) {
+        cat.items = cat.items.filter(i => i.id !== editingItem);
+    }
+    closeModal();
+    renderMenu();
+    localStorage.setItem('ph_menu_update', Date.now().toString());
+    showToast('Item deleted!');
+}
+
+// ==================== REPORTS ====================
+function renderReports(period) {
+    const orders = loadOrders();
+    const now = new Date();
+    let filtered = [...orders];
+    
+    if (period === 'daily') {
+        const today = now.toDateString();
+        filtered = orders.filter(o => new Date(o.timestamp).toDateString() === today);
+    } else if (period === 'weekly') {
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay());
+        weekStart.setHours(0,0,0,0);
+        filtered = orders.filter(o => new Date(o.timestamp) >= weekStart);
+    } else if (period === 'monthly') {
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        filtered = orders.filter(o => new Date(o.timestamp) >= monthStart);
+    }
+    
+    const orderCount = filtered.length;
+    const totalRevenue = filtered.reduce((sum, o) => sum + (o.total || 0), 0);
+    const avgOrder = orderCount > 0 ? totalRevenue / orderCount : 0;
+    
+    // Item ranking
+    const itemSales = {};
+    filtered.forEach(o => {
+        (o.items || []).forEach(it => {
+            const key = it.name;
+            if (!itemSales[key]) itemSales[key] = { name: it.name, count: 0, revenue: 0 };
+            itemSales[key].count += it.quantity || 1;
+            itemSales[key].revenue += it.total || (it.price * (it.quantity || 1));
+        });
+    });
+    const sortedItems = Object.values(itemSales).sort((a, b) => b.count - a.count);
+    const topItems = sortedItems.slice(0, 5);
+    const bottomItems = sortedItems.slice(-5).reverse();
+    
+    // Stats
+    document.getElementById('report-stats').innerHTML = `
+        <div class="report-stat"><div class="num">${orderCount}</div><div class="label">Orders</div></div>
+        <div class="report-stat"><div class="num">Br ${totalRevenue.toFixed(0)}</div><div class="label">Revenue</div></div>
+        <div class="report-stat"><div class="num">Br ${avgOrder.toFixed(0)}</div><div class="label">Avg Order</div></div>
+    `;
+    
+    // Ranking
+    document.getElementById('ranking-grid').innerHTML = `
+        <div class="ranking-box"><h4>🔥 Most Sold</h4>
+            <ul class="ranking-list">${topItems.map((it,i) => `<li><span class="rank">#${i+1}</span><span class="name">${it.name}</span><span class="count">${it.count}x</span></li>`).join('') || '<li style="color:#CBD5E1;">No data</li>'}</ul>
+        </div>
+        <div class="ranking-box"><h4>📉 Least Sold</h4>
+            <ul class="ranking-list">${bottomItems.map((it,i) => `<li><span class="rank">#${i+1}</span><span class="name">${it.name}</span><span class="count">${it.count}x</span></li>`).join('') || '<li style="color:#CBD5E1;">No data</li>'}</ul>
+        </div>
+    `;
+    
+    // Recent orders
+    const recent = filtered.slice(0, 10);
+    document.getElementById('recent-orders').innerHTML = `
+        <h4>Recent Orders (${period})</h4>
+        ${recent.map(o => `<div class="recent-order">
+            <span>#${o.orderNo || 'N/A'} - Table ${o.table || 'N/A'}</span>
+            <span>Br ${(o.total || 0).toFixed(2)}</span>
+            <span style="font-size:11px;color:#CBD5E1;">${o.timestamp ? new Date(o.timestamp).toLocaleTimeString() : ''}</span>
+        </div>`).join('') || '<div style="color:#CBD5E1;padding:10px 0;">No orders in this period</div>'}
+    `;
+}
+
+// ==================== TOAST ====================
+function showToast(msg) {
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+}
+
+// ==================== LOAD ALL ====================
+function loadAll() {
+    renderMenu();
+    renderReports(currentPeriod);
+    document.getElementById('last-updated').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', () => {
+    loadAll();
+    // Listen for storage changes (menu updates from this page)
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'ph_menu_update' || e.key === STORAGE_KEY) {
+            loadAll();
+        }
+    });
+    // Auto-refresh every 30 seconds
+    setInterval(loadAll, 30000);
+});
+
+// Close modal on overlay click
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+});
+</script>
+</body>
+</html>
