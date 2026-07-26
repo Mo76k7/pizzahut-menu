@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0A0A0C">
+    <title>Pizza Hut Admin — Management & Reports</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --color-primary: #EE1945;
+            --color-primary-dark: #B80F32;
+            --color-accent: #FFAA00;
+            --color-bg: #0A0A0C;
+            --color-text-main: #FFFFFF;
+            --color-text-muted: #CBD5E1;
+            --color-success: #10B981;
+            --color-error: #EF4444;
+            --font-display: 'Barlow Condensed', sans-serif;
+            --font-sans: 'Inter', sans-serif;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 8px;
+            --glass-bg: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --glass-blur: blur(20px) saturate(180%);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        html, body { width: 100%; height: 100%; overflow: hidden; }
+        body { background-color: #040405; font-family: var(--font-sans); color: var(--color-text-main); display: flex; justify-content: center; align-items: center; }
+
+        .app-container { width: 100%; height: 100vh; height: 100dvh; max-width: 100%; background-color: var(--color-bg); position: relative; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* Background Art */
+        .bg-mesh { position: absolute; inset: 0; z-index: 1; filter: blur(60px); pointer-events: none; overflow: hidden; }
+        .blob { position: absolute; border-radius: 50%; opacity: 0.4; }
+        .blob-1 { width: 45vmax; height: 45vmax; top: -15%; left: -15%; background: #EE1945; }
+        .blob-2 { width: 35vmax; height: 35vmax; bottom: -10%; right: -10%; background: #6A11CB; }
+
+        /* HEADER */
+        .app-header { padding: calc(14px + var(--safe-top)) 4vw 12px; display: flex; justify-content: space-between; align-items: center; background: rgba(18, 18, 24, 0.6); backdrop-filter: var(--glass-blur); border-bottom: 1px solid var(--glass-border); z-index: 20; position: relative; }
+        .brand-title { font-family: var(--font-display); font-weight: 900; font-size: clamp(20px, 5vw, 26px); color: var(--color-primary); letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+
+        /* NAVIGATION TABS */
+        .admin-nav { display: flex; gap: 10px; padding: 12px 4vw 8px; z-index: 20; position: relative; border-bottom: 1px solid var(--glass-border); background: rgba(10, 10, 12, 0.4); }
+        .a-tab { padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--color-text-muted); display: flex; align-items: center; gap: 6px; transition: all 0.2s ease; }
+        .a-tab.active { background: var(--color-primary); color: #FFF; border-color: var(--color-primary); box-shadow: 0 4px 15px rgba(238, 25, 69, 0.4); }
+
+        /* VIEWPORT */
+        .view-container { flex: 1; overflow-y: auto; padding: 14px 4vw calc(20px + var(--safe-bottom)); scrollbar-width: none; z-index: 10; position: relative; }
+        .view-container::-webkit-scrollbar { display: none; }
+        .app-view { display: none; animation: fadeIn 0.3s ease-out forwards; }
+        .app-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        .display-title { font-family: var(--font-display); font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-main); font-size: clamp(20px, 5vw, 26px); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+
+        /* BUTTONS & CARDS */
+        .btn-add { background: var(--glass-bg); border: 1px solid var(--glass-border); color: #FFF; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 800; text-transform: uppercase; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .btn-add:active { transform: scale(0.96); }
+
+        .menu-list-item { background: rgba(22, 22, 30, 0.8); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; backdrop-filter: var(--glass-blur); }
+        .menu-list-item img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; border: 1px solid var(--glass-border); }
+        .menu-item-info { flex: 1; min-width: 0; }
+        .menu-item-info h4 { font-size: 14px; font-weight: 700; color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .menu-item-info span { font-size: 13px; font-weight: 800; color: var(--color-accent); }
+
+        .stock-badge { padding: 5px 10px; border-radius: 12px; font-size: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none; display: flex; align-items: center; gap: 4px; }
+        .stock-badge.in-stock { background: rgba(16, 185, 129, 0.2); color: var(--color-success); border: 1px solid var(--color-success); }
+        .stock-badge.out-stock { background: rgba(239, 68, 68, 0.2); color: var(--color-error); border: 1px solid var(--color-error); }
+
+        /* REPORTS STYLES */
+        .filter-row { display: flex; gap: 8px; margin-bottom: 16px; }
+        .filter-btn { padding: 6px 14px; border-radius: 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--color-text-muted); }
+        .filter-btn.active { background: var(--color-primary); color: #FFF; border-color: var(--color-primary); }
+
+        .stat-card { background: rgba(22, 22, 30, 0.85); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 16px; text-align: center; margin-bottom: 12px; backdrop-filter: var(--glass-blur); }
+        .stat-value { font-family: var(--font-display); font-size: 32px; font-weight: 900; color: var(--color-accent); margin: 4px 0; }
+        .stat-label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 1px; }
+
+        .ranking-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+        .ranking-card { background: rgba(22, 22, 30, 0.85); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 14px; backdrop-filter: var(--glass-blur); }
+        .ranking-title { font-size: 13px; font-weight: 800; color: #FFF; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .ranking-item { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--color-text-muted); padding: 4px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .ranking-item:last-child { border-bottom: none; }
+        .ranking-item .rank-num { color: var(--color-accent); font-weight: 900; }
+
+        .recent-orders-card { background: rgba(22, 22, 30, 0.85); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: 14px; backdrop-filter: var(--glass-blur); }
+        .recent-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+        .recent-row:last-child { border-bottom: none; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(12px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+        .modal-card { width: 100%; max-width: 420px; background: rgba(22, 22, 30, 0.95); border: 1px solid var(--glass-border-light); border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .modal-title { font-family: var(--font-display); font-size: 22px; font-weight: 900; color: #FFF; margin-bottom: 16px; text-transform: uppercase; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 4px; }
+        .form-input { width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); color: #FFF; padding: 10px; border-radius: var(--radius-sm); font-size: 13px; outline: none; }
+        .form-input:focus { border-color: var(--color-primary); }
+
+        .btn-primary { background: var(--color-primary); color: #FFF; border: none; padding: 12px; border-radius: var(--radius-sm); width: 100%; font-size: 13px; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 8px; }
+        .btn-cancel { background: transparent; color: var(--color-text-muted); border: 1px solid var(--glass-border); padding: 10px; border-radius: var(--radius-sm); width: 100%; font-size: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; margin-top: 6px; }
+
+        .toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--color-primary); color: #FFF; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 800; z-index: 999; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <div class="bg-mesh">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+        </div>
+
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="brand-title">
+                <i class="fa-solid fa-gear"></i> RESTAURANT ADMIN
+            </div>
+        </header>
+
+        <!-- ADMIN NAV -->
+        <div class="admin-nav">
+            <div class="a-tab active" id="tab-menu" onclick="switchTab('menu')"><i class="fa-solid fa-list"></i> Menu</div>
+            <div class="a-tab" id="tab-reports" onclick="switchTab('reports')"><i class="fa-solid fa-chart-column"></i> Reports</div>
+        </div>
+
+        <!-- MAIN VIEWPORT -->
+        <main class="view-container">
+
+            <!-- TAB 1: MENU MANAGER -->
+            <div id="view-menu" class="app-view active">
+                <div class="display-title">
+                    <span>Menu Manager</span>
+                    <button class="btn-add" onclick="openAddModal()"><i class="fa-solid fa-plus"></i> Add Item</button>
+                </div>
+
+                <div id="menu-items-list">
+                    <!-- Menu items rendered here -->
+                </div>
+            </div>
+
+            <!-- TAB 2: REPORTS & ANALYTICS -->
+            <div id="view-reports" class="app-view">
+                <div class="display-title">Analytics & Revenue</div>
+
+                <div class="filter-row">
+                    <div class="filter-btn active" id="f-daily" onclick="filterReports('daily')">Daily</div>
+                    <div class="filter-btn" id="f-weekly" onclick="filterReports('weekly')">Weekly</div>
+                    <div class="filter-btn" id="f-monthly" onclick="filterReports('monthly')">Monthly</div>
+                </div>
+
+                <!-- METRICS -->
+                <div class="stat-card">
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-value" id="stat-orders-count">0</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Total Revenue</div>
+                    <div class="stat-value" id="stat-revenue">Br 0.00</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Avg Order Value</div>
+                    <div class="stat-value" id="stat-avg-order">Br 0.00</div>
+                </div>
+
+                <!-- RANKINGS -->
+                <div class="ranking-grid">
+                    <div class="ranking-card">
+                        <div class="ranking-title" style="color: var(--color-accent);"><i class="fa-solid fa-fire"></i> Most Sold</div>
+                        <div id="most-sold-list">
+                            <div class="ranking-item"><span>Loading...</span></div>
+                        </div>
+                    </div>
+
+                    <div class="ranking-card">
+                        <div class="ranking-title" style="color: var(--color-error);"><i class="fa-solid fa-chart-line-down"></i> Least Sold</div>
+                        <div id="least-sold-list">
+                            <div class="ranking-item"><span>Loading...</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RECENT ORDERS -->
+                <div class="recent-orders-card">
+                    <div class="ranking-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Orders</div>
+                    <div id="recent-orders-list">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ADD ITEM MODAL -->
+    <div class="modal-overlay" id="item-modal">
+        <div class="modal-card">
+            <div class="modal-title" id="modal-form-title">Add New Menu Item</div>
+            
+            <div class="form-group">
+                <label>Item Name</label>
+                <input type="text" id="input-name" class="form-input" placeholder="e.g. Hawaiian Pizza">
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <select id="input-category" class="form-input" style="background:#000;">
+                    <option value="veg-pizza">Veg Pizza</option>
+                    <option value="meat-pizza">Meat Pizza</option>
+                    <option value="chicken-pizza">Chicken Pizza</option>
+                    <option value="fasting-pizza">Fasting Pizza</option>
+                    <option value="sides">Sides & Pasta</option>
+                    <option value="drinks">Drinks</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Price (Br)</label>
+                <input type="number" id="input-price" class="form-input" placeholder="e.g. 770">
+            </div>
+
+            <div class="form-group">
+                <label>Image URL</label>
+                <input type="text" id="input-image" class="form-input" placeholder="https://images.unsplash.com/...">
+            </div>
+
+            <button class="btn-primary" onclick="saveMenuItem()">Save Item</button>
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // SUPABASE CONFIGURATION
+        const SUPABASE_URL = "https://fxaqyfmlbomidkfxaprf.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4YXF5Zm1sYm9taWRrZnhhcHJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5ODQ3MTEsImV4cCI6MjEwMDU2MDcxMX0.jXfMdV_aJ4o8eKtgL_P_MeT5i7qweO0qOcLNIk8Xkgo";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let menuItems = [];
+        let allOrders = [];
+        let editingItemId = null;
+        let currentReportFilter = 'daily';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchMenuItems();
+            await fetchOrdersData();
+        });
+
+        // ==========================================
+        // 1. MENU MANAGEMENT
+        // ==========================================
+        async function fetchMenuItems() {
+            try {
+                const { data, error } = await supabase.from('menu_items').select('*').order('id', { ascending: true });
+                if (error) throw error;
+                menuItems = data || [];
+                renderMenuItems();
+            } catch (err) {
+                console.error("Error fetching menu:", err);
+                showToast("Failed to load menu items.");
+            }
+        }
+
+        function renderMenuItems() {
+            const container = document.getElementById('menu-items-list');
+            if (!menuItems.length) {
+                container.innerHTML = `<p style="text-align:center; padding: 40px; color: var(--color-text-muted);">No menu items found. Click 'Add Item' to create one.</p>`;
+                return;
+            }
+
+            container.innerHTML = menuItems.map(item => `
+                <div class="menu-list-item">
+                    <img src="${item.image_url}" alt="${item.name_en}">
+                    <div class="menu-item-info">
+                        <h4>${item.name_en}</h4>
+                        <span>Br ${item.price}.00</span>
+                    </div>
+                    <button class="stock-badge ${item.in_stock ? 'in-stock' : 'out-stock'}" onclick="toggleStock(${item.id}, ${item.in_stock})">
+                        ${item.in_stock ? '<i class="fa-solid fa-check"></i> Available' : '<i class="fa-solid fa-xmark"></i> Out of Stock'}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function toggleStock(itemId, currentStatus) {
+            try {
+                const { error } = await supabase
+                    .from('menu_items')
+                    .update({ in_stock: !currentStatus })
+                    .eq('id', itemId);
+
+                if (error) throw error;
+
+                // Update local status instantly
+                const item = menuItems.find(i => i.id === itemId);
+                if (item) item.in_stock = !currentStatus;
+                
+                renderMenuItems();
+                showToast(`Updated stock status for ${item.name_en}`);
+            } catch (err) {
+                console.error("Error updating stock:", err);
+                showToast("Failed to update status.");
+            }
+        }
+
+        function openAddModal() {
+            editingItemId = null;
+            document.getElementById('modal-form-title').textContent = "Add New Menu Item";
+            document.getElementById('input-name').value = '';
+            document.getElementById('input-price').value = '';
+            document.getElementById('input-image').value = '';
+            document.getElementById('item-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('item-modal').style.display = 'none';
+        }
+
+        async function saveMenuItem() {
+            const name = document.getElementById('input-name').value.trim();
+            const category = document.getElementById('input-category').value;
+            const price = parseFloat(document.getElementById('input-price').value);
+            const image_url = document.getElementById('input-image').value.trim() || 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&q=80';
+
+            if (!name || isNaN(price)) {
+                showToast("Please fill in item name and price.");
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.from('menu_items').insert([{
+                    name_en: name,
+                    category: category,
+                    price: price,
+                    image_url: image_url,
+                    in_stock: true
+                }]).select();
+
+                if (error) throw error;
+
+                showToast("New item added to menu!");
+                closeModal();
+                await fetchMenuItems();
+            } catch (err) {
+                console.error("Error adding item:", err);
+                showToast("Failed to save menu item.");
+            }
+        }
+
+        // ==========================================
+        // 2. REPORTS & ANALYTICS
+        // ==========================================
+        async function fetchOrdersData() {
+            try {
+                const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+                if (error) throw error;
+                allOrders = data || [];
+                renderReports();
+            } catch (err) {
+                console.error("Error fetching orders for report:", err);
+            }
+        }
+
+        function filterReports(range) {
+            currentReportFilter = range;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`f-${range}`).classList.add('active');
+            renderReports();
+        }
+
+        function renderReports() {
+            const now = new Date();
+            let filtered = allOrders;
+
+            // Date filtering
+            if (currentReportFilter === 'daily') {
+                const todayStr = now.toISOString().slice(0, 10);
+                filtered = allOrders.filter(o => o.created_at && o.created_at.startsWith(todayStr));
+            } else if (currentReportFilter === 'weekly') {
+                const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                filtered = allOrders.filter(o => new Date(o.created_at) >= sevenDaysAgo);
+            } else if (currentReportFilter === 'monthly') {
+                const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                filtered = allOrders.filter(o => new Date(o.created_at) >= thirtyDaysAgo);
+            }
+
+            // Calculations
+            const orderCount = filtered.length;
+            const totalRevenue = filtered.reduce((acc, o) => acc + (parseFloat(o.total_price) || 0), 0);
+            const avgOrder = orderCount > 0 ? (totalRevenue / orderCount) : 0;
+
+            document.getElementById('stat-orders-count').textContent = orderCount;
+            document.getElementById('stat-revenue').textContent = `Br ${totalRevenue.toFixed(2)}`;
+            document.getElementById('stat-avg-order').textContent = `Br ${avgOrder.toFixed(2)}`;
+
+            // Rank Most / Least Sold Items
+            const itemCounts = {};
+            filtered.forEach(o => {
+                if (Array.isArray(o.items)) {
+                    o.items.forEach(item => {
+                        const name = item.name_en || item.name || 'Unknown Item';
+                        const qty = item.quantity || 1;
+                        itemCounts[name] = (itemCounts[name] || 0) + qty;
+                    });
+                }
+            });
+
+            const sortedItems = Object.entries(itemCounts).sort((a, b) => b[1] - a[1]);
+
+            // Most Sold
+            const mostSoldContainer = document.getElementById('most-sold-list');
+            if (sortedItems.length === 0) {
+                mostSoldContainer.innerHTML = `<div class="ranking-item"><span>No sales recorded</span></div>`;
+            } else {
+                mostSoldContainer.innerHTML = sortedItems.slice(0, 3).map(([name, qty], i) => `
+                    <div class="ranking-item">
+                        <span><span class="rank-num">#${i + 1}</span> ${name}</span>
+                        <span>${qty}x</span>
+                    </div>
+                `).join('');
+            }
+
+            // Least Sold
+            const leastSoldContainer = document.getElementById('least-sold-list');
+            if (sortedItems.length === 0) {
+                leastSoldContainer.innerHTML = `<div class="ranking-item"><span>No sales recorded</span></div>`;
+            } else {
+                leastSoldContainer.innerHTML = [...sortedItems].reverse().slice(0, 3).map(([name, qty], i) => `
+                    <div class="ranking-item">
+                        <span><span class="rank-num">#${i + 1}</span> ${name}</span>
+                        <span>${qty}x</span>
+                    </div>
+                `).join('');
+            }
+
+            // Recent Orders List
+            const recentContainer = document.getElementById('recent-orders-list');
+            if (!filtered.length) {
+                recentContainer.innerHTML = `<p style="font-size: 11px; color: var(--color-text-muted); text-align:center; padding: 10px;">No recent orders</p>`;
+            } else {
+                recentContainer.innerHTML = filtered.slice(0, 5).map(o => {
+                    const timeStr = new Date(o.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <div class="recent-row">
+                            <span>#${o.id} — Table ${o.table_number || 'N/A'}</span>
+                            <span style="color: var(--color-accent);">Br ${o.total_price}.00</span>
+                            <span style="color: var(--color-text-muted); font-size: 10px;">${timeStr}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // ==========================================
+        // 3. TAB NAVIGATION
+        // ==========================================
+        function switchTab(tab) {
+            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('active'));
+
+            if (tab === 'menu') {
+                document.getElementById('view-menu').classList.add('active');
+                document.getElementById('tab-menu').classList.add('active');
+            } else if (tab === 'reports') {
+                document.getElementById('view-reports').classList.add('active');
+                document.getElementById('tab-reports').classList.add('active');
+                fetchOrdersData();
+            }
+        }
+
+        function showToast(msg) {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+            const t = document.createElement('div');
+            t.className = 'toast-notification'; t.textContent = msg;
+            document.querySelector('.app-container').appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
