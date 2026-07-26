@@ -1026,6 +1026,14 @@
             text-align: center;
             outline: none;
         }
+        .table-input-field.error {
+            border-color: var(--color-error);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
+        }
+        .table-input-field::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+            font-weight: 400;
+        }
 
         .instructions-textarea {
             width: 100%;
@@ -1539,6 +1547,24 @@
                 opacity: 0;
             }
         }
+
+        /* Required field indicator */
+        .required-star {
+            color: var(--color-error);
+            margin-left: 2px;
+        }
+
+        .field-error-msg {
+            color: var(--color-error);
+            font-size: clamp(9px, 2vw, 10px);
+            font-weight: 600;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .field-error-msg.show {
+            display: block;
+        }
     </style>
 </head>
 
@@ -1643,10 +1669,12 @@
                 <div id="cart-form-section" style="display:none;">
                     <div class="table-selector-card">
                         <div class="table-selector-label"><i class="fa-solid fa-chair"></i> <span
-                                data-i18n="table_number">Table Number</span></div>
-                        <input type="text" id="table-number-input" class="table-input-field" placeholder="01"
-                            value="01">
+                                data-i18n="table_number">Table Number</span> <span class="required-star">*</span></div>
+                        <input type="text" id="table-number-input" class="table-input-field" placeholder="e.g. 04"
+                            value="">
                     </div>
+                    <div id="table-error-msg" class="field-error-msg">Please enter a table number</div>
+
                     <div class="split-bill-toggle">
                         <i class="fa-solid fa-users"></i> <span data-i18n="split_among">Split among</span>
                         <input type="number" class="split-count" id="split-count" value="1" min="1" max="20"
@@ -1674,7 +1702,9 @@
                     </div>
                     <div class="payment-card">
                         <div class="payment-section-title"><i class="fa-solid fa-credit-card"></i> <span
-                                data-i18n="payment_method">Payment Method</span></div>
+                                data-i18n="payment_method">Payment Method</span> <span class="required-star">*</span>
+                        </div>
+                        <div id="payment-error-msg" class="field-error-msg">Please select a payment method</div>
                         <div class="payment-shortcuts">
                             <button class="payment-btn" onclick="selectPayment('telebirr', this)"><i
                                     class="fa-solid fa-mobile-screen"></i> Telebirr<span
@@ -1912,6 +1942,12 @@
                 }
             });
             setupDragToDismiss();
+
+            // Clear error states on input
+            document.getElementById('table-number-input').addEventListener('input', function() {
+                this.classList.remove('error');
+                document.getElementById('table-error-msg').classList.remove('show');
+            });
         });
 
         // ==================== LANGUAGE ====================
@@ -2223,6 +2259,7 @@
                 cb.style.display = 'none'; fs.style.display = 'none'; selectedPayment = null;
                 document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('selected'));
                 document.getElementById('payment-account-display').classList.remove('show');
+                document.getElementById('payment-error-msg').classList.remove('show');
                 root.innerHTML = `<div class="empty-cart-state"><div class="empty-cart-icon">🛒</div><h3>${t('your_tray')} is Empty</h3><p>Browse our delicious menu!</p><button class="btn-browse-menu" onclick="navigateTo('home')"><i class="fa-solid fa-pizza-slice"></i> ${t('menu_nav')}</button><div class="popular-section"><h3>🔥 Popular Picks</h3>${popularHTML()}</div></div>`;
                 return;
             }
@@ -2277,6 +2314,7 @@
             selectedPayment = method;
             document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('selected'));
             el.classList.add('selected');
+            document.getElementById('payment-error-msg').classList.remove('show');
             const display = document.getElementById('payment-account-display');
             const acc = PAYMENT_ACCOUNTS[method];
             document.getElementById('display-account-number').textContent = acc.number;
@@ -2293,8 +2331,31 @@
         // ==================== ORDER ====================
         function submitOrderToTelegram() {
             if (!cart.length) return;
-            if (!selectedPayment) { showToast('Select a payment method!'); return; }
-            const table = document.getElementById('table-number-input').value.trim() || 'N/A';
+
+            // Validate Table Number (REQUIRED)
+            const tableInput = document.getElementById('table-number-input');
+            const tableVal = tableInput.value.trim();
+            const tableError = document.getElementById('table-error-msg');
+            if (!tableVal) {
+                tableInput.classList.add('error');
+                tableError.classList.add('show');
+                showToast('Please enter a table number');
+                return;
+            } else {
+                tableInput.classList.remove('error');
+                tableError.classList.remove('show');
+            }
+
+            // Validate Payment Method (REQUIRED)
+            if (!selectedPayment) {
+                document.getElementById('payment-error-msg').classList.add('show');
+                showToast('Please select a payment method');
+                return;
+            } else {
+                document.getElementById('payment-error-msg').classList.remove('show');
+            }
+
+            const table = tableVal;
             const instr = document.getElementById('extra-instructions-input').value.trim();
             const sc = parseInt(document.getElementById('split-count').value) || 1;
             const orderNo = (() => {
