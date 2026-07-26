@@ -286,6 +286,10 @@
             padding: 10px 14px; border-radius: 4px; font-family: 'Courier New', Courier, monospace; font-size: 15px; outline: none; width: 100%;
             box-sizing: border-box; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); font-weight: 700;
         }
+        .table-input-field.error {
+            border-color: var(--primary-plastic);
+            background: #fff0f0;
+        }
 
         .cart-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px dashed #d1c8b4; flex-wrap: wrap;}
         .cart-item:last-child { border-bottom: none; }
@@ -535,8 +539,9 @@
                 
                 <div id="cart-form-section" style="display:none;">
                     <div class="receipt-card">
-                        <div style="font-size: 13px; font-weight: 800; color: var(--ink-muted); margin-bottom:8px; text-transform: uppercase;"><i class="fa-solid fa-chair"></i> <span id="t-table-num">Table Number</span></div>
+                        <div style="font-size: 13px; font-weight: 800; color: var(--ink-muted); margin-bottom:8px; text-transform: uppercase;"><i class="fa-solid fa-chair"></i> <span id="t-table-num">Table Number</span> <span style="color: var(--primary-plastic);">*</span></div>
                         <input type="text" id="table-number-input" class="table-input-field" placeholder="e.g. 05" value="01">
+                        <div id="table-error-msg" style="color: var(--primary-plastic); font-size: 12px; font-weight: 700; margin-top: 6px; display: none;">Please enter a table number</div>
                     </div>
                 </div>
                 
@@ -572,7 +577,7 @@
                     </div>
 
                     <div class="receipt-card" style="padding: 16px;">
-                        <div style="font-size: 13px; font-weight: 800; color: var(--ink-muted); text-transform: uppercase;"><i class="fa-solid fa-credit-card"></i> <span id="t-payment-method">Payment Method</span></div>
+                        <div style="font-size: 13px; font-weight: 800; color: var(--ink-muted); text-transform: uppercase;"><i class="fa-solid fa-credit-card"></i> <span id="t-payment-method">Payment Method</span> <span style="color: var(--primary-plastic);">*</span></div>
                         <div class="payment-gateways">
                             <button class="pay-btn pay-telebirr" onclick="selectPayment('telebirr', this)"><i class="fa-solid fa-mobile-screen"></i> Telebirr</button>
                             <button class="pay-btn pay-cbe" onclick="selectPayment('cbe', this)"><i class="fa-solid fa-building-columns"></i> CBE Birr</button>
@@ -1331,9 +1336,25 @@
         function processOrderToTelegram() {
             if(cart.length === 0) return;
             if(!selectedPayment) { showToast('Please select a payment method!'); return; }
+            
+            // --- TABLE NUMBER VALIDATION ---
+            const tableInput = document.getElementById('table-number-input');
+            const tableVal = tableInput.value.trim();
+            const errorMsg = document.getElementById('table-error-msg');
+            
+            if(!tableVal) {
+                tableInput.classList.add('error');
+                errorMsg.style.display = 'block';
+                showToast('Please enter a table number.');
+                return;
+            } else {
+                tableInput.classList.remove('error');
+                errorMsg.style.display = 'none';
+            }
+
             playHaptic();
             
-            const table = document.getElementById('table-number-input').value.trim() || 'N/A';
+            const table = tableVal;
             const instr = document.getElementById('extra-instructions-input').value.trim();
             const sc = document.getElementById('split-toggle').checked ? (parseInt(document.getElementById('split-ways').value) || 1) : 1;
             
